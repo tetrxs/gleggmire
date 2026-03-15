@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getLatestTerms } from "@/lib/data/glossary";
-import { MOCK_CLIPS } from "@/lib/mock-clips";
 import { OpenModalButton } from "@/components/ui/open-modal-button";
 import type { TermWithPreview } from "@/lib/data/glossary";
 
@@ -48,73 +47,15 @@ function TermPreviewCard({ term }: { term: TermWithPreview }) {
   );
 }
 
-function ClipPreviewCard({
-  title,
-  upvotes,
-  source,
-  badges,
-}: {
-  title: string;
-  upvotes: number;
-  source: string;
-  badges: string[];
-}) {
-  return (
-    <div
-      className="card-hover flex flex-col gap-3 p-5"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-semibold leading-tight" style={{ color: "var(--color-text)" }}>
-          {title}
-        </span>
-        {badges.includes("hall-of-fame") && (
-          <span
-            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-            style={{
-              backgroundColor: "color-mix(in srgb, #F59E0B 15%, transparent)",
-              color: "#D97706",
-            }}
-          >
-            🏆
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
-        <span className="uppercase font-medium">{source}</span>
-        <span>·</span>
-        <span>▲ {upvotes}</span>
-      </div>
-    </div>
-  );
-}
 
-const HERO_IMAGES = [
-  "gleggmire_warnining.png",
-  "gleggmire_triangle.png",
-  "gleggmire_badge.png",
-  "gleggmire_coin.png",
-  "gleggmire_wanted.png",
-];
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-const HERO_POSITIONS = [
-  { className: "animate-float", style: { top: "2rem", left: "1%" }, width: 160, height: 160 },
-  { className: "animate-tilt-rock", style: { top: "6rem", right: "1%" }, width: 190, height: 190 },
-  { className: "animate-float-slow", style: { bottom: "2rem", left: "2%" }, width: 150, height: 150 },
+const HERO_DECORATIONS = [
+  { src: "/images/elements/gleggmire_coin.png", className: "animate-float", style: { top: "2rem", left: "1%" }, width: 160, height: 160 },
+  { src: "/images/elements/gleggmire_wanted.png", className: "animate-tilt-rock", style: { top: "6rem", right: "1%" }, width: 190, height: 190 },
+  { src: "/images/elements/gleggmire_triangle.png", className: "animate-float-slow", style: { bottom: "2rem", left: "2%" }, width: 150, height: 150 },
 ] as const;
 
 export default async function HomePage() {
-  const latestTerms = await getLatestTerms(4);
-  const previewClips = MOCK_CLIPS.slice(0, 6);
-  const randomImages = shuffleArray(HERO_IMAGES).slice(0, 3);
+  const latestTerms = await getLatestTerms(8);
 
   return (
     <div className="flex flex-col">
@@ -123,15 +64,15 @@ export default async function HomePage() {
           ============================ */}
       <section className="relative flex flex-col items-center justify-center gap-6 px-4 pb-16 pt-20 text-center animate-fade-in">
         {/* Decorative floating images – desktop only */}
-        {randomImages.map((filename, i) => (
+        {HERO_DECORATIONS.map((img) => (
           <Image
-            key={filename}
-            src={`/images/elements/${filename}`}
+            key={img.src}
+            src={img.src}
             alt=""
-            width={HERO_POSITIONS[i].width}
-            height={HERO_POSITIONS[i].height}
-            className={`hidden lg:block absolute select-none pointer-events-none ${HERO_POSITIONS[i].className}`}
-            style={{ ...HERO_POSITIONS[i].style, filter: "drop-shadow(4px 6px 16px rgba(0,0,0,0.35))" }}
+            width={img.width}
+            height={img.height}
+            className={`hidden lg:block absolute select-none pointer-events-none ${img.className}`}
+            style={{ ...img.style, filter: "drop-shadow(4px 6px 16px rgba(0,0,0,0.35))" }}
             aria-hidden="true"
           />
         ))}
@@ -228,7 +169,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        {/* Term preview grid */}
+        {/* Term preview grid – 2 rows */}
         {latestTerms.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {latestTerms.map((term) => (
@@ -255,48 +196,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ============================
-          4. CLIPS VORSCHAU
-          ============================ */}
-      <section
-        className="mx-auto w-full max-w-6xl px-4 py-16"
-        style={{ borderTop: "2px solid var(--color-border)" }}
-      >
-        {/* Section header */}
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <h2
-              className="text-3xl font-bold tracking-tight sm:text-4xl"
-              style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
-            >
-              Aktuelle Clips
-            </h2>
-            <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-              Die beliebtesten Community-Clips
-            </p>
-          </div>
-          <Link
-            href="/glossar"
-            className="shrink-0 text-xs font-bold uppercase no-underline transition-colors"
-            style={{ color: "var(--color-accent)", letterSpacing: "0.08em" }}
-          >
-            CLIPS IN BEGRIFFEN ENTDECKEN →
-          </Link>
-        </div>
-
-        {/* Clips preview grid – 2 rows: 3 columns on desktop */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {previewClips.map((c) => (
-            <ClipPreviewCard
-              key={c.clip.id}
-              title={c.clip.title}
-              upvotes={c.clip.upvotes}
-              source={c.clip.source}
-              badges={c.badges}
-            />
-          ))}
-        </div>
-      </section>
 
       {/* ============================
           5. FAN-DISCLAIMER INFO BOX

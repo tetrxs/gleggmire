@@ -23,8 +23,8 @@ export default function Header() {
         <div className="flex items-center">
           <Link href="/" className="no-underline">
             <span
-              className="font-heading text-4xl font-bold"
-              style={{ color: "var(--color-text)" }}
+              className="text-4xl font-bold"
+              style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
             >
               G<span style={{ color: "var(--color-accent)" }}>G</span>.
             </span>
