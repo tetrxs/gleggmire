@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SubmitTermForm } from "@/components/glossary/submit-term-form";
-import { MOCK_EXISTING_TERMS } from "@/lib/mock-data";
+import { getExistingTermsForMatching } from "@/lib/data/glossary";
 
 export const metadata: Metadata = {
   title: "Begriff einreichen — gleggmire.net",
@@ -8,7 +8,9 @@ export const metadata: Metadata = {
     "Reiche einen neuen Begriff für das Gleggmire-Glossar ein. Die Community prüft und bewertet deinen Vorschlag.",
 };
 
-export default function EinreichenPage() {
+export default async function EinreichenPage() {
+  const existingTerms = await getExistingTermsForMatching();
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <div className="mb-8">
@@ -24,7 +26,7 @@ export default function EinreichenPage() {
         </p>
       </div>
 
-      <SubmitTermForm existingTerms={MOCK_EXISTING_TERMS} />
+      <SubmitTermForm existingTerms={existingTerms} />
     </main>
   );
 }

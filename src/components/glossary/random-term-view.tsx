@@ -1,40 +1,92 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { XpButton } from "@/components/ui/xp-button";
-import { MOCK_TERMS, MOCK_DEFINITIONS } from "@/lib/mock-data";
 import { SketchDivider } from "@/components/ui/sketch-elements";
 import Link from "next/link";
 
+interface RandomTermData {
+  id: string;
+  slug: string;
+  term: string;
+  phonetic: string | null;
+  word_type: string | null;
+  status: string;
+  definitions: { definition: string; example_sentence: string | null }[];
+  tags: { tag: string }[];
+  aliases: { alias: string }[];
+}
+
+const SPIN_WORDS = [
+  "Gleggmire",
+  "Snench",
+  "Blödsinn",
+  "Schleim",
+  "Kackwurst",
+  "Troll",
+  "Unfug",
+  "Quatsch",
+  "Mumpitz",
+  "Schabernack",
+  "Firlefanz",
+  "Kokolores",
+  "Papperlapapp",
+  "Humbug",
+  "Hokuspokus",
+];
+
 export function RandomTermView() {
   const [isSpinning, setIsSpinning] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [displayTerm, setDisplayTerm] = useState<string | null>(null);
+  const [selectedTerm, setSelectedTerm] = useState<RandomTermData | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const spin = useCallback(() => {
+  const spin = useCallback(async () => {
     setIsSpinning(true);
+    setSelectedTerm(null);
+
+    // Start the fetch in parallel with the spin animation
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const fetchPromise = fetch("/api/v1/terms/random", {
+      signal: controller.signal,
+    }).then((res) => (res.ok ? res.json() : null));
+
+    // Run the visual spin animation
     let counter = 0;
     const totalSpins = 15;
-    const interval = setInterval(() => {
-      const randomIdx = Math.floor(Math.random() * MOCK_TERMS.length);
-      setDisplayTerm(MOCK_TERMS[randomIdx].term);
-      counter++;
+    await new Promise<void>((resolve) => {
+      const interval = setInterval(() => {
+        const randomIdx = Math.floor(Math.random() * SPIN_WORDS.length);
+        setDisplayTerm(SPIN_WORDS[randomIdx]);
+        counter++;
 
-      if (counter >= totalSpins) {
-        clearInterval(interval);
-        const finalIdx = Math.floor(Math.random() * MOCK_TERMS.length);
-        setCurrentIndex(finalIdx);
-        setDisplayTerm(MOCK_TERMS[finalIdx].term);
-        setIsSpinning(false);
+        if (counter >= totalSpins) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 150);
+    });
+
+    // Wait for the fetch to finish
+    try {
+      const data: RandomTermData | null = await fetchPromise;
+      if (data) {
+        setSelectedTerm(data);
+        setDisplayTerm(data.term);
+      } else {
+        setDisplayTerm("Fehler :(");
       }
-    }, 150);
+    } catch {
+      setDisplayTerm("Fehler :(");
+    }
+
+    setIsSpinning(false);
   }, []);
 
-  const selectedTerm =
-    currentIndex !== null ? MOCK_TERMS[currentIndex] : null;
-  const selectedDef = selectedTerm
-    ? MOCK_DEFINITIONS.find((d) => d.term_id === selectedTerm.id)
-    : null;
+  const firstDef = selectedTerm?.definitions?.[0] ?? null;
 
   return (
     <div className="space-y-8">
@@ -102,15 +154,15 @@ export function RandomTermView() {
             </p>
           )}
 
-          {selectedDef && (
+          {firstDef && (
             <div
               className="rounded-lg border-l-2 pl-4 py-2 space-y-2"
               style={{ borderColor: "var(--color-accent)" }}
             >
-              <p className="text-sm leading-relaxed">{selectedDef.definition}</p>
-              {selectedDef.example_sentence && (
+              <p className="text-sm leading-relaxed">{firstDef.definition}</p>
+              {firstDef.example_sentence && (
                 <p className="text-sm italic" style={{ color: "var(--color-muted)" }}>
-                  &ldquo;{selectedDef.example_sentence}&rdquo;
+                  &ldquo;{firstDef.example_sentence}&rdquo;
                 </p>
               )}
             </div>

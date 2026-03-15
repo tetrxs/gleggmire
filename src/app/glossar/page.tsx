@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { GlossaryList } from "@/components/glossary/glossary-list";
-import { MOCK_TERMS, MOCK_DEFINITIONS, MOCK_TAGS } from "@/lib/mock-data";
+import { getApprovedTerms } from "@/lib/data/glossary";
 
 export const metadata: Metadata = {
   title: "Glossar — gleggmire.net",
@@ -8,11 +8,12 @@ export const metadata: Metadata = {
     "Das Gleggmire-Glossar: Alle Begriffe, Definitionen und Insider aus dem Gleggmire-Universum.",
 };
 
-export default function GlossarPage() {
-  // TODO: Replace mock data with Supabase query
-  const terms = MOCK_TERMS;
-  const definitions = MOCK_DEFINITIONS;
-  const tags = MOCK_TAGS;
+export default async function GlossarPage() {
+  const termsWithPreview = await getApprovedTerms();
+
+  const terms = termsWithPreview.map(({ definitions, tags, ...term }) => term);
+  const definitions = termsWithPreview.flatMap((t) => t.definitions);
+  const tags = termsWithPreview.flatMap((t) => t.tags);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">

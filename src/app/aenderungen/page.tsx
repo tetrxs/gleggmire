@@ -1,42 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getRecentEdits } from "@/lib/data/glossary";
 
 export const metadata: Metadata = {
   title: "Änderungsprotokoll — gleggmire.net",
   description:
     "Öffentliches Änderungsprotokoll aller Bearbeitungen im Gleggmire-Glossar.",
 };
-
-// Mock edit history data
-const MOCK_EDITS = [
-  {
-    id: "1",
-    term: "Gegläggmirt",
-    slug: "geglaggmirt",
-    field: "definition",
-    user: "TrollMeister42",
-    reason: "Weil ich es kann",
-    date: "2026-03-14T18:30:00Z",
-  },
-  {
-    id: "2",
-    term: "Kanackentasche",
-    slug: "kanackentasche",
-    field: "example_sentence",
-    user: "SchleimExperte",
-    reason: "Besseres Beispiel gefunden",
-    date: "2026-03-13T14:20:00Z",
-  },
-  {
-    id: "3",
-    term: "Snench",
-    slug: "snench",
-    field: "tags",
-    user: "GleggFan99",
-    reason: "Tag 'Klassiker' hinzugefügt",
-    date: "2026-03-12T09:15:00Z",
-  },
-];
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("de-DE", {
@@ -48,7 +18,9 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default function AenderungenPage() {
+export default async function AenderungenPage() {
+  const edits = await getRecentEdits();
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
       <div className="mb-8">
@@ -87,7 +59,7 @@ export default function AenderungenPage() {
         </div>
 
         {/* Table rows */}
-        {MOCK_EDITS.map((edit) => (
+        {edits.map((edit) => (
           <div
             key={edit.id}
             className="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-4 px-5 py-4 border-b last:border-b-0 hover:bg-[var(--color-bg)] transition-colors duration-150"
@@ -100,17 +72,17 @@ export default function AenderungenPage() {
               <span className="sm:hidden text-[10px] font-sans font-medium mr-1" style={{ color: "var(--color-muted)" }}>
                 Datum:
               </span>
-              {formatDate(edit.date)}
+              {formatDate(edit.edited_at)}
             </span>
             <span className="text-sm">
               <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
                 Begriff:
               </span>
               <Link
-                href={`/glossar/${edit.slug}`}
+                href={`/glossar/${edit.glossary_terms?.slug ?? ""}`}
                 className="font-medium text-[var(--color-accent)] hover:underline"
               >
-                {edit.term}
+                {edit.glossary_terms?.term ?? "Unbekannt"}
               </Link>
             </span>
             <span className="text-sm">
@@ -124,31 +96,30 @@ export default function AenderungenPage() {
                   color: "var(--color-muted)",
                 }}
               >
-                {edit.field}
+                {edit.field_changed}
               </span>
             </span>
             <span className="text-sm">
               <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
                 Bearbeiter:
               </span>
-              {edit.user}
+              {edit.edited_by.slice(0, 8)}...
             </span>
             <span className="text-sm italic" style={{ color: "var(--color-muted)" }}>
               <span className="sm:hidden text-[10px] font-medium mr-1 not-italic" style={{ color: "var(--color-muted)" }}>
                 Begründung:
               </span>
-              {edit.reason}
+              {edit.reason ?? "—"}
             </span>
           </div>
         ))}
-      </div>
 
-      <p
-        className="mt-6 text-center text-xs"
-        style={{ color: "var(--color-muted)" }}
-      >
-        Weitere Einträge werden geladen sobald die Datenbank verbunden ist.
-      </p>
+        {edits.length === 0 && (
+          <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--color-muted)" }}>
+            Noch keine Änderungen vorhanden.
+          </div>
+        )}
+      </div>
     </main>
   );
 }

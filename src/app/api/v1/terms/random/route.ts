@@ -1,78 +1,58 @@
 import { NextResponse } from "next/server";
-
-// Mock data for development - will be replaced with Supabase queries
-const MOCK_TERMS = [
-  {
-    id: "1",
-    slug: "geglaggmirt",
-    term: "Geglaggmirt",
-    phonetic: "/ge.glak.mirt/",
-    word_type: "Verb (Partizip II)",
-    status: "approved",
-    verified_by_gleggmire: true,
-    definitions: [
-      {
-        id: "d1",
-        definition:
-          "Zustand, in dem man von Gleggmire verbal zerstoert wurde.",
-        example_sentence:
-          "Der Chatter wurde live geglaggmirt.",
-        upvotes: 42,
-        downvotes: 3,
-        cope_meter_avg: 8.5,
-      },
-    ],
-    tags: ["Gleggmire-Original", "Verb"],
-    aliases: ["geglagged"],
-  },
-  {
-    id: "2",
-    slug: "copium",
-    term: "Copium",
-    phonetic: "/ko:.pi.um/",
-    word_type: "Nomen",
-    status: "approved",
-    verified_by_gleggmire: false,
-    definitions: [
-      {
-        id: "d2",
-        definition:
-          "Fiktive Substanz, die man inhaliert, wenn man mit der Realitaet nicht klarkommt.",
-        example_sentence: "Chat ist wieder am Copium inhalieren.",
-        upvotes: 35,
-        downvotes: 2,
-        cope_meter_avg: 9.2,
-      },
-    ],
-    tags: ["Twitch-Kultur"],
-    aliases: ["cope"],
-  },
-  {
-    id: "3",
-    slug: "kekw",
-    term: "KEKW",
-    word_type: "Emote / Interjektion",
-    status: "approved",
-    verified_by_gleggmire: false,
-    definitions: [
-      {
-        id: "d3",
-        definition:
-          "Emote fuer herzhaftes Lachen.",
-        example_sentence: "KEKW er hat es wirklich gesagt",
-        upvotes: 28,
-        downvotes: 1,
-        cope_meter_avg: 3.0,
-      },
-    ],
-    tags: ["Emote", "Twitch-Kultur"],
-    aliases: [],
-  },
-];
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
-  const randomIndex = Math.floor(Math.random() * MOCK_TERMS.length);
-  const term = MOCK_TERMS[randomIndex];
+  const supabase = await createClient();
 
-  return NextResponse.json(term);
+  // Fetch a batch of approved, non-secret term IDs and pick one at random
+  const { data: terms, error } = await supabase
+    .from("glossary_terms")
+    .select("id")
+    .eq("status", "approved")
+    .eq("is_secret", false)
+    .limit(100);
+
+  if (error || !terms || terms.length === 0) {
+    return NextResponse.json(
+      { error: "No terms available" },
+      { status: 404 }
+    );
+  }
+
+  const randomTerm = terms[Math.floor(Math.random() * terms.length)];
+
+  // Fetch the full term plus related data
+  const [termResult, definitionsResult, tagsResult, aliasesResult] = await Promise.all([
+    supabase
+      .from("glossary_terms")
+      .select("*")
+      .eq("id", randomTerm.id)
+      .single(),
+    supabase
+      .from("term_definitions")
+      .select("*")
+      .eq("term_id", randomTerm.id),
+    supabase
+      .from("term_tags")
+      .select("*")
+      .eq("term_id", randomTerm.id),
+    supabase
+      .from("term_aliases")
+      .select("*")
+      .eq("term_id", randomTerm.id),
+  ]);
+
+  if (termResult.error || !termResult.data) {
+    return NextResponse.json(
+      { error: "Failed to fetch term details" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    ...termResult.data,
+    definitions: definitionsResult.data ?? [],
+    tags: tagsResult.data ?? [],
+    aliases: aliasesResult.data ?? [],
+  });
 }

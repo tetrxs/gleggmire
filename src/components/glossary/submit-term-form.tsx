@@ -6,8 +6,8 @@ import { XpButton } from "@/components/ui/xp-button";
 import { XpDialog } from "@/components/ui/xp-dialog";
 import { TagSelect } from "@/components/glossary/tag-select";
 import { FuzzyMatchAlert } from "@/components/glossary/fuzzy-match-alert";
-import { findMatches, type TermMatch } from "@/lib/utils/normalize";
-import type { ExistingTerm } from "@/lib/mock-data";
+import { findMatches, normalizeTerm, type TermMatch } from "@/lib/utils/normalize";
+import type { TermMatchCandidate } from "@/lib/data/glossary";
 
 const WORD_TYPES = [
   "Verb",
@@ -41,10 +41,18 @@ const EMPTY_FORM: FormData = {
 };
 
 interface SubmitTermFormProps {
-  existingTerms: ExistingTerm[];
+  existingTerms: TermMatchCandidate[];
 }
 
-export function SubmitTermForm({ existingTerms }: SubmitTermFormProps) {
+export function SubmitTermForm({ existingTerms: rawTerms }: SubmitTermFormProps) {
+  // Transform TermMatchCandidate[] into the shape findMatches expects
+  const existingTerms = rawTerms.map((t) => ({
+    id: t.id,
+    term: t.term,
+    slug: t.slug,
+    normalized: normalizeTerm(t.term),
+    aliases: t.aliases.map((a) => a.alias),
+  }));
   const router = useRouter();
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
   const [matches, setMatches] = useState<TermMatch[]>([]);
