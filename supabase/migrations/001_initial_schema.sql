@@ -1,14 +1,13 @@
 -- gleggmire.net — Initial Database Schema
 -- Based on specification document
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- UUID generation uses built-in gen_random_uuid() (Supabase/PG14+)
 
 -- ============================================
 -- USERS
 -- ============================================
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   discord_id TEXT UNIQUE NOT NULL,
   username TEXT NOT NULL,
   avatar_url TEXT,
@@ -30,7 +29,7 @@ CREATE INDEX idx_users_glegg_score ON users(glegg_score DESC);
 -- GLOSSARY TERMS
 -- ============================================
 CREATE TABLE glossary_terms (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT UNIQUE NOT NULL,
   term TEXT NOT NULL,
   phonetic TEXT,
@@ -53,7 +52,7 @@ CREATE INDEX idx_terms_created_at ON glossary_terms(created_at DESC);
 -- TERM DEFINITIONS (up to 3 per term, Urban Dictionary style)
 -- ============================================
 CREATE TABLE term_definitions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   definition TEXT NOT NULL,
   example_sentence TEXT NOT NULL,
@@ -72,7 +71,7 @@ CREATE INDEX idx_definitions_term_id ON term_definitions(term_id);
 -- TERM ALIASES
 -- ============================================
 CREATE TABLE term_aliases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   alias TEXT NOT NULL,
   alias_normalized TEXT NOT NULL,
@@ -86,7 +85,7 @@ CREATE INDEX idx_aliases_normalized ON term_aliases(alias_normalized);
 -- TERM TAGS
 -- ============================================
 CREATE TABLE term_tags (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   tag TEXT NOT NULL,
   UNIQUE(term_id, tag)
@@ -99,7 +98,7 @@ CREATE INDEX idx_tags_tag ON term_tags(tag);
 -- TERM EDIT HISTORY (Wikipedia-style)
 -- ============================================
 CREATE TABLE term_edit_history (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   edited_by UUID REFERENCES users(id),
   field_changed TEXT NOT NULL,
@@ -116,7 +115,7 @@ CREATE INDEX idx_edit_history_edited_at ON term_edit_history(edited_at DESC);
 -- CLIPS
 -- ============================================
 CREATE TABLE clips (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   source TEXT NOT NULL CHECK (source IN ('youtube', 'twitch')),
   external_url TEXT NOT NULL,
   external_id TEXT NOT NULL,
@@ -136,7 +135,7 @@ CREATE INDEX idx_clips_upvotes ON clips(upvotes DESC);
 -- CLIP-TERM LINKS (Many-to-Many)
 -- ============================================
 CREATE TABLE clip_term_links (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clip_id UUID NOT NULL REFERENCES clips(id) ON DELETE CASCADE,
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   start_seconds INTEGER,
@@ -152,7 +151,7 @@ CREATE INDEX idx_clip_term_term ON clip_term_links(term_id);
 -- COMMENTS
 -- ============================================
 CREATE TABLE comments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
   entity_type TEXT NOT NULL CHECK (entity_type IN ('term', 'clip')),
   entity_id UUID NOT NULL,
@@ -179,7 +178,7 @@ CREATE INDEX idx_comments_created_at ON comments(created_at DESC);
 -- COMMENT IP LOG (GDPR — 90 day auto-delete)
 -- ============================================
 CREATE TABLE comment_ip_log (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   comment_id UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
   ip_address TEXT NOT NULL,
   user_agent TEXT,
@@ -194,7 +193,7 @@ CREATE INDEX idx_ip_log_delete_at ON comment_ip_log(delete_at);
 -- VOTES (unified voting table)
 -- ============================================
 CREATE TABLE votes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   entity_type TEXT NOT NULL CHECK (entity_type IN ('definition', 'comment', 'clip', 'clip_term_link')),
   entity_id UUID NOT NULL,
@@ -210,7 +209,7 @@ CREATE INDEX idx_votes_user ON votes(user_id);
 -- COPE-O-METER VOTES (separate from up/down votes)
 -- ============================================
 CREATE TABLE cope_votes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   definition_id UUID NOT NULL REFERENCES term_definitions(id) ON DELETE CASCADE,
   value INTEGER NOT NULL CHECK (value >= 0 AND value <= 100),
@@ -224,7 +223,7 @@ CREATE INDEX idx_cope_votes_definition ON cope_votes(definition_id);
 -- REACTIONS (community-specific emoji reactions)
 -- ============================================
 CREATE TABLE reactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   comment_id UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
   reaction_type TEXT NOT NULL CHECK (reaction_type IN ('W', 'L', 'Ratio', 'Cope', 'Seethe', 'Geglaggmirt', 'Kek')),
@@ -238,7 +237,7 @@ CREATE INDEX idx_reactions_comment ON reactions(comment_id);
 -- BADGES
 -- ============================================
 CREATE TABLE badges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   badge_type TEXT NOT NULL,
   earned_at TIMESTAMPTZ DEFAULT NOW(),
@@ -251,7 +250,7 @@ CREATE INDEX idx_badges_user ON badges(user_id);
 -- MODERATION LOG (immutable)
 -- ============================================
 CREATE TABLE moderation_log (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   moderator_id UUID NOT NULL REFERENCES users(id),
   action TEXT NOT NULL,
   target_type TEXT NOT NULL,
@@ -267,7 +266,7 @@ CREATE INDEX idx_mod_log_created_at ON moderation_log(created_at DESC);
 -- DISPUTES (Bestreitungs-System)
 -- ============================================
 CREATE TABLE disputes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   started_by UUID NOT NULL REFERENCES users(id),
   reason TEXT,
@@ -287,7 +286,7 @@ CREATE INDEX idx_disputes_status ON disputes(status);
 -- DELETION PETITIONS (Troll feature — always fail)
 -- ============================================
 CREATE TABLE deletion_petitions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   term_id UUID NOT NULL REFERENCES glossary_terms(id) ON DELETE CASCADE,
   started_by UUID NOT NULL REFERENCES users(id),
   reason TEXT NOT NULL,
@@ -300,7 +299,7 @@ CREATE TABLE deletion_petitions (
 -- WEEKLY CHALLENGES
 -- ============================================
 CREATE TABLE weekly_challenges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   created_by UUID REFERENCES users(id),
@@ -313,7 +312,7 @@ CREATE TABLE weekly_challenges (
 -- TROLL OF THE MONTH
 -- ============================================
 CREATE TABLE troll_of_month (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id),
   month INTEGER NOT NULL,
   year INTEGER NOT NULL,
@@ -325,7 +324,7 @@ CREATE TABLE troll_of_month (
 -- BREAKING NEWS / ALERTS
 -- ============================================
 CREATE TABLE site_alerts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   message TEXT NOT NULL,
   created_by UUID NOT NULL REFERENCES users(id),
   is_active BOOLEAN DEFAULT TRUE,
