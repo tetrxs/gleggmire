@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Space_Grotesk, Lilita_One } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileNav from "@/components/layout/mobile-nav";
 import { KonamiCode } from "@/components/troll/konami-code";
 import { TimeEvents } from "@/components/troll/time-events";
+import { CookieConsentBanner } from "@/components/ui/cookie-consent";
+import { SuggestionModal } from "@/components/ui/suggestion-modal";
+import { TermSubmitModal } from "@/components/glossary/term-submit-modal";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+const lilitaOne = Lilita_One({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-heading",
   display: "swap",
@@ -31,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="de" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
+    <html lang="de" className={`${spaceGrotesk.variable} ${lilitaOne.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -53,13 +58,17 @@ export default function RootLayout({
         style={{ backgroundColor: "var(--color-bg)", color: "var(--color-text)" }}
       >
         <Header />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-8 pt-[4.5rem]">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-8">
           {children}
         </main>
         <Footer />
         <MobileNav />
         <KonamiCode />
         <TimeEvents />
+        <CookieConsentBanner />
+        <SuggestionModal />
+        <TermSubmitModal />
+        <ScrollToTop />
       </body>
     </html>
   );

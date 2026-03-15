@@ -1,70 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AuthButton } from "@/components/auth/auth-button";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header
-      className="fixed top-0 z-50 w-full backdrop-blur-md transition-colors"
+      className="w-full"
       style={{
-        backgroundColor: "color-mix(in srgb, var(--color-bg) 85%, transparent)",
+        backgroundColor: "var(--color-bg)",
         borderBottom: "2px solid var(--color-text)",
       }}
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        {/* Left: Logo */}
+      <div className="relative mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4">
+        {/* Left: Logo Image */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-baseline gap-0 no-underline">
-            <span
-              className="text-lg font-bold uppercase tracking-tight"
-              style={{
-                fontFamily: "var(--font-heading), 'Space Grotesk', sans-serif",
-                color: "var(--color-text)",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              GLEGGMIRE
-            </span>
-            <span
-              className="text-sm font-bold uppercase"
-              style={{ color: "var(--color-accent)" }}
-            >
-              .NET
-            </span>
+          <Link href="/" className="no-underline">
+            <Image
+              src="/images/gleggmire_title.png"
+              alt="GLEGGMIRE.NET"
+              width={240}
+              height={60}
+              className="h-[60px] w-auto"
+              priority
+            />
           </Link>
         </div>
-
-        {/* Center: Navigation links (hidden on mobile) */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {[
-            { href: "/glossar", label: "GLOSSAR" },
-            { href: "/clips", label: "CLIPS" },
-            { href: "/einreichen", label: "EINREICHEN" },
-          ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-xs font-medium uppercase no-underline transition-colors"
-              style={{
-                color: "var(--color-text)",
-                letterSpacing: "0.08em",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.color = "var(--color-accent)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "var(--color-text)")
-              }
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
 
         {/* Right: Actions (hidden on mobile) */}
         <div className="hidden items-center gap-3 md:flex">
@@ -141,32 +109,34 @@ export default function Header() {
           <nav className="flex flex-col gap-0">
             {[
               { href: "/glossar", label: "GLOSSAR" },
-              { href: "/clips", label: "CLIPS" },
               { href: "/einreichen", label: "EINREICHEN" },
               { href: "/leaderboard", label: "LEADERBOARD" },
               { href: "/zufall", label: "ZUFALL" },
               { href: "/about", label: "ABOUT" },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="py-2 text-sm font-medium uppercase no-underline transition-colors"
-                style={{
-                  color: "var(--color-text)",
-                  letterSpacing: "0.08em",
-                  borderBottom: "1px solid var(--color-border)",
-                }}
-                onClick={() => setMobileMenuOpen(false)}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "var(--color-accent)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "var(--color-text)")
-                }
-              >
-                {item.label}
-              </Link>
-            ))}
+            ].map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`py-2 text-sm font-medium uppercase no-underline transition-colors${isActive ? " sketch-underline" : ""}`}
+                  style={{
+                    color: isActive ? "var(--color-accent)" : "var(--color-text)",
+                    letterSpacing: "0.08em",
+                    borderBottom: "1px solid var(--color-border)",
+                  }}
+                  onClick={() => setMobileMenuOpen(false)}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "var(--color-accent)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = isActive ? "var(--color-accent)" : "var(--color-text)")
+                  }
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="mt-4 flex items-center gap-2">
