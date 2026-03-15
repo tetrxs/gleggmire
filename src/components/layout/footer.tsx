@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VisitCounter } from "@/components/troll/visit-counter";
 
 export default function Footer() {
   return (
@@ -76,6 +77,11 @@ export default function Footer() {
             </a>
           </div>
         </div>
+      </div>
+
+      {/* Visitor Counter */}
+      <div className="flex justify-center py-4">
+        <VisitCounter />
       </div>
 
       {/* Bottom strip */}

@@ -3,6 +3,8 @@ import "./globals.css";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MobileNav from "@/components/layout/mobile-nav";
+import { KonamiCode } from "@/components/troll/konami-code";
+import { TimeEvents } from "@/components/troll/time-events";
 
 export const metadata: Metadata = {
   title: "gleggmire.net \u2014 Das Gleggmire-Glossar",
@@ -24,6 +26,8 @@ export default function RootLayout({
         </main>
         <Footer />
         <MobileNav />
+        <KonamiCode />
+        <TimeEvents />
       </body>
     </html>
   );
