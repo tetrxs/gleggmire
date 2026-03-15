@@ -57,8 +57,8 @@
   --color-warning: var(--color-warning);
   --color-error: var(--color-error);
 
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-sans: var(--font-body, 'Inter'), sans-serif;
+  --font-display: var(--font-heading, 'Space Grotesk'), sans-serif;
 }
 
 /* ============================================
