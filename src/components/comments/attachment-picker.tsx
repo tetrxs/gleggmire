@@ -1,0 +1,224 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { XpButton } from "@/components/ui/xp-button";
+import type { AttachmentType } from "@/types/database";
+
+export interface AttachmentData {
+  type: AttachmentType;
+  url: string;
+  file?: File;
+  startSeconds?: number;
+  title?: string;
+}
+
+interface AttachmentPickerProps {
+  mode: "image" | "gif" | "youtube" | "twitch";
+  onAttach: (data: AttachmentData) => void;
+  onCancel: () => void;
+}
+
+function isValidYouTubeUrl(url: string): boolean {
+  return (
+    /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/.test(url) ||
+    /^https?:\/\/youtu\.be\/[\w-]+/.test(url)
+  );
+}
+
+function isValidTwitchUrl(url: string): boolean {
+  return (
+    /^https?:\/\/(www\.)?twitch\.tv\//.test(url) ||
+    /^https?:\/\/clips\.twitch\.tv\//.test(url)
+  );
+}
+
+function extractYouTubeId(url: string): string | null {
+  const match =
+    url.match(/youtube\.com\/watch\?v=([\w-]+)/) ||
+    url.match(/youtu\.be\/([\w-]+)/);
+  return match ? match[1] : null;
+}
+
+export function AttachmentPicker({
+  mode,
+  onAttach,
+  onCancel,
+}: AttachmentPickerProps) {
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState("");
+  const [startSeconds, setStartSeconds] = useState(0);
+  const [validated, setValidated] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  if (mode === "image" || mode === "gif") {
+    const accept =
+      mode === "image" ? ".jpg,.jpeg,.png,.webp" : ".gif";
+    const maxSize = mode === "image" ? 10 : 20;
+    const label = mode === "image" ? "Bild" : "GIF";
+
+    return (
+      <div
+        className="xp-inset p-3 space-y-2"
+        style={{
+          backgroundColor: "var(--xp-fenster-weiss)",
+          fontFamily: "Tahoma, Verdana, sans-serif",
+          fontSize: "11px",
+        }}
+      >
+        <p className="font-bold">
+          {mode === "image" ? "\uD83D\uDDBC" : "GIF"} {label} hochladen
+        </p>
+        <p className="text-[10px] opacity-70">
+          Max. {maxSize}MB{mode === "image" ? " (JPG, PNG, WEBP)" : " (.gif)"}
+        </p>
+        <input
+          ref={fileRef}
+          type="file"
+          accept={accept}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (file.size > maxSize * 1024 * 1024) {
+              setError(`Datei zu gross! Max. ${maxSize}MB.`);
+              return;
+            }
+            const objectUrl = URL.createObjectURL(file);
+            onAttach({
+              type: mode,
+              url: objectUrl,
+              file,
+            });
+          }}
+          className="block w-full text-[11px]"
+        />
+        {error && (
+          <p
+            className="font-bold"
+            style={{ color: "var(--xp-fehler-rot)" }}
+          >
+            {error}
+          </p>
+        )}
+        <div className="flex justify-end">
+          <XpButton onClick={onCancel}>Abbrechen</XpButton>
+        </div>
+      </div>
+    );
+  }
+
+  // YouTube or Twitch URL input
+  const isYoutube = mode === "youtube";
+  const placeholder = isYoutube
+    ? "https://youtube.com/watch?v=... oder https://youtu.be/..."
+    : "https://twitch.tv/... oder https://clips.twitch.tv/...";
+  const icon = isYoutube ? "\u25B6" : "\uD83D\uDFE3";
+  const label = isYoutube ? "YouTube-Video" : "Twitch Clip";
+
+  function handleValidate() {
+    setError("");
+    const valid = isYoutube
+      ? isValidYouTubeUrl(url)
+      : isValidTwitchUrl(url);
+    if (!valid) {
+      setError(`Ungueltige ${label}-URL. Bitte ueberpruefen.`);
+      return;
+    }
+    setValidated(true);
+  }
+
+  function handleConfirm() {
+    onAttach({
+      type: isYoutube ? "youtube" : "twitch",
+      url,
+      startSeconds: isYoutube ? startSeconds : undefined,
+      title: isYoutube
+        ? `YouTube Video (${extractYouTubeId(url) ?? "???"})`
+        : `Twitch Clip`,
+    });
+  }
+
+  return (
+    <div
+      className="xp-inset p-3 space-y-2"
+      style={{
+        backgroundColor: "var(--xp-fenster-weiss)",
+        fontFamily: "Tahoma, Verdana, sans-serif",
+        fontSize: "11px",
+      }}
+    >
+      <p className="font-bold">
+        {icon} {label} verlinken
+      </p>
+
+      {!validated ? (
+        <>
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder={placeholder}
+            className="xp-inset-strong w-full px-2 py-1 text-[11px]"
+            style={{
+              backgroundColor: "var(--xp-fenster-weiss)",
+              fontFamily: "Tahoma, Verdana, sans-serif",
+            }}
+          />
+          {error && (
+            <p
+              className="font-bold"
+              style={{ color: "var(--xp-fehler-rot)" }}
+            >
+              {error}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <XpButton onClick={onCancel}>Abbrechen</XpButton>
+            <XpButton variant="primary" onClick={handleValidate} disabled={!url.trim()}>
+              Pruefen
+            </XpButton>
+          </div>
+        </>
+      ) : (
+        <>
+          <div
+            className="xp-raised p-2 space-y-2"
+            style={{ backgroundColor: "var(--xp-silber-luna)" }}
+          >
+            <p className="font-bold truncate">
+              {isYoutube
+                ? `\uD83C\uDFAC YouTube Video (${extractYouTubeId(url) ?? url})`
+                : `\uD83D\uDFE3 Twitch Clip`}
+            </p>
+            <p className="text-[10px] opacity-70 truncate">{url}</p>
+
+            {isYoutube && (
+              <div className="space-y-1">
+                <label className="flex items-center gap-2">
+                  <span>Startpunkt:</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={600}
+                    value={startSeconds}
+                    onChange={(e) => setStartSeconds(Number(e.target.value))}
+                    className="flex-1"
+                  />
+                  <span className="font-mono w-12 text-right">
+                    {Math.floor(startSeconds / 60)}:
+                    {String(startSeconds % 60).padStart(2, "0")}
+                  </span>
+                </label>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <XpButton onClick={() => setValidated(false)}>Zurueck</XpButton>
+            <XpButton variant="primary" onClick={handleConfirm}>
+              Anhaengen
+            </XpButton>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
