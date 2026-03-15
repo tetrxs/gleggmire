@@ -9,6 +9,7 @@ import { TimeEvents } from "@/components/troll/time-events";
 import { CookieConsentBanner } from "@/components/ui/cookie-consent";
 import { SuggestionModal } from "@/components/ui/suggestion-modal";
 import { TermSubmitModal } from "@/components/glossary/term-submit-modal";
+import { RouletteModal } from "@/components/glossary/roulette-modal";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 
 const spaceGrotesk = Space_Grotesk({
@@ -71,6 +72,7 @@ export default function RootLayout({
         <CookieConsentBanner />
         <SuggestionModal />
         <TermSubmitModal />
+        <RouletteModal />
         <ScrollToTop />
       </body>
     </html>

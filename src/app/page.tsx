@@ -185,13 +185,19 @@ export default async function HomePage() {
           </div>
         )}
 
-        {/* CTA to add own term */}
+        {/* CTA to add own term + roulette */}
         <div className="mt-6 flex items-center gap-3">
           <OpenModalButton
             event="open-term-submit-modal"
             className="btn-outlined text-xs"
           >
             + DEINEN BEGRIFF HINZUFÜGEN
+          </OpenModalButton>
+          <OpenModalButton
+            event="open-roulette-modal"
+            className="btn-outlined text-xs"
+          >
+            GLEGG-ROULETTE
           </OpenModalButton>
         </div>
       </section>
