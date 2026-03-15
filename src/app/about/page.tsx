@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,6 +11,33 @@ export default function AboutPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-2xl font-bold text-[var(--color-text)] mb-6">Ueber gleggmire.net</h1>
+
+      {/* Hero visual */}
+      <div className="mb-8 flex flex-col items-center gap-4">
+        <Image
+          src="/images/gleggmire_title.png"
+          alt="GLEGGMIRE.NET"
+          width={400}
+          height={140}
+          className="h-auto w-[280px] sm:w-[360px]"
+        />
+        <div className="flex items-center gap-4">
+          <Image
+            src="/images/gleggmire_badge.png"
+            alt="Chaos Division Badge"
+            width={140}
+            height={70}
+            className="h-auto w-[120px] animate-float-slow"
+          />
+          <Image
+            src="/images/gleggmire_coin.png"
+            alt="Gleggmire Community Coin"
+            width={80}
+            height={80}
+            className="h-auto w-[60px] animate-float"
+          />
+        </div>
+      </div>
 
       <div className="card p-6 space-y-6 text-sm text-[var(--color-text)]">
         {/* Projektbeschreibung */}

@@ -8,13 +8,24 @@ export const metadata: Metadata = {
 
 export default function ImpressumPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-[var(--color-text)] mb-6">Impressum</h1>
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <h1
+        className="mb-6 text-xl font-bold uppercase tracking-wide sm:text-2xl"
+        style={{
+          fontFamily: "var(--font-heading)",
+          color: "var(--color-text)",
+          letterSpacing: "0.04em",
+        }}
+      >
+        Impressum
+      </h1>
 
-      <div className="card p-6 space-y-6 text-sm text-[var(--color-text)]">
+      <div className="space-y-6 text-sm leading-relaxed" style={{ color: "var(--color-text)" }}>
         <section>
-          <h2 className="text-base font-semibold mb-2">Angaben gemaess Paragraph 5 TMG</h2>
-          <p className="leading-relaxed">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            Angaben gemaess &sect;5 TMG
+          </h2>
+          <p>
             Hans Vincent Trommer
             <br />
             c/o MDC Management#57
@@ -27,24 +38,36 @@ export default function ImpressumPage() {
           </p>
         </section>
 
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
         <section>
-          <h2 className="text-base font-semibold mb-2">Kontakt</h2>
-          <p className="leading-relaxed">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            Kontakt
+          </h2>
+          <p>
             E-Mail:{" "}
             <a
               href="mailto:kontakt@gleggmire.net"
-              className="text-[#E8593C] underline hover:no-underline"
+              className="font-medium no-underline"
+              style={{ color: "var(--color-accent)" }}
             >
               kontakt@gleggmire.net
             </a>
             <br />
-            Discord: <span className="font-bold">tetrxs</span>
+            Discord: <span className="font-semibold">tetrxs</span>
           </p>
         </section>
 
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 dark:border-zinc-700">
-          <p className="text-xs text-[var(--color-muted)]">
-            Hinweis: Dies ist ein privates, nicht-kommerzielles Fan-Projekt.
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        <section>
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            Haftungsausschluss
+          </h2>
+          <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+            Die Inhalte dieser Seite werden mit groesster Sorgfalt erstellt. Fuer die
+            Richtigkeit, Vollstaendigkeit und Aktualitaet der Inhalte koennen wir
+            jedoch keine Gewaehr uebernehmen.
           </p>
         </section>
       </div>

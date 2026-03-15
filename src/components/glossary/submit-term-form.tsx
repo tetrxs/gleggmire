@@ -42,9 +42,10 @@ const EMPTY_FORM: FormData = {
 
 interface SubmitTermFormProps {
   existingTerms: TermMatchCandidate[];
+  onSuccess?: () => void;
 }
 
-export function SubmitTermForm({ existingTerms: rawTerms }: SubmitTermFormProps) {
+export function SubmitTermForm({ existingTerms: rawTerms, onSuccess }: SubmitTermFormProps) {
   // Transform TermMatchCandidate[] into the shape findMatches expects
   const existingTerms = rawTerms.map((t) => ({
     id: t.id,
@@ -377,7 +378,11 @@ export function SubmitTermForm({ existingTerms: rawTerms }: SubmitTermFormProps)
         title={dialog.title}
         message={dialog.message}
         open={dialog.open}
-        onClose={() => setDialog((prev) => ({ ...prev, open: false }))}
+        onClose={() => {
+          const wasSuccess = dialog.type === "info" && dialog.title === "Erfolg";
+          setDialog((prev) => ({ ...prev, open: false }));
+          if (wasSuccess && onSuccess) onSuccess();
+        }}
       />
     </>
   );

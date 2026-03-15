@@ -13,7 +13,7 @@ import { XpDialog } from "@/components/ui/xp-dialog";
 import { VoteButtons } from "@/components/glossary/vote-buttons";
 import { DisputeBanner } from "@/components/glossary/dispute-banner";
 import { CopeOMeter } from "@/components/glossary/cope-o-meter";
-import { SketchUnderline, SketchDivider } from "@/components/ui/sketch-elements";
+import { SketchUnderline } from "@/components/ui/sketch-elements";
 
 interface TermDetailProps {
   term: GlossaryTerm;
@@ -37,11 +37,6 @@ function getTagClasses(tag: string) {
   return TAG_CLASSES[tag.toLowerCase()] ?? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
 }
 
-const FAKE_TRANSLATIONS: Record<string, string> = {
-  default:
-    "This term is untranslatable. It exists only in the Gleggmire-Verse and defies all linguistic conventions. Oxford has been notified.",
-};
-
 export function TermDetail({
   term,
   definitions,
@@ -50,7 +45,6 @@ export function TermDetail({
 }: TermDetailProps) {
   const [disputeDialog, setDisputeDialog] = useState(false);
   const [reportDialog, setReportDialog] = useState(false);
-  const [translateDialog, setTranslateDialog] = useState(false);
 
   const totalUpvotes = definitions.reduce((sum, d) => sum + d.upvotes, 0);
   const totalDownvotes = definitions.reduce((sum, d) => sum + d.downvotes, 0);
@@ -153,7 +147,7 @@ export function TermDetail({
         </section>
       )}
 
-      <SketchDivider className="text-[var(--color-border)]" />
+      <div className="pb-1" style={{ borderBottom: "1px solid var(--color-border)" }} />
 
       {/* Definitions */}
       <section className="space-y-4">
@@ -167,10 +161,9 @@ export function TermDetail({
         {definitions.map((def, index) => (
           <div
             key={def.id}
-            className="rounded-xl border p-5 space-y-4"
+            className="space-y-4 pb-5"
             style={{
-              borderColor: "var(--color-border)",
-              backgroundColor: "var(--color-surface)",
+              borderBottom: index < definitions.length - 1 ? "1px solid var(--color-border)" : "none",
             }}
           >
             {/* Definition number + text */}
@@ -238,7 +231,7 @@ export function TermDetail({
         )}
       </section>
 
-      <SketchDivider className="text-[var(--color-border)]" />
+      <div className="pb-1" style={{ borderBottom: "1px solid var(--color-border)" }} />
 
       {/* Approved-o-Meter */}
       <XpWindow title="Gleggmire-Approved-o-Meter">
@@ -291,7 +284,7 @@ export function TermDetail({
         </div>
       </XpWindow>
 
-      <SketchDivider className="text-[var(--color-border)]" />
+      <div className="pb-1" style={{ borderBottom: "1px solid var(--color-border)" }} />
 
       {/* Action Buttons */}
       <section className="flex flex-wrap gap-3">
@@ -301,16 +294,13 @@ export function TermDetail({
         <XpButton onClick={() => setReportDialog(true)}>
           Melden
         </XpButton>
-        <XpButton onClick={() => setTranslateDialog(true)}>
-          Auf Englisch übersetzen
-        </XpButton>
       </section>
 
       {/* Metadata Footer */}
       <section
-        className="rounded-xl border p-4 space-y-1.5 text-xs"
+        className="pt-4 space-y-1.5 text-xs"
         style={{
-          borderColor: "var(--color-border)",
+          borderTop: "1px solid var(--color-border)",
           color: "var(--color-muted)",
         }}
       >
@@ -354,16 +344,6 @@ export function TermDetail({
         message="Ihre Meldung wurde von Gleggmire persönlich geprüft und mit freundlichem Kopfschütteln abgelehnt."
         open={reportDialog}
         onClose={() => setReportDialog(false)}
-      />
-
-      <XpDialog
-        type="info"
-        title="Übersetzung"
-        message={
-          FAKE_TRANSLATIONS[term.slug] ?? FAKE_TRANSLATIONS.default
-        }
-        open={translateDialog}
-        onClose={() => setTranslateDialog(false)}
       />
     </div>
   );

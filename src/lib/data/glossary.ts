@@ -154,6 +154,43 @@ export async function getExistingTermsForMatching(): Promise<
 }
 
 /**
+ * Get the N most recently added approved terms with their first definition and tags.
+ * Used for homepage preview sections.
+ */
+export async function getLatestTerms(
+  limit: number = 4
+): Promise<TermWithPreview[]> {
+  try {
+    const supabase = await createClient();
+
+    const { data: terms, error } = await supabase
+      .from("glossary_terms")
+      .select("*")
+      .eq("status", "approved")
+      .eq("is_secret", false)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error || !terms) return [];
+
+    const termIds = terms.map((t) => t.id);
+
+    const [{ data: definitions }, { data: tags }] = await Promise.all([
+      supabase.from("term_definitions").select("*").in("term_id", termIds),
+      supabase.from("term_tags").select("*").in("term_id", termIds),
+    ]);
+
+    return terms.map((term) => ({
+      ...term,
+      definitions: (definitions ?? []).filter((d) => d.term_id === term.id),
+      tags: (tags ?? []).filter((t) => t.term_id === term.id),
+    })) as TermWithPreview[];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Get a random approved, non-secret term with at least one definition.
  * Useful for a "word of the day" or random explore feature.
  */

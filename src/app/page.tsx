@@ -1,42 +1,159 @@
+import Image from "next/image";
 import Link from "next/link";
+import { getLatestTerms } from "@/lib/data/glossary";
+import { MOCK_CLIPS } from "@/lib/mock-clips";
+import { OpenModalButton } from "@/components/ui/open-modal-button";
+import type { TermWithPreview } from "@/lib/data/glossary";
 
 const MARQUEE_TEXT =
   "GEGLÄGGMIRT · KOMPLETT · SNENCH · LUNGEN-TORPEDO · KANACKENTASCHE · AUF GLEGG · ";
 
-export default function HomePage() {
+function TermPreviewCard({ term }: { term: TermWithPreview }) {
+  const def = term.definitions[0];
+  const tags = term.tags.slice(0, 3);
+
+  return (
+    <Link
+      href={`/glossar/${term.slug}`}
+      className="card-hover flex flex-col gap-3 p-5 no-underline"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className="text-lg font-bold leading-tight"
+          style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+        >
+          {term.term}
+        </span>
+        {tags.length > 0 && (
+          <span
+            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+              color: "var(--color-accent)",
+            }}
+          >
+            {tags[0].tag}
+          </span>
+        )}
+      </div>
+      {def && (
+        <p
+          className="line-clamp-2 text-xs leading-relaxed"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          {def.definition}
+        </p>
+      )}
+    </Link>
+  );
+}
+
+function ClipPreviewCard({
+  title,
+  upvotes,
+  source,
+  badges,
+}: {
+  title: string;
+  upvotes: number;
+  source: string;
+  badges: string[];
+}) {
+  return (
+    <div
+      className="card-hover flex flex-col gap-3 p-5"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-sm font-semibold leading-tight" style={{ color: "var(--color-text)" }}>
+          {title}
+        </span>
+        {badges.includes("hall-of-fame") && (
+          <span
+            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+            style={{
+              backgroundColor: "color-mix(in srgb, #F59E0B 15%, transparent)",
+              color: "#D97706",
+            }}
+          >
+            🏆
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
+        <span className="uppercase font-medium">{source}</span>
+        <span>·</span>
+        <span>▲ {upvotes}</span>
+      </div>
+    </div>
+  );
+}
+
+export default async function HomePage() {
+  const latestTerms = await getLatestTerms(4);
+  const previewClips = MOCK_CLIPS.slice(0, 5);
+
   return (
     <div className="flex flex-col">
       {/* ============================
           1. HERO SECTION
           ============================ */}
-      <section className="flex flex-col items-center justify-center gap-8 px-4 py-24 text-center animate-fade-in">
+      <section className="relative flex flex-col items-center justify-center gap-6 px-4 pb-16 pt-20 text-center animate-fade-in">
+        {/* Decorative floating images – desktop only */}
+        <Image
+          src="/images/gleggmire_coin.png"
+          alt=""
+          width={160}
+          height={160}
+          className="hidden lg:block absolute select-none pointer-events-none animate-float"
+          style={{ top: "2rem", left: "1%", filter: "drop-shadow(2px 4px 10px rgba(0,0,0,0.12))" }}
+          aria-hidden="true"
+        />
+        <Image
+          src="/images/gleggmire_wanted.png"
+          alt=""
+          width={190}
+          height={190}
+          className="hidden lg:block absolute select-none pointer-events-none animate-tilt-rock"
+          style={{ top: "6rem", right: "1%", filter: "drop-shadow(2px 4px 10px rgba(0,0,0,0.12))" }}
+          aria-hidden="true"
+        />
+        <Image
+          src="/images/gleggmire_card.png"
+          alt=""
+          width={150}
+          height={150}
+          className="hidden lg:block absolute select-none pointer-events-none animate-float-slow"
+          style={{ bottom: "2rem", left: "2%", filter: "drop-shadow(2px 4px 10px rgba(0,0,0,0.12))" }}
+          aria-hidden="true"
+        />
+
         <h1
-          className="font-bold uppercase leading-[0.95] tracking-tighter"
+          className="leading-[1.1]"
           style={{
             fontFamily: "var(--font-heading)",
             color: "var(--color-text)",
-            fontSize: "clamp(3rem, 10vw, 7rem)",
+            fontSize: "clamp(2.5rem, 9vw, 6.5rem)",
           }}
         >
-          DAS{" "}
-          <span className="pill" style={{ verticalAlign: "baseline" }}>
-            GLOSSAR
-          </span>{" "}
-          DER
-          <br />
-          GLEGGMIRE
-          <br />
-          <span className="pill-accent" style={{ verticalAlign: "baseline" }}>
-            COMMUNITY
+          <span className="block">Das Glossar</span>
+          <span className="block">
+            der{" "}
+            <span className="sketch-underline" style={{ color: "var(--color-accent)" }}>
+              Gleggmire
+            </span>
+          </span>
+          <span className="block">
+            Community
+            <span style={{ color: "var(--color-accent)" }}>.</span>
           </span>
         </h1>
 
         <p
-          className="max-w-md text-base uppercase tracking-widest"
-          style={{ color: "var(--color-text-muted)" }}
+          className="max-w-lg text-sm tracking-wide sm:text-base"
+          style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}
         >
-          Das kollektive Nachschlagewerk &mdash; von der Community, fuer die
-          Community.
+          Von der Community, fuer die Community &mdash; Begriffe, Clips, Chaos und alles was
+          dazugehoert.
         </p>
 
         <div className="flex flex-col items-center gap-4 sm:flex-row">
@@ -50,11 +167,13 @@ export default function HomePage() {
       </section>
 
       {/* ============================
-          2. MARQUEE / TICKER STRIP
+          2. MARQUEE / TICKER – full bleed
           ============================ */}
       <section
         className="overflow-hidden whitespace-nowrap"
         style={{
+          marginLeft: "calc(50% - 50vw)",
+          width: "100vw",
           backgroundColor: "var(--color-text)",
           color: "var(--color-bg)",
           borderTop: "2px solid var(--color-border)",
@@ -62,7 +181,7 @@ export default function HomePage() {
         }}
       >
         <div className="animate-marquee flex w-max py-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <span
               key={i}
               className="text-sm font-bold uppercase tracking-[0.2em]"
@@ -75,215 +194,133 @@ export default function HomePage() {
       </section>
 
       {/* ============================
-          3. STATS ROW
+          3. GLOSSAR VORSCHAU
           ============================ */}
-      <section className="flex flex-col items-center gap-2 py-20 animate-slide-up">
-        <div
-          className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-center"
-          style={{
-            fontFamily: "var(--font-heading)",
-            color: "var(--color-text)",
-          }}
-        >
+      <section className="mx-auto w-full max-w-6xl px-4 py-14">
+        {/* Section header */}
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <span
-              className="block font-bold"
-              style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}
+            <h2
+              className="text-2xl font-bold tracking-tight sm:text-3xl"
+              style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
             >
-              79+
-            </span>
-            <span
-              className="text-xs font-semibold uppercase tracking-[0.2em]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Begriffe
-            </span>
+              Neu im Glossar
+            </h2>
+            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+              Die zuletzt hinzugefuegten Begriffe der Community
+            </p>
           </div>
-          <span
-            className="hidden text-4xl font-light sm:block"
-            style={{ color: "var(--color-border)" }}
+          <Link
+            href="/glossar"
+            className="shrink-0 text-xs font-bold uppercase no-underline transition-colors"
+            style={{ color: "var(--color-accent)", letterSpacing: "0.08em" }}
           >
-            &middot;
-          </span>
-          <div>
-            <span
-              className="block font-bold"
-              style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}
-            >
-              18
-            </span>
-            <span
-              className="text-xs font-semibold uppercase tracking-[0.2em]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Clips
-            </span>
+            ALLE BEGRIFFE →
+          </Link>
+        </div>
+
+        {/* Term preview grid */}
+        {latestTerms.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {latestTerms.map((term) => (
+              <TermPreviewCard key={term.id} term={term} />
+            ))}
           </div>
-          <span
-            className="hidden text-4xl font-light sm:block"
-            style={{ color: "var(--color-border)" }}
+        ) : (
+          <div
+            className="flex h-32 items-center justify-center rounded-2xl text-sm"
+            style={{ border: "2px dashed var(--color-border)", color: "var(--color-text-muted)" }}
           >
-            &middot;
-          </span>
-          <div>
-            <span
-              className="block font-bold"
-              style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}
-            >
-              97
-            </span>
-            <span
-              className="text-xs font-semibold uppercase tracking-[0.2em]"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Definitionen
-            </span>
+            Noch keine Begriffe vorhanden.
           </div>
+        )}
+
+        {/* CTA to add own term */}
+        <div className="mt-6 flex items-center gap-3">
+          <OpenModalButton
+            event="open-term-submit-modal"
+            className="btn-outlined text-xs"
+          >
+            + DEINEN BEGRIFF HINZUFÜGEN
+          </OpenModalButton>
         </div>
       </section>
 
       {/* ============================
-          4. FEATURE CARDS
-          ============================ */}
-      <section className="mx-auto grid w-full max-w-6xl gap-6 px-4 pb-20 md:grid-cols-2 lg:grid-cols-3 animate-slide-up">
-        {/* Begriff des Tages */}
-        <div className="card p-8 flex flex-col gap-5">
-          <div className="flex items-center gap-3">
-            <span style={{ color: "var(--color-accent)" }}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-            </span>
-            <h3
-              className="text-xl font-bold uppercase tracking-tight"
-              style={{
-                fontFamily: "var(--font-heading)",
-                color: "var(--color-text)",
-              }}
-            >
-              Begriff des Tages
-            </h3>
-          </div>
-          <div className="flex flex-1 items-center justify-center py-10">
-            <p
-              className="text-center text-sm italic"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Hier erscheint bald der taegliche Featured-Begriff...
-            </p>
-          </div>
-        </div>
-
-        {/* Top Clips */}
-        <div className="card p-8 flex flex-col gap-5">
-          <div className="flex items-center gap-3">
-            <span style={{ color: "var(--color-accent)" }}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </span>
-            <h3
-              className="text-xl font-bold uppercase tracking-tight"
-              style={{
-                fontFamily: "var(--font-heading)",
-                color: "var(--color-text)",
-              }}
-            >
-              Top Clips
-            </h3>
-          </div>
-          <div className="flex flex-1 items-center justify-center py-10">
-            <p
-              className="text-center text-sm italic"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Die beliebtesten Clips der Woche...
-            </p>
-          </div>
-        </div>
-
-        {/* Aktivitaets-Feed */}
-        <div className="card p-8 flex flex-col gap-5">
-          <div className="flex items-center gap-3">
-            <span style={{ color: "var(--color-accent)" }}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-              </svg>
-            </span>
-            <h3
-              className="text-xl font-bold uppercase tracking-tight"
-              style={{
-                fontFamily: "var(--font-heading)",
-                color: "var(--color-text)",
-              }}
-            >
-              Aktivitaets-Feed
-            </h3>
-          </div>
-          <div className="flex flex-1 items-center justify-center py-10">
-            <p
-              className="text-center text-sm italic"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Letzte Community-Aktivitaeten...
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================
-          5. BOTTOM CTA
+          4. CLIPS VORSCHAU
           ============================ */}
       <section
-        className="flex flex-col items-center gap-8 px-4 py-24 text-center"
-        style={{
-          borderTop: "2px solid var(--color-border)",
-        }}
+        className="mx-auto w-full max-w-6xl px-4 py-14"
+        style={{ borderTop: "2px solid var(--color-border)" }}
       >
-        <h2
-          className="font-bold uppercase leading-[0.95] tracking-tighter"
+        {/* Section header */}
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2
+              className="text-2xl font-bold tracking-tight sm:text-3xl"
+              style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+            >
+              Aktuelle Clips
+            </h2>
+            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+              Die beliebtesten Community-Clips
+            </p>
+          </div>
+          <Link
+            href="/glossar"
+            className="shrink-0 text-xs font-bold uppercase no-underline transition-colors"
+            style={{ color: "var(--color-accent)", letterSpacing: "0.08em" }}
+          >
+            CLIPS IN BEGRIFFEN ENTDECKEN →
+          </Link>
+        </div>
+
+        {/* Clips preview grid – 2 rows: 3 on top, 2 on bottom */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {previewClips.map((c) => (
+            <ClipPreviewCard
+              key={c.clip.id}
+              title={c.clip.title}
+              upvotes={c.clip.upvotes}
+              source={c.clip.source}
+              badges={c.badges}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* ============================
+          5. FAN-DISCLAIMER INFO BOX
+          ============================ */}
+      <section className="mx-auto w-full max-w-4xl px-4 py-10">
+        <div
+          className="rounded-2xl p-6 sm:p-8"
           style={{
-            fontFamily: "var(--font-heading)",
-            color: "var(--color-text)",
-            fontSize: "clamp(2rem, 6vw, 4.5rem)",
+            backgroundColor: "var(--color-surface)",
+            border: "2px solid var(--color-border)",
           }}
         >
-          WERDE TEIL DER{" "}
-          <span className="pill-accent" style={{ verticalAlign: "baseline" }}>
-            COMMUNITY
-          </span>
-        </h2>
-        <Link href="/glossar/einreichen" className="btn-outlined no-underline">
-          BEGRIFF EINREICHEN
-        </Link>
+          <h3
+            className="mb-2 text-base font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+          >
+            Reines Fan-Projekt mit Herz &#10084;&#65039;
+          </h3>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+            gleggmire.net ist ein{" "}
+            <strong style={{ color: "var(--color-text)" }}>inoffizielles Community-Projekt</strong>{" "}
+            und hat nichts mit Gleggmire oder seinen offiziellen Kanaelen zu tun. Bei Fragen:{" "}
+            <a
+              href="mailto:kontakt@gleggmire.net"
+              className="font-semibold no-underline"
+              style={{ color: "var(--color-accent)" }}
+            >
+              kontakt@gleggmire.net
+            </a>
+          </p>
+        </div>
       </section>
+
     </div>
   );
 }

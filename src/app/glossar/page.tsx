@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GlossaryList } from "@/components/glossary/glossary-list";
 import { getApprovedTerms } from "@/lib/data/glossary";
+import { OpenModalButton } from "@/components/ui/open-modal-button";
 
 export const metadata: Metadata = {
   title: "Glossar — gleggmire.net",
@@ -17,17 +18,24 @@ export default async function GlossarPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
-      <div className="mb-8">
-        <h1
-          className="text-3xl font-bold tracking-tight"
-          style={{ fontFamily: "var(--font-heading)" }}
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1
+            className="text-3xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Glossar
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+            Das Gleggmire-Lexikon. Durchsuche, filtere und entdecke Begriffe.
+          </p>
+        </div>
+        <OpenModalButton
+          event="open-term-submit-modal"
+          className="btn-filled shrink-0 text-xs"
         >
-          Glossar
-        </h1>
-        <p className="mt-2 text-sm" style={{ color: "var(--color-muted)" }}>
-          Das offizielle Gleggmire-Lexikon. Durchsuche, filtere und entdecke
-          Begriffe aus dem Gleggmire-Universum.
-        </p>
+          + Begriff EINREICHEN
+        </OpenModalButton>
       </div>
 
       <GlossaryList terms={terms} definitions={definitions} tags={tags} />

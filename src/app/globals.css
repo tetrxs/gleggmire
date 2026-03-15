@@ -57,8 +57,8 @@
   --color-warning: var(--color-warning);
   --color-error: var(--color-error);
 
-  --font-sans: var(--font-body, 'Inter'), sans-serif;
-  --font-display: var(--font-heading, 'Space Grotesk'), sans-serif;
+  --font-sans: var(--font-body, 'Space Grotesk'), sans-serif;
+  --font-display: var(--font-heading, 'Lilita One'), sans-serif;
 }
 
 /* ============================================
@@ -80,39 +80,21 @@ body {
 }
 
 /* ============================================
-   Typography
+   Typography – in @layer base so Tailwind utilities win
    ============================================ */
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-h1 {
-  font-size: clamp(3rem, 8vw, 6rem);
-  text-transform: uppercase;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
-}
-
-h2 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-
-h3 {
-  font-size: clamp(1.25rem, 3vw, 2rem);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-h4 {
-  font-size: 1.25rem;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.1;
+  }
+  h1 {
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+  }
 }
 
 /* ============================================
@@ -350,4 +332,53 @@ a, button, input, select, textarea,
 
 .animate-marquee {
   animation: marquee 20s linear infinite;
+}
+
+/* ============================================
+   Floating / Decorative Asset Animations
+   ============================================ */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-3deg); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes tilt-rock {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(232, 89, 60, 0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(232, 89, 60, 0.6)); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-tilt-rock {
+  animation: tilt-rock 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
 }

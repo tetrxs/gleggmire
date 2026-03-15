@@ -6,6 +6,8 @@ import { GlossaryCard } from "@/components/glossary/glossary-card";
 
 type SortMode = "az" | "za" | "newest" | "oldest";
 
+const ITEMS_PER_PAGE = 24;
+
 interface GlossaryListProps {
   terms: GlossaryTerm[];
   definitions: TermDefinition[];
@@ -24,12 +26,14 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("az");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setSearch(value);
+      setPage(1);
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         setDebouncedSearch(value);
@@ -111,6 +115,12 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
     return result;
   }, [terms, debouncedSearch, activeTag, sortMode, tags]);
 
+  const totalPages = Math.ceil(filteredTerms.length / ITEMS_PER_PAGE);
+  const pagedTerms = useMemo(
+    () => filteredTerms.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
+    [filteredTerms, page],
+  );
+
   return (
     <div className="flex flex-col gap-6">
       {/* Search bar */}
@@ -155,7 +165,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
               <button
                 key={option.value}
                 type="button"
-                onClick={() => setSortMode(option.value)}
+                onClick={() => { setSortMode(option.value); setPage(1); }}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
                   sortMode === option.value
                     ? "bg-[var(--color-accent)] text-white shadow-sm"
@@ -189,7 +199,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
         </span>
         <button
           type="button"
-          onClick={() => setActiveTag(null)}
+          onClick={() => { setActiveTag(null); setPage(1); }}
           className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
             activeTag === null
               ? "bg-[var(--color-accent)] text-white"
@@ -211,7 +221,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
           <button
             key={tag}
             type="button"
-            onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+            onClick={() => { setActiveTag(activeTag === tag ? null : tag); setPage(1); }}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
               activeTag === tag
                 ? "bg-[var(--color-accent)] text-white"
@@ -240,16 +250,43 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredTerms.map((term) => (
-            <GlossaryCard
-              key={term.id}
-              term={term}
-              definition={definitionMap.get(term.id)}
-              tags={tagMap.get(term.id) ?? []}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pagedTerms.map((term) => (
+              <GlossaryCard
+                key={term.id}
+                term={term}
+                definition={definitionMap.get(term.id)}
+                tags={tagMap.get(term.id) ?? []}
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <button
+                onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                disabled={page === 1}
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+                style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+              >
+                ‹
+              </button>
+              <span className="text-sm tabular-nums" style={{ color: "var(--color-text-muted)" }}>
+                {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                disabled={page === totalPages}
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-30"
+                style={{ borderColor: "var(--color-border)", color: "var(--color-text)" }}
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

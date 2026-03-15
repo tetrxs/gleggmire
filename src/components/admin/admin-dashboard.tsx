@@ -7,8 +7,9 @@ import { ModerationQueue } from "./moderation-queue";
 import { UserManagement } from "./user-management";
 import { ModerationLog } from "./moderation-log";
 import { BreakingNewsForm } from "./breaking-news-form";
+import { SuggestionsManager } from "./suggestions-manager";
 
-type AdminView = "dashboard" | "queue" | "users" | "log" | "news";
+type AdminView = "dashboard" | "queue" | "users" | "log" | "news" | "suggestions";
 
 const STATS = [
   { label: "Ausstehende Einreichungen", value: 7, color: "#E8593C" },
@@ -64,6 +65,17 @@ export function AdminDashboard() {
     );
   }
 
+  if (view === "suggestions") {
+    return (
+      <div>
+        <div className="mb-4">
+          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
+        </div>
+        <SuggestionsManager />
+      </div>
+    );
+  }
+
   return (
     <XpWindow title="Admin-Panel">
       {/* Stats Cards */}
@@ -96,6 +108,9 @@ export function AdminDashboard() {
           </XpButton>
           <XpButton onClick={() => setView("log")}>
             Moderations-Log
+          </XpButton>
+          <XpButton variant="primary" onClick={() => setView("suggestions")}>
+            Vorschlaege verwalten
           </XpButton>
         </div>
       </div>

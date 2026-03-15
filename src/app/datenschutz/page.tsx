@@ -1,214 +1,224 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Datenschutzerklaerung — gleggmire.net",
+  title: "Datenschutz — gleggmire.net",
   description:
     "Datenschutzerklaerung gemaess DSGVO fuer gleggmire.net – Informationen zur Datenverarbeitung.",
 };
 
 export default function DatenschutzPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-[var(--color-text)] mb-6">Datenschutzerklaerung</h1>
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <h1
+        className="mb-6 text-xl font-bold uppercase tracking-wide sm:text-2xl"
+        style={{
+          fontFamily: "var(--font-heading)",
+          color: "var(--color-text)",
+          letterSpacing: "0.04em",
+        }}
+      >
+        Datenschutz
+      </h1>
 
-      <div className="card p-6 space-y-8 text-sm text-[var(--color-text)]">
+      <div className="space-y-8 text-sm leading-relaxed" style={{ color: "var(--color-text)" }}>
         {/* 1. Verantwortlicher */}
         <section>
-          <h2 className="text-base font-semibold mb-2">1. Verantwortlicher</h2>
-          <p className="leading-relaxed">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            1. Verantwortlicher
+          </h2>
+          <p>
             Hans Vincent Trommer
             <br />
             c/o MDC Management#57
             <br />
-            Welserstrasse 3
-            <br />
-            87463 Dietmannsried
-            <br />
-            Deutschland
+            Welserstrasse 3, 87463 Dietmannsried, Deutschland
           </p>
-          <p className="mt-2 leading-relaxed">
+          <p className="mt-1">
             E-Mail:{" "}
-            <a href="mailto:kontakt@gleggmire.net" className="text-[#E8593C] underline hover:no-underline">
+            <a href="mailto:kontakt@gleggmire.net" className="font-medium no-underline" style={{ color: "var(--color-accent)" }}>
               kontakt@gleggmire.net
             </a>
-            <br />
-            Discord: <span className="font-bold">tetrxs</span>
+            {" "}&middot; Discord: <span className="font-semibold">tetrxs</span>
           </p>
         </section>
+
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
 
         {/* 2. Ueberblick */}
         <section>
-          <h2 className="text-base font-semibold mb-2">2. Ueberblick der Verarbeitung</h2>
-          <p className="leading-relaxed">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            2. Ueberblick der Verarbeitung
+          </h2>
+          <p>
             gleggmire.net ist ein inoffizielles Fan-Projekt. Wir verarbeiten personenbezogene Daten
             nur soweit dies fuer den Betrieb der Webseite und ihrer Funktionen erforderlich ist.
-            Es findet <span className="font-bold">kein Tracking, keine Werbung und kein Profiling</span> statt.
+            Es findet <strong>kein Tracking, keine Werbung und kein Profiling</strong> statt.
           </p>
         </section>
 
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
         {/* 3. Rechtsgrundlagen */}
         <section>
-          <h2 className="text-base font-semibold mb-2">3. Rechtsgrundlagen</h2>
-          <p className="leading-relaxed mb-2">
-            Die Verarbeitung personenbezogener Daten erfolgt auf Grundlage folgender Rechtsgrundlagen:
-          </p>
-          <ul className="ml-4 list-disc space-y-2 text-[var(--color-text-muted)]">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            3. Rechtsgrundlagen
+          </h2>
+          <ul className="ml-4 list-disc space-y-2" style={{ color: "var(--color-text-muted)" }}>
             <li>
-              <span className="font-semibold text-[var(--color-text)]">Art. 6 Abs. 1 lit. a DSGVO (Einwilligung):</span>{" "}
-              Discord OAuth Login — du entscheidest aktiv, dich anzumelden.
+              <strong style={{ color: "var(--color-text)" }}>Art. 6 Abs. 1 lit. a DSGVO (Einwilligung):</strong>{" "}
+              Discord OAuth Login, Cookie-Consent fuer optionale Dienste.
             </li>
             <li>
-              <span className="font-semibold text-[var(--color-text)]">Art. 6 Abs. 1 lit. b DSGVO (Vertragsdurchfuehrung):</span>{" "}
-              Bereitstellung der Webseite und ihrer Funktionen (Glossar, Kommentare, Einreichungen).
+              <strong style={{ color: "var(--color-text)" }}>Art. 6 Abs. 1 lit. b DSGVO (Vertragsdurchfuehrung):</strong>{" "}
+              Bereitstellung der Webseite und ihrer Funktionen.
             </li>
             <li>
-              <span className="font-semibold text-[var(--color-text)]">Art. 6 Abs. 1 lit. f DSGVO (Berechtigtes Interesse):</span>{" "}
-              IP-Logging bei Kommentaren zur Missbrauchspraevention, technisch notwendige Cookies/LocalStorage.
+              <strong style={{ color: "var(--color-text)" }}>Art. 6 Abs. 1 lit. f DSGVO (Berechtigtes Interesse):</strong>{" "}
+              IP-Logging bei Kommentaren, technisch notwendige Cookies/LocalStorage.
             </li>
           </ul>
         </section>
 
-        {/* 4. Hosting & Infrastruktur */}
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 4. Hosting */}
         <section>
-          <h2 className="text-base font-semibold mb-2">4. Hosting &amp; Infrastruktur</h2>
-          <p className="mb-3">Fuer den Betrieb dieser Seite werden folgende Dienste eingesetzt:</p>
-          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] dark:border-zinc-700">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            4. Hosting &amp; Infrastruktur
+          </h2>
+          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]" style={{ backgroundColor: "var(--color-bg)" }}>
                   <th className="px-3 py-2 font-semibold">Dienst</th>
                   <th className="px-3 py-2 font-semibold">Zweck</th>
                   <th className="px-3 py-2 font-semibold">Standort</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Railway</td>
                   <td className="px-3 py-2">Application Hosting</td>
                   <td className="px-3 py-2">Niederlande (EU)</td>
                 </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Supabase</td>
                   <td className="px-3 py-2">Datenbank &amp; Auth</td>
-                  <td className="px-3 py-2">Frankfurt, Deutschland (EU)</td>
+                  <td className="px-3 py-2">Frankfurt, DE (EU)</td>
                 </tr>
                 <tr>
                   <td className="px-3 py-2">Upstash Redis</td>
-                  <td className="px-3 py-2">Rate-Limiting &amp; Cache</td>
+                  <td className="px-3 py-2">Rate-Limiting</td>
                   <td className="px-3 py-2">EU</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p className="mt-3 leading-relaxed text-[var(--color-text-muted)]">
-            Alle Dienste verarbeiten Daten ausschliesslich innerhalb der EU. Es findet keine Datenuebermittlung
-            in Drittlaender statt (mit Ausnahme von YouTube/Twitch-Embeds, siehe Abschnitt 7).
+          <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Alle Dienste verarbeiten Daten ausschliesslich innerhalb der EU.
           </p>
         </section>
+
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
 
         {/* 5. Schriftarten */}
         <section>
-          <h2 className="text-base font-semibold mb-2">5. Schriftarten</h2>
-          <p className="leading-relaxed">
-            Diese Webseite verwendet die Schriftarten <span className="font-bold">Inter</span> und{" "}
-            <span className="font-bold">Space Grotesk</span> (Google Fonts).
-            Die Schriftarten werden <span className="font-bold">lokal von unserem eigenen Server</span> ausgeliefert
-            (Self-Hosting). Es findet <span className="font-bold">keine Verbindung zu Google-Servern</span> statt
-            und es werden keine Daten an Google uebermittelt.
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            5. Schriftarten
+          </h2>
+          <p>
+            Wir verwenden <strong>Inter</strong> und <strong>Space Grotesk</strong> (Google Fonts),
+            die <strong>lokal von unserem Server</strong> ausgeliefert werden.
+            Es findet keine Verbindung zu Google-Servern statt.
           </p>
         </section>
+
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
 
         {/* 6. Discord OAuth */}
         <section>
-          <h2 className="text-base font-semibold mb-2">6. Discord OAuth (Anmeldung)</h2>
-          <p className="leading-relaxed">
-            Die Anmeldung erfolgt freiwillig ueber Discord OAuth 2.0. Dabei wirst du zu Discord weitergeleitet
-            und entscheidest dort, ob du gleggmire.net Zugriff auf folgende Daten gewaehrst:
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            6. Discord OAuth (Anmeldung)
+          </h2>
+          <p>
+            Die Anmeldung erfolgt freiwillig ueber Discord OAuth 2.0. Folgende Daten werden abgefragt:
           </p>
-          <ul className="ml-4 mt-2 list-disc space-y-1 text-[var(--color-text-muted)]">
-            <li>Discord User ID (eindeutige Kennung)</li>
+          <ul className="ml-4 mt-1 list-disc space-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            <li>Discord User ID</li>
             <li>Username &amp; Display Name</li>
             <li>Avatar URL</li>
           </ul>
-          <p className="mt-2 leading-relaxed">
-            <span className="font-bold">Die E-Mail-Adresse wird nicht angefragt und nicht gespeichert.</span>{" "}
-            Du kannst deinen Account jederzeit loeschen lassen (siehe Abschnitt 10).
-          </p>
-          <p className="mt-2 leading-relaxed text-[var(--color-text-muted)]">
-            Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung durch aktiven Login).
+          <p className="mt-2">
+            <strong>Die E-Mail-Adresse wird nicht angefragt und nicht gespeichert.</strong>{" "}
+            Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.
           </p>
         </section>
 
-        {/* 7. YouTube & Twitch Embeds */}
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 7. Embeds */}
         <section>
-          <h2 className="text-base font-semibold mb-2">7. YouTube &amp; Twitch Embeds</h2>
-          <p className="leading-relaxed">
-            YouTube-Videos werden ueber <span className="font-bold">youtube-nocookie.com</span> eingebunden
-            (erweiterter Datenschutzmodus). Erst beim aktiven Abspielen eines Videos werden Daten an
-            YouTube (Google Ireland Limited) uebermittelt, darunter IP-Adresse und Geraeteinformationen.
-          </p>
-          <p className="mt-2 leading-relaxed">
-            Twitch-Clips werden ueber Twitch-Embeds eingebunden. Beim Laden eines Twitch-Embeds werden
-            Daten an Twitch (Amazon) uebermittelt.
-          </p>
-          <p className="mt-2 leading-relaxed text-[var(--color-text-muted)]">
-            Bei beiden Diensten kann eine Datenuebermittlung in die USA stattfinden. Google und Amazon
-            sind unter dem EU-US Data Privacy Framework zertifiziert.
-            Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Darstellung von Inhalten).
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            7. YouTube &amp; Twitch Embeds
+          </h2>
+          <p>
+            YouTube-Videos werden ueber <strong>youtube-nocookie.com</strong> eingebunden.
+            Twitch-Clips ueber Twitch-Embeds. Erst beim aktiven Abspielen werden Daten
+            an YouTube (Google) bzw. Twitch (Amazon) uebermittelt. Beide sind unter dem
+            EU-US Data Privacy Framework zertifiziert.
           </p>
         </section>
 
-        {/* 8. IP-Adressen & Logging */}
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 8. IP */}
         <section>
-          <h2 className="text-base font-semibold mb-2">8. IP-Adressen &amp; Logging</h2>
-          <p className="leading-relaxed">
-            Bei anonymen Kommentaren wird die IP-Adresse fuer maximal <span className="font-bold">90 Tage</span> gespeichert.
-            Diese ist ausschliesslich fuer den Administrator einsehbar und dient der Missbrauchspraevention
-            (z.B. Spam, Beleidigungen).
-          </p>
-          <p className="mt-2 leading-relaxed">
-            Server-Access-Logs (IP-Adresse, Zeitstempel, aufgerufene URL) werden durch den Hosting-Anbieter
-            fuer maximal 14 Tage gespeichert.
-          </p>
-          <p className="mt-2 leading-relaxed text-[var(--color-text-muted)]">
-            Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Sicherheit und Missbrauchsschutz).
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            8. IP-Adressen &amp; Logging
+          </h2>
+          <p>
+            Bei anonymen Kommentaren wird die IP-Adresse fuer max. <strong>90 Tage</strong> gespeichert
+            (Missbrauchspraevention). Server-Access-Logs werden fuer max. 14 Tage aufbewahrt.
           </p>
         </section>
 
-        {/* 9. Cookies & LocalStorage */}
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 9. Cookies */}
         <section>
-          <h2 className="text-base font-semibold mb-2">9. Cookies &amp; LocalStorage</h2>
-          <p className="leading-relaxed">
-            Es werden <span className="font-bold">keine Tracking-Cookies und keine Analyse-Tools</span> eingesetzt.
-            Wir verwenden ausschliesslich technisch notwendige Cookies und LocalStorage:
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            9. Cookies &amp; LocalStorage
+          </h2>
+          <p className="mb-3">
+            <strong>Keine Tracking-Cookies, keine Analyse-Tools.</strong> Wir verwenden:
           </p>
-          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] dark:border-zinc-700 mt-3">
+          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]" style={{ backgroundColor: "var(--color-bg)" }}>
                   <th className="px-3 py-2 font-semibold">Name/Zweck</th>
                   <th className="px-3 py-2 font-semibold">Typ</th>
                   <th className="px-3 py-2 font-semibold">Dauer</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Supabase Auth Session</td>
                   <td className="px-3 py-2">Cookie</td>
                   <td className="px-3 py-2">7 Tage</td>
                 </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
+                  <td className="px-3 py-2">Cookie-Consent Praeferenz</td>
+                  <td className="px-3 py-2">LocalStorage</td>
+                  <td className="px-3 py-2">1 Jahr</td>
+                </tr>
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Theme-Praeferenz (Hell/Dunkel)</td>
                   <td className="px-3 py-2">LocalStorage</td>
                   <td className="px-3 py-2">Dauerhaft</td>
                 </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Stummschaltungsstatus</td>
-                  <td className="px-3 py-2">LocalStorage</td>
-                  <td className="px-3 py-2">Dauerhaft</td>
-                </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
-                  <td className="px-3 py-2">Hintergrundauswahl</td>
                   <td className="px-3 py-2">LocalStorage</td>
                   <td className="px-3 py-2">Dauerhaft</td>
                 </tr>
@@ -220,115 +230,115 @@ export default function DatenschutzPage() {
               </tbody>
             </table>
           </div>
-          <p className="mt-3 leading-relaxed text-[var(--color-text-muted)]">
-            Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an technischer Funktionalitaet).
-            Ein Cookie-Banner ist nicht erforderlich, da keine optionalen Cookies eingesetzt werden.
+          <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            YouTube/Twitch-Embeds werden erst nach Einwilligung geladen (Cookie-Consent).
           </p>
         </section>
 
-        {/* 10. Nutzerdaten & Loeschung */}
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 10. Loeschung */}
         <section>
-          <h2 className="text-base font-semibold mb-2">10. Nutzerdaten &amp; Loeschung</h2>
-          <p className="leading-relaxed">
-            Du hast jederzeit das Recht auf Loeschung deiner Daten. Kontaktiere uns hierfuer per E-Mail
-            oder Discord.
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            10. Nutzerdaten &amp; Loeschung
+          </h2>
+          <p>
+            Du hast jederzeit das Recht auf Loeschung deiner Daten. Bei einer Loeschung werden:
           </p>
-          <p className="mt-2">Bei einer Loeschung werden:</p>
-          <ul className="ml-4 mt-2 list-disc space-y-1 text-[var(--color-text-muted)]">
+          <ul className="ml-4 mt-1 list-disc space-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
             <li>Accountdaten (Discord ID, Username, Avatar) vollstaendig geloescht</li>
-            <li>Einreichungen und Kommentare anonymisiert (Autorenzuordnung wird entfernt)</li>
-            <li>IP-Logs, die deinem Account zugeordnet sind, geloescht</li>
+            <li>Einreichungen und Kommentare anonymisiert</li>
+            <li>IP-Logs geloescht</li>
           </ul>
         </section>
 
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
         {/* 11. Speicherdauer */}
         <section>
-          <h2 className="text-base font-semibold mb-2">11. Speicherdauer</h2>
-          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] dark:border-zinc-700">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            11. Speicherdauer
+          </h2>
+          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]" style={{ backgroundColor: "var(--color-bg)" }}>
                   <th className="px-3 py-2 font-semibold">Datenart</th>
                   <th className="px-3 py-2 font-semibold">Speicherdauer</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Accountdaten</td>
                   <td className="px-3 py-2">Bis zur Loeschung</td>
                 </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">IP-Adressen (Kommentare)</td>
                   <td className="px-3 py-2">90 Tage</td>
                 </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr className="border-b border-[var(--color-border)]">
                   <td className="px-3 py-2">Server-Access-Logs</td>
                   <td className="px-3 py-2">14 Tage</td>
                 </tr>
-                <tr className="border-b border-[var(--color-border)] dark:border-zinc-700">
+                <tr>
                   <td className="px-3 py-2">Auth-Session</td>
                   <td className="px-3 py-2">7 Tage</td>
-                </tr>
-                <tr>
-                  <td className="px-3 py-2">Entwuerfe (Drafts)</td>
-                  <td className="px-3 py-2">24 Stunden</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        {/* 12. Deine Rechte */}
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 12. Rechte */}
         <section>
-          <h2 className="text-base font-semibold mb-2">12. Deine Rechte (Art. 15–21 DSGVO)</h2>
-          <p className="leading-relaxed mb-2">
-            Du hast gegenueber uns folgende Rechte bezueglich deiner personenbezogenen Daten:
-          </p>
-          <ul className="ml-4 list-disc space-y-1 text-[var(--color-text-muted)]">
-            <li><span className="text-[var(--color-text)]">Auskunftsrecht</span> (Art. 15 DSGVO) — Welche Daten ueber dich gespeichert sind</li>
-            <li><span className="text-[var(--color-text)]">Berichtigungsrecht</span> (Art. 16 DSGVO) — Korrektur unrichtiger Daten</li>
-            <li><span className="text-[var(--color-text)]">Loeschungsrecht</span> (Art. 17 DSGVO) — Loeschung deiner Daten</li>
-            <li><span className="text-[var(--color-text)]">Einschraenkungsrecht</span> (Art. 18 DSGVO) — Einschraenkung der Verarbeitung</li>
-            <li><span className="text-[var(--color-text)]">Datenuebertragbarkeit</span> (Art. 20 DSGVO) — Export deiner Daten</li>
-            <li><span className="text-[var(--color-text)]">Widerspruchsrecht</span> (Art. 21 DSGVO) — Widerspruch gegen Verarbeitung</li>
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            12. Deine Rechte (Art. 15–21 DSGVO)
+          </h2>
+          <ul className="ml-4 list-disc space-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            <li><strong style={{ color: "var(--color-text)" }}>Auskunft</strong> (Art. 15) — Welche Daten ueber dich gespeichert sind</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Berichtigung</strong> (Art. 16) — Korrektur unrichtiger Daten</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Loeschung</strong> (Art. 17) — Loeschung deiner Daten</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Einschraenkung</strong> (Art. 18) — Einschraenkung der Verarbeitung</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Datenuebertragbarkeit</strong> (Art. 20) — Export deiner Daten</li>
+            <li><strong style={{ color: "var(--color-text)" }}>Widerspruch</strong> (Art. 21) — Widerspruch gegen Verarbeitung</li>
           </ul>
-          <p className="mt-3 leading-relaxed">
-            Zur Ausuebung deiner Rechte kannst du uns jederzeit per E-Mail ({" "}
-            <a href="mailto:kontakt@gleggmire.net" className="text-[#E8593C] underline hover:no-underline">
+          <p className="mt-2">
+            Kontakt:{" "}
+            <a href="mailto:kontakt@gleggmire.net" className="font-medium no-underline" style={{ color: "var(--color-accent)" }}>
               kontakt@gleggmire.net
             </a>
-            ) oder Discord kontaktieren.
           </p>
         </section>
 
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
         {/* 13. Beschwerderecht */}
         <section>
-          <h2 className="text-base font-semibold mb-2">13. Beschwerderecht bei einer Aufsichtsbehoerde</h2>
-          <p className="leading-relaxed">
-            Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehoerde zu beschweren,
-            wenn du der Ansicht bist, dass die Verarbeitung deiner Daten gegen die DSGVO verstoesst.
-            Die fuer uns zustaendige Aufsichtsbehoerde ist:
-          </p>
-          <p className="mt-2 leading-relaxed">
-            Bayerisches Landesamt fuer Datenschutzaufsicht (BayLDA)
-            <br />
-            Promenade 18, 91522 Ansbach
-            <br />
-            <a href="https://www.lda.bayern.de" className="text-[#E8593C] underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            13. Beschwerderecht
+          </h2>
+          <p>
+            Zustaendige Aufsichtsbehoerde: Bayerisches Landesamt fuer Datenschutzaufsicht (BayLDA),
+            Promenade 18, 91522 Ansbach &mdash;{" "}
+            <a href="https://www.lda.bayern.de" className="font-medium no-underline" style={{ color: "var(--color-accent)" }} target="_blank" rel="noopener noreferrer">
               www.lda.bayern.de
             </a>
           </p>
         </section>
 
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
         {/* 14. Aenderungen */}
         <section>
-          <h2 className="text-base font-semibold mb-2">14. Aenderungen dieser Datenschutzerklaerung</h2>
-          <p className="leading-relaxed">
-            Wir behalten uns vor, diese Datenschutzerklaerung anzupassen, um sie an geaenderte
-            Rechtslagen oder technische Aenderungen anzupassen. Die aktuelle Version gilt ab dem Zeitpunkt
-            der Veroeffentlichung auf dieser Seite.
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            14. Aenderungen
+          </h2>
+          <p>
+            Wir behalten uns vor, diese Datenschutzerklaerung bei Bedarf anzupassen.
           </p>
-          <p className="mt-2 text-[var(--color-text-muted)]">
+          <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
             Stand: Maerz 2026
           </p>
         </section>
