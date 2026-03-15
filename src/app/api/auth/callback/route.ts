@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/constants/admin";
 
 export async function GET(request: NextRequest) {
@@ -36,8 +36,10 @@ export async function GET(request: NextRequest) {
 
   if (discordId) {
     try {
-      // Check if user already exists
-      const { data: existingUser } = await supabase
+      // Use service role client for user management (RLS requires service_role for INSERT)
+      const serviceClient = await createServiceClient();
+
+      const { data: existingUser } = await serviceClient
         .from("users")
         .select("id")
         .eq("discord_id", discordId)
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
 
       if (!existingUser) {
         // Create new user record
-        await supabase.from("users").insert({
+        await serviceClient.from("users").insert({
           id: user.id,
           discord_id: discordId,
           username,
@@ -58,7 +60,7 @@ export async function GET(request: NextRequest) {
         });
       } else {
         // Update existing user with latest Discord info
-        await supabase
+        await serviceClient
           .from("users")
           .update({
             username,
