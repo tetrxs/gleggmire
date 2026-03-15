@@ -12,24 +12,43 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const next = searchParams.get("next") ?? "/";
 
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const redirectUrl = new URL("/api/auth/callback", request.url);
-  redirectUrl.searchParams.set("next", next);
+    // Build redirect URL – prefer NEXT_PUBLIC_SITE_URL for production, fall back to request.url
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.url;
+    const redirectUrl = new URL("/api/auth/callback", baseUrl);
+    redirectUrl.searchParams.set("next", next);
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "discord",
-    options: {
-      redirectTo: redirectUrl.toString(),
-    },
-  });
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: {
+        redirectTo: redirectUrl.toString(),
+      },
+    });
 
-  if (error || !data.url) {
+    if (error) {
+      console.error("Discord OAuth error:", error.message);
+      return NextResponse.json(
+        { error: "Discord Login fehlgeschlagen. Bitte versuche es spaeter erneut." },
+        { status: 500 }
+      );
+    }
+
+    if (!data.url) {
+      console.error("Discord OAuth: no redirect URL returned");
+      return NextResponse.json(
+        { error: "Discord Login fehlgeschlagen." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.redirect(data.url);
+  } catch (err) {
+    console.error("Login route error:", err);
     return NextResponse.json(
-      { error: "Failed to initiate Discord login" },
+      { error: "Interner Fehler beim Login." },
       { status: 500 }
     );
   }
-
-  return NextResponse.redirect(data.url);
 }
