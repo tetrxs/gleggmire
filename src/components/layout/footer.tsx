@@ -65,8 +65,8 @@ export default function Footer() {
           </span>
         </div>
 
-        {/* Main footer content – 3 columns */}
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Main footer content – 2 columns */}
+        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 sm:grid-cols-2">
           {/* Left: Logo Image + short description */}
           <div className="flex flex-col gap-3">
             <Link href="/" className="no-underline">
@@ -81,39 +81,6 @@ export default function Footer() {
               Das Community-Glossar fuer alles rund um Gleggmire.
               Von Fans, fuer Fans.
             </p>
-          </div>
-
-          {/* Middle: Navigation */}
-          <div>
-            <h3
-              className="mb-3 text-xs font-bold uppercase"
-              style={{ color: "var(--color-text)", letterSpacing: "0.12em" }}
-            >
-              NAVIGATION
-            </h3>
-            <nav className="grid grid-cols-2 gap-x-4 gap-y-2">
-              {[
-                { href: "/glossar", label: "GLOSSAR" },
-                { href: "/leaderboard", label: "LEADERBOARD" },
-                { href: "/zufall", label: "ZUFALL" },
-                { href: "/about", label: "ABOUT" },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-xs font-medium uppercase no-underline transition-colors"
-                  style={{ color: "var(--color-text-muted)", letterSpacing: "0.06em" }}
-                  onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                    (e.currentTarget.style.color = "var(--color-accent)")
-                  }
-                  onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                    (e.currentTarget.style.color = "var(--color-text-muted)")
-                  }
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
           </div>
 
           {/* Right: YouTube + Twitch */}

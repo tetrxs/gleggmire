@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getLatestTerms } from "@/lib/data/glossary";
 import { OpenModalButton } from "@/components/ui/open-modal-button";
 import type { TermWithPreview } from "@/lib/data/glossary";
+import { MOCK_USERS } from "@/lib/mock-users";
 
 const MARQUEE_TEXT =
   "GEGLÄGGMIRT · KOMPLETT · SNENCH · LUNGEN-TORPEDO · KANACKENTASCHE · AUF GLEGG · ";
@@ -213,26 +214,165 @@ export default async function HomePage() {
 
 
       {/* ============================
-          5. FAN-DISCLAIMER INFO BOX
+          4. LEADERBOARD PREVIEW
           ============================ */}
-      <section className="mx-auto w-full max-w-4xl px-4 py-10">
-        <div
-          className="rounded-2xl p-6 sm:p-8"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            border: "2px solid var(--color-border)",
-          }}
-        >
-          <h3
-            className="mb-2 text-base font-bold tracking-tight"
+      <section className="mx-auto w-full max-w-6xl px-4 py-14">
+        <div className="mb-6">
+          <h2
+            className="text-2xl font-bold tracking-tight sm:text-3xl"
             style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
           >
-            Reines Fan-Projekt mit Herz &#10084;&#65039;
-          </h3>
-          <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
-            gleggmire.net ist ein{" "}
-            <strong style={{ color: "var(--color-text)" }}>inoffizielles Community-Projekt</strong>{" "}
-            und hat nichts mit Gleggmire oder seinen offiziellen Kanaelen zu tun. Bei Fragen:{" "}
+            TOP GLEGGS
+          </h2>
+          <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Die aktivsten Community-Mitglieder
+          </p>
+        </div>
+
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ border: "2px solid var(--color-border)" }}
+        >
+          {[...MOCK_USERS]
+            .sort((a, b) => b.glegg_score - a.glegg_score)
+            .slice(0, 5)
+            .map((user, index) => {
+              const rank = index + 1;
+              const rankColor =
+                rank === 1
+                  ? "#D4AF37"
+                  : rank === 2
+                    ? "#A8A8A8"
+                    : rank === 3
+                      ? "#CD7F32"
+                      : "var(--color-text-muted)";
+
+              return (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between px-5 py-3"
+                  style={{
+                    borderBottom: index < 4 ? "1px solid var(--color-border)" : "none",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: rankColor, fontFamily: "var(--font-heading)", minWidth: "1.5rem" }}
+                    >
+                      {rank}.
+                    </span>
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: "var(--color-text)" }}
+                    >
+                      {user.username}
+                    </span>
+                  </div>
+                  <span
+                    className="text-xs font-bold"
+                    style={{ color: "var(--color-text-muted)" }}
+                  >
+                    {user.glegg_score.toLocaleString("de-DE")} pts
+                  </span>
+                </div>
+              );
+            })}
+        </div>
+
+        <div className="mt-4">
+          <Link
+            href="/leaderboard"
+            className="text-xs font-bold uppercase no-underline transition-colors"
+            style={{ color: "var(--color-accent)", letterSpacing: "0.08em" }}
+          >
+            VOLLES LEADERBOARD &rarr;
+          </Link>
+        </div>
+      </section>
+
+      {/* ============================
+          5. ABOUT / COMMUNITY SECTION
+          ============================ */}
+      <section
+        className="mx-auto w-full px-4 py-14"
+        style={{ backgroundColor: "var(--color-surface)" }}
+      >
+        <div className="mx-auto max-w-4xl">
+          <h2
+            className="mb-4 text-2xl font-bold tracking-tight sm:text-3xl"
+            style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+          >
+            UEBER UNS
+          </h2>
+
+          <p
+            className="mb-6 text-sm leading-relaxed sm:text-base"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            gleggmire.net ist ein interaktives Fan-Community-Projekt. Wir dokumentieren,
+            archivieren und feiern alles rund um den YouTuber Gleggmire &mdash; von der
+            Community, fuer die Community.
+          </p>
+
+          {/* Fan-disclaimer info box */}
+          <div
+            className="mb-6 rounded-2xl p-5"
+            style={{
+              backgroundColor: "var(--color-bg)",
+              border: "2px solid var(--color-border)",
+            }}
+          >
+            <h3
+              className="mb-2 text-base font-bold tracking-tight"
+              style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+            >
+              Reines Fan-Projekt mit Herz
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+              gleggmire.net ist ein{" "}
+              <strong style={{ color: "var(--color-text)" }}>inoffizielles Community-Projekt</strong>{" "}
+              und hat nichts mit Gleggmire oder seinen offiziellen Kanaelen zu tun.
+            </p>
+          </div>
+
+          {/* Social links and contact */}
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <a
+              href="https://www.youtube.com/@Gleggmire"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold no-underline transition-colors"
+              style={{ color: "var(--color-accent)" }}
+            >
+              <svg
+                className="mr-1 inline-block h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z" />
+              </svg>
+              YouTube
+            </a>
+            <a
+              href="https://www.twitch.tv/gleggmire"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold no-underline transition-colors"
+              style={{ color: "var(--color-accent)" }}
+            >
+              <svg
+                className="mr-1 inline-block h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M11.6 11.2V6.4h-1.6v4.8h1.6Zm4.4 0V6.4H14v4.8h2ZM4.8 0 0 4.8v14.4h6.4V24l4.8-4.8h3.8L24 10.4V0H4.8Zm17.6 9.6-3.8 3.8h-3.8L11.4 17v-3.6H6.4V1.6h16v8Z" />
+              </svg>
+              Twitch
+            </a>
+            <span style={{ color: "var(--color-border)" }}>|</span>
             <a
               href="mailto:kontakt@gleggmire.net"
               className="font-semibold no-underline"
@@ -240,7 +380,7 @@ export default async function HomePage() {
             >
               kontakt@gleggmire.net
             </a>
-          </p>
+          </div>
         </div>
       </section>
 
