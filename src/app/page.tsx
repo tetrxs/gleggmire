@@ -49,14 +49,18 @@ function TermPreviewCard({ term }: { term: TermWithPreview }) {
 
 
 const HERO_DECORATIONS = [
-  // Large – main decorations
-  { src: "/images/elements/gleggmire_coin.png", className: "animate-float", style: { top: "2rem", left: "1%" }, width: 160, height: 160 },
-  { src: "/images/elements/gleggmire_wanted.png", className: "animate-tilt-rock", style: { top: "6rem", right: "1%" }, width: 190, height: 190 },
-  { src: "/images/elements/gleggmire_triangle.png", className: "animate-float-slow", style: { bottom: "2rem", left: "2%" }, width: 150, height: 150 },
-  // Small – secondary accents
-  { src: "/images/elements/gleggmire_badge.png", className: "animate-float-reverse", style: { bottom: "3rem", right: "4%" }, width: 75, height: 75 },
-  { src: "/images/elements/gleggmire_card.png", className: "animate-float", style: { top: "1rem", right: "14%" }, width: 65, height: 65 },
-  { src: "/images/elements/gleggmire_warnining.png", className: "animate-float-slow", style: { top: "12rem", left: "6%" }, width: 70, height: 70 },
+  // Oben links – groß
+  { src: "/images/elements/gleggmire_coin.png", className: "animate-float", style: { top: "1rem", left: "2%" }, width: 150, height: 150 },
+  // Oben rechts – groß
+  { src: "/images/elements/gleggmire_wanted.png", className: "animate-tilt-rock", style: { top: "2rem", right: "2%" }, width: 170, height: 170 },
+  // Mitte links – mittel
+  { src: "/images/elements/gleggmire_warnining.png", className: "animate-float-slow", style: { top: "55%", left: "1%" }, width: 90, height: 90 },
+  // Unten rechts – mittel
+  { src: "/images/elements/gleggmire_badge.png", className: "animate-float-reverse", style: { bottom: "1rem", right: "5%" }, width: 100, height: 100 },
+  // Unten links – groß
+  { src: "/images/elements/gleggmire_triangle.png", className: "animate-float-slow", style: { bottom: "0.5rem", left: "8%" }, width: 130, height: 130 },
+  // Oben rechts innen – klein
+  { src: "/images/elements/gleggmire_card.png", className: "animate-float", style: { top: "0.5rem", right: "16%" }, width: 60, height: 60 },
 ] as const;
 
 export default async function HomePage() {
