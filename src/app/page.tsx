@@ -49,9 +49,14 @@ function TermPreviewCard({ term }: { term: TermWithPreview }) {
 
 
 const HERO_DECORATIONS = [
+  // Large – main decorations
   { src: "/images/elements/gleggmire_coin.png", className: "animate-float", style: { top: "2rem", left: "1%" }, width: 160, height: 160 },
   { src: "/images/elements/gleggmire_wanted.png", className: "animate-tilt-rock", style: { top: "6rem", right: "1%" }, width: 190, height: 190 },
   { src: "/images/elements/gleggmire_triangle.png", className: "animate-float-slow", style: { bottom: "2rem", left: "2%" }, width: 150, height: 150 },
+  // Small – secondary accents
+  { src: "/images/elements/gleggmire_badge.png", className: "animate-float-reverse", style: { bottom: "3rem", right: "4%" }, width: 75, height: 75 },
+  { src: "/images/elements/gleggmire_card.png", className: "animate-float", style: { top: "1rem", right: "14%" }, width: 65, height: 65 },
+  { src: "/images/elements/gleggmire_warnining.png", className: "animate-float-slow", style: { top: "12rem", left: "6%" }, width: 70, height: 70 },
 ] as const;
 
 export default async function HomePage() {
