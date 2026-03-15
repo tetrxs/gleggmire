@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   title: "gleggmire.net — Das Gleggmire-Glossar",
   description:
     "Inoffizielles Fan-Projekt: Das umfassende Glossar und Clip-Archiv rund um den YouTuber Gleggmire. Von der Community, fuer die Community.",
+  icons: {
+    icon: "/images/favicon.png",
+  },
 };
 
 export default function RootLayout({

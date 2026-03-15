@@ -88,9 +88,33 @@ function ClipPreviewCard({
   );
 }
 
+const HERO_IMAGES = [
+  "gleggmire_warnining.png",
+  "gleggmire_triangle.png",
+  "gleggmire_badge.png",
+  "gleggmire_coin.png",
+  "gleggmire_wanted.png",
+];
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+const HERO_POSITIONS = [
+  { className: "animate-float", style: { top: "2rem", left: "1%" }, width: 160, height: 160 },
+  { className: "animate-tilt-rock", style: { top: "6rem", right: "1%" }, width: 190, height: 190 },
+  { className: "animate-float-slow", style: { bottom: "2rem", left: "2%" }, width: 150, height: 150 },
+] as const;
+
 export default async function HomePage() {
   const latestTerms = await getLatestTerms(4);
   const previewClips = MOCK_CLIPS.slice(0, 6);
+  const randomImages = shuffleArray(HERO_IMAGES).slice(0, 3);
 
   return (
     <div className="flex flex-col">
@@ -99,33 +123,18 @@ export default async function HomePage() {
           ============================ */}
       <section className="relative flex flex-col items-center justify-center gap-6 px-4 pb-16 pt-20 text-center animate-fade-in">
         {/* Decorative floating images – desktop only */}
-        <Image
-          src="/images/gleggmire_coin.png"
-          alt=""
-          width={160}
-          height={160}
-          className="hidden lg:block absolute select-none pointer-events-none animate-float"
-          style={{ top: "2rem", left: "1%", filter: "drop-shadow(2px 4px 10px rgba(0,0,0,0.12))" }}
-          aria-hidden="true"
-        />
-        <Image
-          src="/images/gleggmire_wanted.png"
-          alt=""
-          width={190}
-          height={190}
-          className="hidden lg:block absolute select-none pointer-events-none animate-tilt-rock"
-          style={{ top: "6rem", right: "1%", filter: "drop-shadow(2px 4px 10px rgba(0,0,0,0.12))" }}
-          aria-hidden="true"
-        />
-        <Image
-          src="/images/gleggmire_card.png"
-          alt=""
-          width={150}
-          height={150}
-          className="hidden lg:block absolute select-none pointer-events-none animate-float-slow"
-          style={{ bottom: "2rem", left: "2%", filter: "drop-shadow(2px 4px 10px rgba(0,0,0,0.12))" }}
-          aria-hidden="true"
-        />
+        {randomImages.map((filename, i) => (
+          <Image
+            key={filename}
+            src={`/images/elements/${filename}`}
+            alt=""
+            width={HERO_POSITIONS[i].width}
+            height={HERO_POSITIONS[i].height}
+            className={`hidden lg:block absolute select-none pointer-events-none ${HERO_POSITIONS[i].className}`}
+            style={{ ...HERO_POSITIONS[i].style, filter: "drop-shadow(4px 6px 16px rgba(0,0,0,0.35))" }}
+            aria-hidden="true"
+          />
+        ))}
 
         <h1
           className="leading-[1.1]"

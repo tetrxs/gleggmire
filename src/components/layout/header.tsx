@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AuthButton } from "@/components/auth/auth-button";
@@ -23,14 +22,12 @@ export default function Header() {
         {/* Left: Logo Image */}
         <div className="flex items-center">
           <Link href="/" className="no-underline">
-            <Image
-              src="/images/gleggmire_title.png"
-              alt="GLEGGMIRE.NET"
-              width={320}
-              height={80}
-              className="h-[80px] w-auto"
-              priority
-            />
+            <span
+              className="font-heading text-4xl font-bold"
+              style={{ color: "var(--color-text)" }}
+            >
+              G<span style={{ color: "var(--color-accent)" }}>G</span>.
+            </span>
           </Link>
         </div>
 

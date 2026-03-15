@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -71,13 +70,12 @@ export default function Footer() {
           {/* Left: Logo Image + short description */}
           <div className="flex flex-col gap-3">
             <Link href="/" className="no-underline">
-              <Image
-                src="/images/gleggmire_title.png"
-                alt="GLEGGMIRE.NET"
-                width={280}
-                height={70}
-                className="h-[70px] w-auto"
-              />
+              <span
+                className="font-heading text-2xl font-bold"
+                style={{ color: "var(--color-text)" }}
+              >
+                G<span style={{ color: "var(--color-accent)" }}>G</span>.
+              </span>
             </Link>
             <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
               Das Community-Glossar fuer alles rund um Gleggmire.
