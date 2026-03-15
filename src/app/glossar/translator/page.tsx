@@ -1,17 +1,37 @@
 import type { Metadata } from "next";
-import { XpWindow } from "@/components/ui/xp-window";
 import { FakeTranslator } from "@/components/troll/fake-translator";
 
 export const metadata: Metadata = {
   title: "Glegg-Translator — gleggmire.net",
   description:
-    "Uebersetze normales Deutsch in authentisches Gleggmire-Deutsch. Zertifiziert von der Gleggmire-Akademie fuer Sprachwissenschaften.",
+    "Übersetze normales Deutsch in authentisches Gleggmire-Deutsch. Zertifiziert von der Gleggmire-Akademie für Sprachwissenschaften.",
 };
 
 export default function TranslatorPage() {
   return (
-    <XpWindow title="&#x1F30D; Glegg-Translator v2.0 — uebersetzer.exe">
-      <FakeTranslator />
-    </XpWindow>
+    <main className="mx-auto max-w-2xl px-4 py-10">
+      <div className="mb-8">
+        <h1
+          className="text-3xl font-bold tracking-tight"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Glegg-Translator
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-muted)" }}>
+          Übersetze normales Deutsch in authentisches Gleggmire-Deutsch.
+          Zertifiziert von der Gleggmire-Akademie für Sprachwissenschaften.
+        </p>
+      </div>
+
+      <div
+        className="rounded-xl border p-6"
+        style={{
+          borderColor: "var(--color-border)",
+          backgroundColor: "var(--color-surface)",
+        }}
+      >
+        <FakeTranslator />
+      </div>
+    </main>
   );
 }

@@ -10,19 +10,19 @@ interface GlossaryCardProps {
   tags: TermTag[];
 }
 
-const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  Klassiker: { bg: "#1F4ECC", text: "#FFFFFF" },
-  Insider: { bg: "#8B5CF6", text: "#FFFFFF" },
-  Essen: { bg: "#E8593C", text: "#FFFFFF" },
-  Rauchen: { bg: "#6B7280", text: "#FFFFFF" },
-  Lifestyle: { bg: "#3A9E3A", text: "#FFFFFF" },
-  Slang: { bg: "#D4A017", text: "#000000" },
-  Universell: { bg: "#3A6EA5", text: "#FFFFFF" },
-  Meme: { bg: "#EC4899", text: "#FFFFFF" },
+const TAG_COLORS: Record<string, string> = {
+  Klassiker: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+  Insider: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+  Essen: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
+  Rauchen: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+  Lifestyle: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
+  Slang: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
+  Universell: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+  Meme: "bg-pink-50 text-pink-700 dark:bg-pink-950 dark:text-pink-300",
 };
 
-function getTagStyle(tag: string) {
-  return TAG_COLORS[tag] ?? { bg: "var(--xp-silber-luna)", text: "#000000" };
+function getTagClasses(tag: string) {
+  return TAG_COLORS[tag] ?? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
 }
 
 export function GlossaryCard({ term, definition, tags }: GlossaryCardProps) {
@@ -35,97 +35,83 @@ export function GlossaryCard({ term, definition, tags }: GlossaryCardProps) {
   return (
     <Link
       href={`/glossar/${term.slug}`}
-      className="block transition-transform hover:scale-[1.01] active:scale-[0.99]"
+      className="group block rounded-xl border p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+      style={{
+        borderColor: "var(--color-border)",
+        backgroundColor: "var(--color-surface)",
+      }}
     >
-      <div className="xp-window-outer">
-        {/* Title Bar */}
-        <div className="xp-titlebar">
-          <span className="truncate text-[12px]">[{term.term}].exe</span>
-          <div className="flex items-center gap-[2px]">
-            <span className="xp-titlebar-btn xp-titlebar-btn-minmax pointer-events-none">
-              <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                <rect x="1" y="7" width="7" height="2" fill="currentColor" />
+      <div className="flex flex-col gap-3">
+        {/* Term heading */}
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            className="text-base font-semibold tracking-tight group-hover:text-[var(--color-accent)] transition-colors duration-200"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            {term.term}
+          </h3>
+          {term.verified_by_gleggmire && (
+            <span className="mt-0.5 shrink-0">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="var(--color-accent)"
+                aria-label="Gleggmire-verifiziert"
+              >
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
               </svg>
             </span>
-            <span className="xp-titlebar-btn xp-titlebar-btn-close pointer-events-none">
-              <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                <path
-                  d="M1 1L8 8M8 1L1 8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
+          )}
+        </div>
+
+        {/* Definition preview */}
+        <p
+          className="text-sm leading-relaxed line-clamp-3"
+          style={{ color: "var(--color-muted)" }}
+        >
+          {preview}
+        </p>
+
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span
+                key={tag.id}
+                className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${getTagClasses(tag.tag)}`}
+              >
+                {tag.tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Votes inline */}
+        {definition && (
+          <div className="flex items-center gap-3 text-xs" style={{ color: "var(--color-muted)" }}>
+            <span className="inline-flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
+              {definition.upvotes}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {definition.downvotes}
             </span>
           </div>
-        </div>
+        )}
 
-        {/* Body */}
-        <div className="xp-window p-3">
-          <div className="flex flex-col gap-2">
-            {/* Definition preview */}
-            <p className="text-[12px] leading-relaxed">{preview}</p>
-
-            {/* Tags */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {tags.map((tag) => {
-                  const style = getTagStyle(tag.tag);
-                  return (
-                    <span
-                      key={tag.id}
-                      className="xp-raised inline-block px-[6px] py-[1px] text-[10px] font-bold"
-                      style={{
-                        backgroundColor: style.bg,
-                        color: style.text,
-                      }}
-                    >
-                      {tag.tag}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Votes & Badge row */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                {definition && (
-                  <>
-                    <span className="xp-text-label" title="Upvotes">
-                      <span style={{ color: "var(--xp-gruen)" }}>&#9650;</span>{" "}
-                      {definition.upvotes}
-                    </span>
-                    <span className="xp-text-label" title="Downvotes">
-                      <span style={{ color: "var(--xp-fehler-rot)" }}>&#9660;</span>{" "}
-                      {definition.downvotes}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {term.verified_by_gleggmire && (
-                <span
-                  className="xp-raised inline-flex items-center gap-1 px-[6px] py-[1px] text-[10px] font-bold"
-                  style={{
-                    backgroundColor: "var(--xp-gruen)",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  &#10003; Gleggmire-verifiziert
-                </span>
-              )}
-            </div>
-
-            {/* Cope-O-Meter */}
-            {definition && (
-              <CopeOMeter
-                sum={definition.cope_meter_sum}
-                count={definition.cope_meter_count}
-              />
-            )}
-          </div>
-        </div>
+        {/* Cope-O-Meter */}
+        {definition && (
+          <CopeOMeter
+            sum={definition.cope_meter_sum}
+            count={definition.cope_meter_count}
+          />
+        )}
       </div>
     </Link>
   );

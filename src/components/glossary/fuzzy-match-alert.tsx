@@ -19,10 +19,13 @@ function MatchCard({
 }) {
   return (
     <div
-      className="xp-raised flex items-center justify-between gap-2 px-3 py-2"
-      style={{ backgroundColor: "var(--xp-silber-luna)" }}
+      className="flex items-center justify-between gap-3 rounded-lg border px-4 py-2.5"
+      style={{
+        borderColor: "var(--color-border)",
+        backgroundColor: "var(--color-bg)",
+      }}
     >
-      <span className="text-[12px] font-bold">{match.term}</span>
+      <span className="text-sm font-medium">{match.term}</span>
       <XpButton onClick={() => onNavigate(match.slug)}>
         Zum Eintrag wechseln
       </XpButton>
@@ -45,24 +48,26 @@ export function FuzzyMatchAlert({
   const hasExactMatch = matches.some((m) => m.matchType === "exact");
   const exactMatch = matches.find((m) => m.matchType === "exact");
 
-  // Exact match (Tier 1) - red error banner
+  // Exact match (Tier 1) - red alert
   if (hasExactMatch && exactMatch) {
     return (
-      <div
-        className="xp-inset border-2 p-3"
-        style={{
-          backgroundColor: "#FFF0F0",
-          borderColor: "var(--xp-fehler-rot)",
-        }}
-      >
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-[14px]" aria-hidden="true">
-            ✖
-          </span>
-          <span
-            className="text-[12px] font-bold"
-            style={{ color: "var(--xp-fehler-rot)" }}
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/50">
+        <div className="mb-3 flex items-center gap-2">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#EF4444"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+          <span className="text-sm font-semibold text-red-700 dark:text-red-300">
             Dieser Begriff existiert bereits: &quot;{exactMatch.term}&quot;
           </span>
         </div>
@@ -93,7 +98,6 @@ export function FuzzyMatchAlert({
     (m) => m.matchType === "fuzzy" || m.matchType === "substring"
   );
 
-  // Handle "submit anyway" with duplicate reason
   const handleSubmitAnyway = () => {
     if (!showDuplicateReason) {
       setShowDuplicateReason(true);
@@ -110,18 +114,23 @@ export function FuzzyMatchAlert({
   // Many matches (>4) - collapsed view
   if (fuzzyMatches.length > 4 && !showAll) {
     return (
-      <div
-        className="xp-inset border-2 p-3"
-        style={{
-          backgroundColor: "#FFFBE6",
-          borderColor: "#B8860B",
-        }}
-      >
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-[14px]" aria-hidden="true">
-            ⚠️
-          </span>
-          <span className="text-[12px] font-bold" style={{ color: "#8B6914" }}>
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/50">
+        <div className="mb-3 flex items-center gap-2">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#D97706"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
             Es gibt bereits {fuzzyMatches.length} ähnliche Begriffe
           </span>
         </div>
@@ -147,18 +156,23 @@ export function FuzzyMatchAlert({
   if (fuzzyMatches.length === 1) {
     const match = fuzzyMatches[0];
     return (
-      <div
-        className="xp-inset border-2 p-3"
-        style={{
-          backgroundColor: "#FFFBE6",
-          borderColor: "#B8860B",
-        }}
-      >
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-[14px]" aria-hidden="true">
-            ⚠️
-          </span>
-          <span className="text-[12px] font-bold" style={{ color: "#8B6914" }}>
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/50">
+        <div className="mb-3 flex items-center gap-2">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#D97706"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
             Ähnlicher Begriff gefunden: &quot;{match.term}&quot;
           </span>
         </div>
@@ -184,18 +198,23 @@ export function FuzzyMatchAlert({
 
   // Multiple matches (2-4, or >4 expanded)
   return (
-    <div
-      className="xp-inset border-2 p-3"
-      style={{
-        backgroundColor: "#FFFBE6",
-        borderColor: "#B8860B",
-      }}
-    >
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/50">
       <div className="mb-3 flex items-center gap-2">
-        <span className="text-[14px]" aria-hidden="true">
-          ⚠️
-        </span>
-        <span className="text-[12px] font-bold" style={{ color: "#8B6914" }}>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#D97706"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
           Ähnliche Begriffe gefunden:
         </span>
       </div>
@@ -233,35 +252,30 @@ function DuplicateReasonInput({
   onSubmit: () => void;
 }) {
   return (
-    <div className="mt-3">
-      <label className="mb-1 block text-[11px] font-bold">
+    <div className="mt-4 space-y-2">
+      <label className="block text-sm font-medium">
         Warum ist das kein Duplikat?{" "}
-        <span style={{ color: "var(--xp-fehler-rot)" }}>*</span>
+        <span className="text-red-500">*</span>
       </label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="xp-inset w-full resize-none p-2 text-[12px]"
+        className="w-full resize-none rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
         style={{
-          backgroundColor: "#FFFFFF",
-          fontFamily: "Tahoma, Verdana, sans-serif",
-          minHeight: "60px",
+          borderColor: hasError ? "#EF4444" : "var(--color-border)",
+          backgroundColor: "var(--color-bg)",
+          minHeight: "80px",
         }}
-        placeholder="Mindestens 10 Zeichen – erkläre kurz den Unterschied..."
+        placeholder="Mindestens 10 Zeichen — erkläre kurz den Unterschied..."
       />
       {hasError && (
-        <p
-          className="mt-1 text-[11px]"
-          style={{ color: "var(--xp-fehler-rot)" }}
-        >
+        <p className="text-xs text-red-500">
           Bitte mindestens 10 Zeichen eingeben.
         </p>
       )}
-      <div className="mt-2">
-        <XpButton variant="primary" onClick={onSubmit}>
-          Begründung bestätigen & einreichen
-        </XpButton>
-      </div>
+      <XpButton variant="primary" onClick={onSubmit}>
+        Begründung bestätigen & einreichen
+      </XpButton>
     </div>
   );
 }

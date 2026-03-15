@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 
 export default function ZufallPage() {
   return (
-    <div className="max-w-2xl mx-auto">
+    <main className="mx-auto max-w-2xl px-4 py-10">
       <RandomTermView />
-    </div>
+    </main>
   );
 }

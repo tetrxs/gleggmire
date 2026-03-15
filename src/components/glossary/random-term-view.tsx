@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { XpWindow } from "@/components/ui/xp-window";
 import { XpButton } from "@/components/ui/xp-button";
 import { MOCK_TERMS, MOCK_DEFINITIONS } from "@/lib/mock-data";
+import { SketchDivider } from "@/components/ui/sketch-elements";
 import Link from "next/link";
 
 export function RandomTermView() {
@@ -37,72 +37,94 @@ export function RandomTermView() {
     : null;
 
   return (
-    <div className="space-y-6">
-      <XpWindow title="🎰 Glegg-Roulette — zufall.exe">
-        <div className="text-center space-y-6 py-4">
-          <p className="xp-text-body">
-            Drück den Button und entdecke einen zufälligen Begriff aus dem
-            Gleggmire-Universum!
-          </p>
+    <div className="space-y-8">
+      {/* Roulette Card */}
+      <div
+        className="rounded-xl border p-8 text-center"
+        style={{
+          borderColor: "var(--color-border)",
+          backgroundColor: "var(--color-surface)",
+        }}
+      >
+        <h2
+          className="text-2xl font-bold tracking-tight mb-2"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Glegg-Roulette
+        </h2>
+        <p className="text-sm mb-8" style={{ color: "var(--color-muted)" }}>
+          Drück den Button und entdecke einen zufälligen Begriff aus dem
+          Gleggmire-Universum!
+        </p>
 
-          {/* Slot machine display */}
-          <div
-            className="xp-inset mx-auto max-w-md p-6"
-            style={{ minHeight: "80px" }}
+        {/* Slot machine display */}
+        <div
+          className="mx-auto max-w-md rounded-xl border-2 border-dashed p-8 mb-8"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <p
+            className={`text-3xl font-bold tracking-tight transition-all duration-200 ${
+              isSpinning ? "animate-pulse text-[var(--color-accent)]" : ""
+            }`}
+            style={{
+              fontFamily: "var(--font-heading)",
+              color: isSpinning ? "var(--color-accent)" : "var(--color-text)",
+            }}
           >
-            <p
-              className={`text-2xl font-bold text-center ${
-                isSpinning ? "animate-pulse" : ""
-              }`}
-              style={{
-                color: isSpinning ? "var(--xp-glegg-orange)" : "#000",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
-            >
-              {displayTerm || "???"}
-            </p>
-          </div>
-
-          <XpButton variant="primary" onClick={spin} disabled={isSpinning}>
-            {isSpinning ? "🎰 Dreht sich..." : "🎲 Glegg-Roulette!"}
-          </XpButton>
+            {displayTerm || "???"}
+          </p>
         </div>
-      </XpWindow>
+
+        <XpButton variant="primary" onClick={spin} disabled={isSpinning}>
+          {isSpinning ? "Dreht sich..." : "Glegg-Roulette!"}
+        </XpButton>
+      </div>
 
       {/* Show result after spin */}
       {selectedTerm && !isSpinning && (
-        <XpWindow
-          title={`📖 Gleggmire-Enzyklopädie — ${selectedTerm.term}.exe`}
+        <div
+          className="rounded-xl border p-6 space-y-4 animate-fade-in"
+          style={{
+            borderColor: "var(--color-border)",
+            backgroundColor: "var(--color-surface)",
+          }}
         >
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold">{selectedTerm.term}</h2>
+          <h2
+            className="text-xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            {selectedTerm.term}
+          </h2>
 
-            {selectedTerm.phonetic && (
-              <p
-                className="xp-text-label"
-                style={{ fontFamily: "Courier New, monospace" }}
-              >
-                {selectedTerm.phonetic}
-              </p>
-            )}
+          {selectedTerm.phonetic && (
+            <p className="font-mono text-sm" style={{ color: "var(--color-muted)" }}>
+              {selectedTerm.phonetic}
+            </p>
+          )}
 
-            {selectedDef && (
-              <div className="xp-inset p-3 space-y-2">
-                <p className="xp-text-body">{selectedDef.definition}</p>
-                <p className="xp-text-body italic text-gray-600">
+          {selectedDef && (
+            <div
+              className="rounded-lg border-l-2 pl-4 py-2 space-y-2"
+              style={{ borderColor: "var(--color-accent)" }}
+            >
+              <p className="text-sm leading-relaxed">{selectedDef.definition}</p>
+              {selectedDef.example_sentence && (
+                <p className="text-sm italic" style={{ color: "var(--color-muted)" }}>
                   &ldquo;{selectedDef.example_sentence}&rdquo;
                 </p>
-              </div>
-            )}
-
-            <div className="flex gap-2 pt-2">
-              <Link href={`/glossar/${selectedTerm.slug}`}>
-                <XpButton variant="primary">Zum vollständigen Eintrag</XpButton>
-              </Link>
-              <XpButton onClick={spin}>🎲 Nochmal!</XpButton>
+              )}
             </div>
+          )}
+
+          <SketchDivider className="text-[var(--color-border)]" />
+
+          <div className="flex gap-3 pt-2">
+            <Link href={`/glossar/${selectedTerm.slug}`}>
+              <XpButton variant="primary">Zum vollständigen Eintrag</XpButton>
+            </Link>
+            <XpButton onClick={spin}>Nochmal!</XpButton>
           </div>
-        </XpWindow>
+        </div>
       )}
     </div>
   );

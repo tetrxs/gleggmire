@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { XpWindow } from "@/components/ui/xp-window";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Änderungsprotokoll — gleggmire.net",
@@ -50,82 +50,105 @@ function formatDate(dateStr: string) {
 
 export default function AenderungenPage() {
   return (
-    <div className="max-w-4xl mx-auto">
-      <XpWindow title="📜 Änderungsprotokoll — changelog.exe">
-        <div className="space-y-2">
-          <p className="xp-text-body mb-4">
-            Alle Bearbeitungen an Glossar-Einträgen werden hier öffentlich
-            protokolliert — Wikipedia-Style.
-          </p>
+    <main className="mx-auto max-w-4xl px-4 py-10">
+      <div className="mb-8">
+        <h1
+          className="text-3xl font-bold tracking-tight"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Änderungsprotokoll
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-muted)" }}>
+          Alle Bearbeitungen an Glossar-Einträgen werden hier öffentlich
+          protokolliert — Wikipedia-Style.
+        </p>
+      </div>
 
-          <div className="xp-inset p-2">
-            <table className="w-full" style={{ fontSize: "13px" }}>
-              <thead>
-                <tr
-                  className="text-left"
-                  style={{
-                    borderBottom: "1px solid #808080",
-                    fontSize: "11px",
-                  }}
-                >
-                  <th className="py-1 px-2">Datum</th>
-                  <th className="py-1 px-2">Begriff</th>
-                  <th className="py-1 px-2">Feld</th>
-                  <th className="py-1 px-2">Bearbeiter</th>
-                  <th className="py-1 px-2">Begründung</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_EDITS.map((edit) => (
-                  <tr
-                    key={edit.id}
-                    style={{ borderBottom: "1px solid #D4D0C8" }}
-                  >
-                    <td
-                      className="py-2 px-2"
-                      style={{ fontFamily: "Courier New, monospace" }}
-                    >
-                      {formatDate(edit.date)}
-                    </td>
-                    <td className="py-2 px-2">
-                      <a
-                        href={`/glossar/${edit.slug}`}
-                        className="underline"
-                        style={{ color: "var(--xp-blue-start)" }}
-                      >
-                        {edit.term}
-                      </a>
-                    </td>
-                    <td className="py-2 px-2">
-                      <span
-                        className="px-1"
-                        style={{
-                          background: "#ECE9D8",
-                          border: "1px solid #808080",
-                          fontSize: "11px",
-                        }}
-                      >
-                        {edit.field}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2">{edit.user}</td>
-                    <td className="py-2 px-2 italic text-gray-600">
-                      {edit.reason}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <p
-            className="text-center pt-4"
-            style={{ fontSize: "11px", color: "#808080" }}
-          >
-            Weitere Einträge werden geladen sobald die Datenbank verbunden ist.
-          </p>
+      <div
+        className="overflow-hidden rounded-xl border"
+        style={{
+          borderColor: "var(--color-border)",
+          backgroundColor: "var(--color-surface)",
+        }}
+      >
+        {/* Table header */}
+        <div
+          className="hidden sm:grid sm:grid-cols-5 gap-4 px-5 py-3 text-xs font-medium border-b"
+          style={{
+            color: "var(--color-muted)",
+            borderColor: "var(--color-border)",
+          }}
+        >
+          <span>Datum</span>
+          <span>Begriff</span>
+          <span>Feld</span>
+          <span>Bearbeiter</span>
+          <span>Begründung</span>
         </div>
-      </XpWindow>
-    </div>
+
+        {/* Table rows */}
+        {MOCK_EDITS.map((edit) => (
+          <div
+            key={edit.id}
+            className="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-4 px-5 py-4 border-b last:border-b-0 hover:bg-[var(--color-bg)] transition-colors duration-150"
+            style={{ borderColor: "var(--color-border)" }}
+          >
+            <span
+              className="font-mono text-xs tabular-nums"
+              style={{ color: "var(--color-muted)" }}
+            >
+              <span className="sm:hidden text-[10px] font-sans font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+                Datum:
+              </span>
+              {formatDate(edit.date)}
+            </span>
+            <span className="text-sm">
+              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+                Begriff:
+              </span>
+              <Link
+                href={`/glossar/${edit.slug}`}
+                className="font-medium text-[var(--color-accent)] hover:underline"
+              >
+                {edit.term}
+              </Link>
+            </span>
+            <span className="text-sm">
+              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+                Feld:
+              </span>
+              <span
+                className="inline-block rounded-md px-2 py-0.5 text-[11px] font-medium"
+                style={{
+                  backgroundColor: "var(--color-border)",
+                  color: "var(--color-muted)",
+                }}
+              >
+                {edit.field}
+              </span>
+            </span>
+            <span className="text-sm">
+              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+                Bearbeiter:
+              </span>
+              {edit.user}
+            </span>
+            <span className="text-sm italic" style={{ color: "var(--color-muted)" }}>
+              <span className="sm:hidden text-[10px] font-medium mr-1 not-italic" style={{ color: "var(--color-muted)" }}>
+                Begründung:
+              </span>
+              {edit.reason}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <p
+        className="mt-6 text-center text-xs"
+        style={{ color: "var(--color-muted)" }}
+      >
+        Weitere Einträge werden geladen sobald die Datenbank verbunden ist.
+      </p>
+    </main>
   );
 }

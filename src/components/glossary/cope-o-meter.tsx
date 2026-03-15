@@ -9,18 +9,18 @@ export function CopeOMeter({ sum, count }: CopeOMeterProps) {
   if (count === 0) {
     return (
       <div className="flex flex-col gap-1">
-        <span className="xp-text-label font-bold">Cope-O-Meter</span>
+        <span className="text-[11px] font-medium" style={{ color: "var(--color-muted)" }}>
+          Cope-O-Meter
+        </span>
         <div
-          className="xp-inset px-2 py-1"
-          style={{ backgroundColor: "#F1EFE2" }}
+          className="h-2 w-full rounded-full"
+          style={{ backgroundColor: "var(--color-border)" }}
         >
-          <span
-            className="text-[10px] italic"
-            style={{ color: "var(--xp-border-dark)" }}
-          >
-            Noch keine Bewertungen
-          </span>
+          <div className="h-full w-0 rounded-full" />
         </div>
+        <span className="text-[10px]" style={{ color: "var(--color-muted)" }}>
+          Noch keine Bewertungen
+        </span>
       </div>
     );
   }
@@ -31,35 +31,35 @@ export function CopeOMeter({ sum, count }: CopeOMeterProps) {
   let barColor: string;
   let label: string;
   if (clamped <= 30) {
-    barColor = "var(--xp-gruen)";
+    barColor = "#22C55E";
     label = "Basiert";
   } else if (clamped <= 70) {
-    barColor = "#D4A017";
+    barColor = "#EAB308";
     label = "Cope";
   } else {
-    barColor = "var(--xp-fehler-rot)";
+    barColor = "#EF4444";
     label = "Max Cope";
   }
 
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
-        <span className="xp-text-label font-bold">Cope-O-Meter</span>
-        <span className="text-[10px]" style={{ color: "var(--xp-border-dark)" }}>
+        <span className="text-[11px] font-medium" style={{ color: "var(--color-muted)" }}>
+          Cope-O-Meter
+        </span>
+        <span className="text-[10px] tabular-nums" style={{ color: "var(--color-muted)" }}>
           {clamped}% &mdash; {label}
         </span>
       </div>
       <div
-        className="xp-inset h-[14px] overflow-hidden"
-        style={{ backgroundColor: "#F1EFE2" }}
+        className="h-2 w-full overflow-hidden rounded-full"
+        style={{ backgroundColor: "var(--color-border)" }}
       >
         <div
-          className="h-full transition-all duration-300"
+          className="h-full rounded-full transition-all duration-500 ease-out"
           style={{
             width: `${clamped}%`,
             backgroundColor: barColor,
-            backgroundImage:
-              "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.1) 100%)",
           }}
         />
       </div>

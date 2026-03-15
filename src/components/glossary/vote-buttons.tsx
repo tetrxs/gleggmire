@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { XpButton } from "@/components/ui/xp-button";
 
 interface VoteButtonsProps {
   upvotes: number;
@@ -45,24 +44,56 @@ export function VoteButtons({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <XpButton
+    <div className="flex flex-wrap items-center gap-3">
+      {/* Upvote */}
+      <button
+        type="button"
         onClick={handleUpvote}
-        className={`transition-colors ${voted === "up" ? "!bg-green-200" : "hover:!bg-green-100"}`}
+        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+          voted === "up"
+            ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+            : "hover:bg-green-50 dark:hover:bg-green-950/50"
+        }`}
+        style={{
+          border: "1px solid var(--color-border)",
+          ...(voted !== "up" ? { color: "var(--color-muted)" } : {}),
+        }}
       >
-        {"▲ Gleggmire-approved"} ({upvotes})
-      </XpButton>
-      <XpButton
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="tabular-nums">{upvotes}</span>
+        <span className="hidden sm:inline text-[10px]" style={{ color: "var(--color-muted)" }}>
+          Gleggmire-approved
+        </span>
+      </button>
+
+      {/* Downvote */}
+      <button
+        type="button"
         onClick={handleDownvote}
-        className={`transition-colors ${voted === "down" ? "!bg-red-200" : "hover:!bg-red-100"}`}
+        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+          voted === "down"
+            ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+            : "hover:bg-red-50 dark:hover:bg-red-950/50"
+        }`}
+        style={{
+          border: "1px solid var(--color-border)",
+          ...(voted !== "down" ? { color: "var(--color-muted)" } : {}),
+        }}
       >
-        {"▼ Cope & Seethe"} ({downvotes})
-      </XpButton>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="tabular-nums">{downvotes}</span>
+        <span className="hidden sm:inline text-[10px]" style={{ color: "var(--color-muted)" }}>
+          Cope & Seethe
+        </span>
+      </button>
+
+      {/* Ratio'd indicator */}
       {isRatiod && (
-        <span
-          className="ml-2 font-bold animate-pulse"
-          style={{ color: "var(--xp-fehler-rot)", fontSize: "14px" }}
-        >
+        <span className="ml-1 text-xs font-bold text-red-500 animate-pulse">
           RATIO&apos;D
         </span>
       )}

@@ -36,7 +36,7 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-[6px]">
+    <div className="flex flex-wrap gap-2">
       {PREDEFINED_TAGS.map((tag) => {
         const isSelected = selectedTags.includes(tag);
         return (
@@ -44,14 +44,19 @@ export function TagSelect({ selectedTags, onChange }: TagSelectProps) {
             key={tag}
             type="button"
             onClick={() => toggleTag(tag)}
-            className="xp-raised cursor-pointer px-2 py-[2px] text-[11px] transition-colors select-none"
+            className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-150 select-none ${
+              isSelected
+                ? "bg-[var(--color-accent)] text-white shadow-sm"
+                : "hover:bg-[var(--color-border)]"
+            }`}
             style={{
-              backgroundColor: isSelected
-                ? "var(--glegg-orange)"
-                : "var(--xp-silber-luna)",
-              color: isSelected ? "#FFFFFF" : "#000000",
-              fontFamily: "Tahoma, Verdana, sans-serif",
-              fontWeight: isSelected ? "bold" : "normal",
+              ...(isSelected
+                ? {}
+                : {
+                    backgroundColor: "var(--color-surface)",
+                    color: "var(--color-text)",
+                    border: "1px solid var(--color-border)",
+                  }),
             }}
             aria-pressed={isSelected}
           >

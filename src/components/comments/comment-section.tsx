@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { XpWindow } from "@/components/ui/xp-window";
-import { XpButton } from "@/components/ui/xp-button";
 import { CommentItem } from "@/components/comments/comment-item";
 import { CommentEditor } from "@/components/comments/comment-editor";
 import { useAudioStore } from "@/stores/audio-store";
@@ -17,37 +16,21 @@ interface CommentSectionProps {
   comments: CommentWithMeta[];
 }
 
-function sortComments(
-  comments: CommentWithMeta[],
-  mode: SortMode
-): CommentWithMeta[] {
+function sortComments(comments: CommentWithMeta[], mode: SortMode): CommentWithMeta[] {
   const sorted = [...comments];
   switch (mode) {
     case "newest":
-      sorted.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       break;
     case "top":
-      sorted.sort(
-        (a, b) =>
-          b.upvotes - b.downvotes - (a.upvotes - a.downvotes)
-      );
+      sorted.sort((a, b) => b.upvotes - b.downvotes - (a.upvotes - a.downvotes));
       break;
     case "controversial":
-      // Controversial = most total votes with close ratio
       sorted.sort((a, b) => {
         const aTotal = a.upvotes + a.downvotes;
         const bTotal = b.upvotes + b.downvotes;
-        const aRatio =
-          aTotal > 0
-            ? 1 - Math.abs(a.upvotes - a.downvotes) / aTotal
-            : 0;
-        const bRatio =
-          bTotal > 0
-            ? 1 - Math.abs(b.upvotes - b.downvotes) / bTotal
-            : 0;
+        const aRatio = aTotal > 0 ? 1 - Math.abs(a.upvotes - a.downvotes) / aTotal : 0;
+        const bRatio = bTotal > 0 ? 1 - Math.abs(b.upvotes - b.downvotes) / bTotal : 0;
         return bRatio * bTotal - aRatio * aTotal;
       });
       break;
@@ -55,18 +38,11 @@ function sortComments(
   return sorted;
 }
 
-export function CommentSection({
-  entityType,
-  entityId,
-  comments,
-}: CommentSectionProps) {
+export function CommentSection({ entityType, entityId, comments }: CommentSectionProps) {
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const { isMuted, toggleMute } = useAudioStore();
 
-  const sortedComments = useMemo(
-    () => sortComments(comments, sortMode),
-    [comments, sortMode]
-  );
+  const sortedComments = useMemo(() => sortComments(comments, sortMode), [comments, sortMode]);
 
   const sortButtons: { mode: SortMode; label: string }[] = [
     { mode: "newest", label: "Neueste" },
@@ -75,155 +51,66 @@ export function CommentSection({
   ];
 
   return (
-    <XpWindow title={"\uD83D\uDCAC Community-Stimmung \u2014 Nicht abst\u00FCrzen"}>
-      {/* Global mute toggle - sticky systray style */}
-      <div
-        className="sticky top-0 z-10 flex items-center gap-2 px-2 py-1.5 mb-3 xp-raised"
-        style={{
-          backgroundColor: "var(--xp-silber-luna)",
-          fontFamily: "Tahoma, Verdana, sans-serif",
-          fontSize: "11px",
-        }}
-      >
+    <XpWindow title="Community-Stimmung">
+      {/* Global mute toggle */}
+      <div className="sticky top-0 z-10 mb-4 flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 dark:border-zinc-700">
         <button
           type="button"
           onClick={toggleMute}
-          className="flex items-center gap-2 cursor-pointer select-none"
-          title={
-            isMuted
-              ? "Clips stumm \u2014 klicken zum Aktivieren"
-              : "Clips laut \u2014 klicken zum Stummschalten"
-          }
+          className="flex items-center gap-2 text-sm font-medium transition-colors cursor-pointer select-none"
+          title={isMuted ? "Clips stumm — klicken zum Aktivieren" : "Clips laut — klicken zum Stummschalten"}
         >
-          {/* Speaker icon */}
-          <span className="relative inline-flex items-center justify-center w-5 h-5">
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-white text-xs ${isMuted ? "bg-red-500" : "bg-emerald-500"}`}>
             {isMuted ? (
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M2 5h3l4-3v12l-4-3H2V5z"
-                  fill="#CC0000"
-                  stroke="#800000"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M12 4l-4 4m0-4l4 4"
-                  stroke="#CC0000"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></svg>
             ) : (
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M2 5h3l4-3v12l-4-3H2V5z"
-                  fill="#008000"
-                  stroke="#005000"
-                  strokeWidth="0.5"
-                />
-                <path
-                  d="M11 5.5c.8.8.8 2.2 0 3"
-                  stroke="#008000"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                <path
-                  d="M13 3.5c1.5 1.5 1.5 4.5 0 6"
-                  stroke="#008000"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" /></svg>
             )}
           </span>
-          <span
-            className="font-bold"
-            style={{
-              color: isMuted ? "#CC0000" : "#008000",
-            }}
-          >
-            {isMuted
-              ? "Clips stumm \u2014 klicken zum Aktivieren"
-              : "Clips laut \u2014 klicken zum Stummschalten"}
+          <span className={`font-medium ${isMuted ? "text-red-500 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+            {isMuted ? "Clips stumm — klicken zum Aktivieren" : "Clips laut — klicken zum Stummschalten"}
           </span>
         </button>
       </div>
 
       {/* Sort controls */}
-      <div
-        className="flex items-center gap-1 mb-3"
-        style={{
-          fontFamily: "Tahoma, Verdana, sans-serif",
-          fontSize: "11px",
-        }}
-      >
-        <span className="opacity-60 mr-1">Sortieren:</span>
-        {sortButtons.map(({ mode, label }) => (
-          <XpButton
-            key={mode}
-            onClick={() => setSortMode(mode)}
-            className={sortMode === mode ? "!bg-[var(--xp-blau-highlight)] !text-white" : ""}
-          >
-            {label}
-          </XpButton>
-        ))}
-        <span className="ml-auto opacity-50">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-sm text-[var(--color-muted)]">Sortieren:</span>
+        <div className="inline-flex rounded-lg border border-[var(--color-border)] p-1 dark:border-zinc-700">
+          {sortButtons.map(({ mode, label }) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setSortMode(mode)}
+              className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                sortMode === mode ? "bg-[#E8593C] text-white" : "text-[var(--color-muted)] hover:text-[var(--color-text)]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto text-sm text-[var(--color-muted)]">
           {comments.length} Kommentar{comments.length !== 1 ? "e" : ""}
         </span>
       </div>
 
       {/* Comment list */}
-      <div className="space-y-3 mb-4">
+      <div className="space-y-3 mb-6">
         {sortedComments.length === 0 ? (
-          <div
-            className="xp-inset p-6 text-center opacity-60"
-            style={{
-              backgroundColor: "var(--xp-fenster-weiss)",
-              fontFamily: "Tahoma, Verdana, sans-serif",
-              fontSize: "11px",
-            }}
-          >
-            <p>Noch keine Kommentare. Sei der Erste, der hier coped!</p>
+          <div className="rounded-xl border border-dashed border-[var(--color-border)] p-8 text-center dark:border-zinc-700">
+            <p className="text-sm text-[var(--color-muted)]">Noch keine Kommentare. Sei der Erste, der hier coped!</p>
           </div>
         ) : (
           sortedComments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              comment={comment}
-              entityType={entityType}
-              entityId={entityId}
-            />
+            <CommentItem key={comment.id} comment={comment} entityType={entityType} entityId={entityId} />
           ))
         )}
       </div>
 
       {/* Comment editor */}
-      <div
-        className="xp-inset p-3"
-        style={{ backgroundColor: "var(--xp-silber-luna)" }}
-      >
-        <p
-          className="font-bold mb-2"
-          style={{
-            fontFamily: "Tahoma, Verdana, sans-serif",
-            fontSize: "11px",
-          }}
-        >
-          Neuen Kommentar schreiben
-        </p>
+      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 dark:border-zinc-700">
+        <p className="text-sm font-semibold text-[var(--color-text)] mb-3">Neuen Kommentar schreiben</p>
         <CommentEditor entityType={entityType} entityId={entityId} />
       </div>
     </XpWindow>

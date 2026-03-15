@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import type { GlossaryTerm, TermDefinition, TermTag } from "@/types/database";
-import { XpButton } from "@/components/ui/xp-button";
 import { GlossaryCard } from "@/components/glossary/glossary-card";
 
 type SortMode = "az" | "za" | "newest" | "oldest";
@@ -12,6 +11,13 @@ interface GlossaryListProps {
   definitions: TermDefinition[];
   tags: TermTag[];
 }
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: "az", label: "A-Z" },
+  { value: "za", label: "Z-A" },
+  { value: "newest", label: "Neueste" },
+  { value: "oldest", label: "Älteste" },
+];
 
 export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
   const [search, setSearch] = useState("");
@@ -49,7 +55,6 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
   const definitionMap = useMemo(() => {
     const map = new Map<string, TermDefinition>();
     for (const def of definitions) {
-      // Keep the one with the most upvotes per term
       const existing = map.get(def.term_id);
       if (!existing || def.upvotes > existing.upvotes) {
         map.set(def.term_id, def);
@@ -72,13 +77,11 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
   const filteredTerms = useMemo(() => {
     let result = terms;
 
-    // Search filter
     if (debouncedSearch.trim()) {
       const q = debouncedSearch.toLowerCase();
       result = result.filter((t) => t.term.toLowerCase().includes(q));
     }
 
-    // Tag filter
     if (activeTag) {
       const termIdsWithTag = new Set(
         tags.filter((t) => t.tag === activeTag).map((t) => t.term_id),
@@ -86,7 +89,6 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
       result = result.filter((t) => termIdsWithTag.has(t.id));
     }
 
-    // Sort
     result = [...result].sort((a, b) => {
       switch (sortMode) {
         case "az":
@@ -110,88 +112,130 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
   }, [terms, debouncedSearch, activeTag, sortMode, tags]);
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Search field */}
-      <div className="xp-inset flex items-center gap-2 p-1" style={{ backgroundColor: "#FFFFFF" }}>
-        <span className="xp-text-label pl-1" style={{ color: "var(--xp-border-dark)" }}>
-          Suche:
-        </span>
+    <div className="flex flex-col gap-6">
+      {/* Search bar */}
+      <div className="relative">
+        <svg
+          className="absolute left-3.5 top-1/2 -translate-y-1/2"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--color-muted)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
         <input
           type="text"
           value={search}
           onChange={handleSearchChange}
-          placeholder="Begriff eingeben..."
-          className="flex-1 bg-transparent px-1 py-[2px] text-[12px] outline-none"
-          style={{ fontFamily: "Tahoma, Verdana, sans-serif" }}
+          placeholder="Begriff suchen..."
+          className="w-full rounded-xl border py-3 pl-11 pr-4 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+          style={{
+            borderColor: "var(--color-border)",
+            backgroundColor: "var(--color-surface)",
+            color: "var(--color-text)",
+          }}
         />
       </div>
 
-      {/* Sort & filter controls */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="xp-text-label font-bold">Sortierung:</span>
-        <XpButton
-          onClick={() => setSortMode("az")}
-          className={sortMode === "az" ? "xp-button-pressed" : ""}
+      {/* Sort & filter row */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Sort pills */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium" style={{ color: "var(--color-muted)" }}>
+            Sortierung:
+          </span>
+          <div className="flex gap-1">
+            {SORT_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setSortMode(option.value)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
+                  sortMode === option.value
+                    ? "bg-[var(--color-accent)] text-white shadow-sm"
+                    : "hover:bg-[var(--color-border)]"
+                }`}
+                style={
+                  sortMode !== option.value
+                    ? { color: "var(--color-text)" }
+                    : undefined
+                }
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Result count */}
+        <span
+          className="text-xs tabular-nums"
+          style={{ color: "var(--color-muted)" }}
         >
-          A-Z
-        </XpButton>
-        <XpButton
-          onClick={() => setSortMode("za")}
-          className={sortMode === "za" ? "xp-button-pressed" : ""}
-        >
-          Z-A
-        </XpButton>
-        <XpButton
-          onClick={() => setSortMode("newest")}
-          className={sortMode === "newest" ? "xp-button-pressed" : ""}
-        >
-          Neueste
-        </XpButton>
-        <XpButton
-          onClick={() => setSortMode("oldest")}
-          className={sortMode === "oldest" ? "xp-button-pressed" : ""}
-        >
-          Aelteste
-        </XpButton>
+          {filteredTerms.length} Begriffe
+        </span>
       </div>
 
-      {/* Tag filters */}
+      {/* Tag filter pills */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="xp-text-label font-bold">Kategorie:</span>
-        <XpButton
+        <span className="text-xs font-medium" style={{ color: "var(--color-muted)" }}>
+          Kategorie:
+        </span>
+        <button
+          type="button"
           onClick={() => setActiveTag(null)}
-          className={activeTag === null ? "xp-button-pressed" : ""}
+          className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
+            activeTag === null
+              ? "bg-[var(--color-accent)] text-white"
+              : "hover:bg-[var(--color-border)]"
+          }`}
+          style={{
+            ...(activeTag !== null
+              ? {
+                  backgroundColor: "var(--color-surface)",
+                  color: "var(--color-text)",
+                  border: "1px solid var(--color-border)",
+                }
+              : {}),
+          }}
         >
           Alle
-        </XpButton>
+        </button>
         {allTags.map((tag) => (
-          <XpButton
+          <button
             key={tag}
+            type="button"
             onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-            className={activeTag === tag ? "xp-button-pressed" : ""}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-all duration-150 ${
+              activeTag === tag
+                ? "bg-[var(--color-accent)] text-white"
+                : "hover:bg-[var(--color-border)]"
+            }`}
+            style={{
+              ...(activeTag !== tag
+                ? {
+                    backgroundColor: "var(--color-surface)",
+                    color: "var(--color-text)",
+                    border: "1px solid var(--color-border)",
+                  }
+                : {}),
+            }}
           >
             {tag}
-          </XpButton>
+          </button>
         ))}
-      </div>
-
-      {/* Result count */}
-      <div
-        className="xp-inset px-2 py-1"
-        style={{ backgroundColor: "#F1EFE2" }}
-      >
-        <span className="xp-text-label">
-          {filteredTerms.length} Begriffe gefunden
-        </span>
       </div>
 
       {/* Cards grid */}
       {filteredTerms.length === 0 ? (
-        <div className="flex h-24 items-center justify-center">
-          <p
-            className="text-center text-[12px] italic"
-            style={{ color: "var(--xp-border-dark)" }}
-          >
+        <div className="flex h-40 items-center justify-center rounded-xl border border-dashed" style={{ borderColor: "var(--color-border)" }}>
+          <p className="text-sm" style={{ color: "var(--color-muted)" }}>
             Keine Begriffe gefunden. Versuch einen anderen Suchbegriff.
           </p>
         </div>

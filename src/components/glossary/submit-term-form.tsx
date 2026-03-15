@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { XpWindow } from "@/components/ui/xp-window";
 import { XpButton } from "@/components/ui/xp-button";
 import { XpDialog } from "@/components/ui/xp-dialog";
 import { TagSelect } from "@/components/glossary/tag-select";
@@ -49,6 +48,7 @@ export function SubmitTermForm({ existingTerms }: SubmitTermFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
   const [matches, setMatches] = useState<TermMatch[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [dialog, setDialog] = useState<{
     open: boolean;
     type: "error" | "warning" | "info";
@@ -60,7 +60,6 @@ export function SubmitTermForm({ existingTerms }: SubmitTermFormProps) {
   const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const formRef = useRef<FormData>(form);
 
-  // Keep ref in sync
   formRef.current = form;
 
   // Restore draft from localStorage on mount
@@ -113,57 +112,51 @@ export function SubmitTermForm({ existingTerms }: SubmitTermFormProps) {
   const updateField = useCallback(
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
       setForm((prev) => ({ ...prev, [key]: value }));
+      // Clear error for this field
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
     },
     []
   );
-
-  const showError = useCallback((message: string) => {
-    setDialog({
-      open: true,
-      type: "error",
-      title: "Fehler",
-      message,
-    });
-  }, []);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
 
       // Validation
-      if (!form.begriff.trim()) {
-        showError("Bitte gib einen Begriff ein.");
-        return;
-      }
-      if (!form.definition.trim()) {
-        showError("Bitte gib eine Definition ein.");
-        return;
-      }
-      if (!form.beispielsatz.trim()) {
-        showError("Bitte gib einen Beispielsatz ein.");
-        return;
-      }
-      if (form.tags.length === 0) {
-        showError("Bitte wähle mindestens eine Kategorie aus.");
+      const newErrors: Record<string, string> = {};
+      if (!form.begriff.trim()) newErrors.begriff = "Bitte gib einen Begriff ein.";
+      if (!form.definition.trim()) newErrors.definition = "Bitte gib eine Definition ein.";
+      if (!form.beispielsatz.trim()) newErrors.beispielsatz = "Bitte gib einen Beispielsatz ein.";
+      if (form.tags.length === 0) newErrors.tags = "Bitte wähle mindestens eine Kategorie aus.";
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
         return;
       }
 
       // Check for exact match blocking
       const hasExact = matches.some((m) => m.matchType === "exact");
       if (hasExact) {
-        showError(
-          "Dieser Begriff existiert bereits. Bitte wechsle zum bestehenden Eintrag."
-        );
+        setDialog({
+          open: true,
+          type: "error",
+          title: "Fehler",
+          message: "Dieser Begriff existiert bereits. Bitte wechsle zum bestehenden Eintrag.",
+        });
         return;
       }
 
-      // Show success dialog (placeholder)
+      // Show success dialog
       setDialog({
         open: true,
         type: "info",
         title: "Erfolg",
         message:
-          'Dein Begriff wurde erfolgreich eingereicht und wird von der Community geprüft. Vielen Dank für deinen Beitrag!',
+          "Dein Begriff wurde erfolgreich eingereicht und wird von der Community geprüft. Vielen Dank für deinen Beitrag!",
       });
 
       // Clear draft
@@ -175,8 +168,9 @@ export function SubmitTermForm({ existingTerms }: SubmitTermFormProps) {
 
       setForm(EMPTY_FORM);
       setMatches([]);
+      setErrors({});
     },
-    [form, matches, showError]
+    [form, matches]
   );
 
   const handleNavigate = useCallback(
@@ -187,187 +181,187 @@ export function SubmitTermForm({ existingTerms }: SubmitTermFormProps) {
   );
 
   const handleSubmitAnyway = useCallback(() => {
-    // Clear matches to allow submission
     setMatches([]);
   }, []);
 
   return (
     <>
-      <XpWindow title="📝 Neuen Begriff einreichen — submit.exe">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Begriff */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Begriff{" "}
-              <span style={{ color: "var(--xp-fehler-rot)" }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={form.begriff}
-              onChange={(e) => updateField("begriff", e.target.value)}
-              className="xp-inset w-full p-2 text-[12px]"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
-              placeholder="z.B. Geglaggmirt"
-              required
-            />
-          </fieldset>
-
-          {/* Fuzzy match results */}
-          {matches.length > 0 && (
-            <FuzzyMatchAlert
-              matches={matches}
-              onNavigate={handleNavigate}
-              onSubmitAnyway={handleSubmitAnyway}
-            />
-          )}
-
-          {/* Definition */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Definition{" "}
-              <span style={{ color: "var(--xp-fehler-rot)" }}>*</span>
-            </label>
-            <textarea
-              value={form.definition}
-              onChange={(e) => updateField("definition", e.target.value)}
-              className="xp-inset w-full resize-none p-2 text-[12px]"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-                minHeight: "80px",
-              }}
-              placeholder="Was bedeutet dieser Begriff?"
-              required
-            />
-          </fieldset>
-
-          {/* Beispielsatz */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Beispielsatz{" "}
-              <span style={{ color: "var(--xp-fehler-rot)" }}>*</span>
-            </label>
-            <textarea
-              value={form.beispielsatz}
-              onChange={(e) => updateField("beispielsatz", e.target.value)}
-              className="xp-inset w-full resize-none p-2 text-[12px]"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-                minHeight: "60px",
-              }}
-              placeholder="z.B. 'Der wurde richtig gegläggmirt gestern'"
-              required
-            />
-          </fieldset>
-
-          {/* Kategorie-Tags */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Kategorie-Tags{" "}
-              <span style={{ color: "var(--xp-fehler-rot)" }}>*</span>
-            </label>
-            <p
-              className="mb-2 text-[11px]"
-              style={{ color: "var(--xp-border-dark)" }}
-            >
-              Wähle mindestens eine Kategorie aus:
-            </p>
-            <TagSelect
-              selectedTags={form.tags}
-              onChange={(tags) => updateField("tags", tags)}
-            />
-          </fieldset>
-
-          {/* Separator */}
-          <hr
-            className="my-1"
-            style={{ borderColor: "var(--xp-border-dark)" }}
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-xl border p-6 sm:p-8 space-y-6"
+        style={{
+          borderColor: "var(--color-border)",
+          backgroundColor: "var(--color-surface)",
+        }}
+      >
+        {/* Begriff */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Begriff <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={form.begriff}
+            onChange={(e) => updateField("begriff", e.target.value)}
+            className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            style={{
+              borderColor: errors.begriff ? "#EF4444" : "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
+            }}
+            placeholder="z.B. Geglaggmirt"
           />
+          {errors.begriff && (
+            <p className="text-xs text-red-500">{errors.begriff}</p>
+          )}
+        </div>
 
-          <p
-            className="text-[11px] italic"
-            style={{ color: "var(--xp-border-dark)" }}
-          >
-            Optionale Felder — helfen bei der Einordnung:
+        {/* Fuzzy match results */}
+        {matches.length > 0 && (
+          <FuzzyMatchAlert
+            matches={matches}
+            onNavigate={handleNavigate}
+            onSubmitAnyway={handleSubmitAnyway}
+          />
+        )}
+
+        {/* Definition */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Definition <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            value={form.definition}
+            onChange={(e) => updateField("definition", e.target.value)}
+            className="w-full resize-none rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            style={{
+              borderColor: errors.definition ? "#EF4444" : "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
+              minHeight: "100px",
+            }}
+            placeholder="Was bedeutet dieser Begriff?"
+          />
+          {errors.definition && (
+            <p className="text-xs text-red-500">{errors.definition}</p>
+          )}
+        </div>
+
+        {/* Beispielsatz */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Beispielsatz <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            value={form.beispielsatz}
+            onChange={(e) => updateField("beispielsatz", e.target.value)}
+            className="w-full resize-none rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            style={{
+              borderColor: errors.beispielsatz ? "#EF4444" : "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
+              minHeight: "80px",
+            }}
+            placeholder="z.B. 'Der wurde richtig gegläggmirt gestern'"
+          />
+          {errors.beispielsatz && (
+            <p className="text-xs text-red-500">{errors.beispielsatz}</p>
+          )}
+        </div>
+
+        {/* Kategorie-Tags */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Kategorie-Tags <span className="text-red-500">*</span>
+          </label>
+          <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+            Wähle mindestens eine Kategorie aus:
           </p>
+          <TagSelect
+            selectedTags={form.tags}
+            onChange={(tags) => updateField("tags", tags)}
+          />
+          {errors.tags && (
+            <p className="text-xs text-red-500">{errors.tags}</p>
+          )}
+        </div>
 
-          {/* Phonetik (IPA) */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Phonetik (IPA)
-            </label>
-            <input
-              type="text"
-              value={form.phonetik}
-              onChange={(e) => updateField("phonetik", e.target.value)}
-              className="xp-inset w-full p-2 text-[12px]"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
-              placeholder="/gɛˈglɛgmɪʁt/"
-            />
-          </fieldset>
+        {/* Separator */}
+        <div
+          className="border-t"
+          style={{ borderColor: "var(--color-border)" }}
+        />
 
-          {/* Wortart */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Wortart
-            </label>
-            <select
-              value={form.wortart}
-              onChange={(e) => updateField("wortart", e.target.value)}
-              className="xp-inset w-full p-2 text-[12px]"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
-            >
-              <option value="">— Bitte wählen —</option>
-              {WORD_TYPES.map((wt) => (
-                <option key={wt} value={wt}>
-                  {wt}
-                </option>
-              ))}
-            </select>
-          </fieldset>
+        <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+          Optionale Felder — helfen bei der Einordnung:
+        </p>
 
-          {/* Herkunft/Kontext */}
-          <fieldset>
-            <label className="xp-text-label mb-1 block font-bold">
-              Herkunft / Kontext
-            </label>
-            <textarea
-              value={form.herkunft}
-              onChange={(e) => updateField("herkunft", e.target.value)}
-              className="xp-inset w-full resize-none p-2 text-[12px]"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-                minHeight: "60px",
-              }}
-              placeholder="Woher stammt der Begriff? In welchem Stream/Video kam er erstmals vor?"
-            />
-          </fieldset>
+        {/* Phonetik (IPA) */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Phonetik (IPA)
+          </label>
+          <input
+            type="text"
+            value={form.phonetik}
+            onChange={(e) => updateField("phonetik", e.target.value)}
+            className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            style={{
+              borderColor: "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
+            }}
+            placeholder="/gɛˈglɛgmɪʁt/"
+          />
+        </div>
 
-          {/* Submit */}
-          <div className="mt-2 flex items-center justify-between">
-            <p
-              className="text-[10px]"
-              style={{ color: "var(--xp-border-dark)" }}
-            >
-              Entwurf wird automatisch gespeichert.
-            </p>
-            <XpButton variant="primary" type="submit">
-              🚀 Begriff einreichen
-            </XpButton>
-          </div>
-        </form>
-      </XpWindow>
+        {/* Wortart */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Wortart
+          </label>
+          <select
+            value={form.wortart}
+            onChange={(e) => updateField("wortart", e.target.value)}
+            className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            style={{
+              borderColor: "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
+            }}
+          >
+            <option value="">— Bitte wählen —</option>
+            {WORD_TYPES.map((wt) => (
+              <option key={wt} value={wt}>
+                {wt}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Herkunft/Kontext */}
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium">
+            Herkunft / Kontext
+          </label>
+          <textarea
+            value={form.herkunft}
+            onChange={(e) => updateField("herkunft", e.target.value)}
+            className="w-full resize-none rounded-lg border px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            style={{
+              borderColor: "var(--color-border)",
+              backgroundColor: "var(--color-bg)",
+              minHeight: "80px",
+            }}
+            placeholder="Woher stammt der Begriff? In welchem Stream/Video kam er erstmals vor?"
+          />
+        </div>
+
+        {/* Submit */}
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-[11px]" style={{ color: "var(--color-muted)" }}>
+            Entwurf wird automatisch gespeichert.
+          </p>
+          <XpButton variant="primary" type="submit">
+            Begriff einreichen
+          </XpButton>
+        </div>
+      </form>
 
       {/* Dialog for errors/success */}
       <XpDialog

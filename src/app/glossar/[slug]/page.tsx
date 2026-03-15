@@ -47,7 +47,7 @@ export default async function GlossarDetailPage({ params }: PageProps) {
   const tags = termTags.filter((t) => t.term_id === term.id);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <main className="mx-auto max-w-3xl px-4 py-10">
       <TermDetail
         term={term}
         definitions={definitions}

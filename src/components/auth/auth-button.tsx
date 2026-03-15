@@ -86,8 +86,12 @@ export function AuthButton() {
 
   if (loading) {
     return (
-      <div className="xp-button text-[11px] opacity-60" aria-busy="true">
-        &#128100; ...
+      <div
+        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm opacity-60"
+        style={{ color: "var(--color-text-muted)" }}
+        aria-busy="true"
+      >
+        ...
       </div>
     );
   }
@@ -96,7 +100,12 @@ export function AuthButton() {
     return (
       <a
         href="/api/auth/login"
-        className="xp-button flex items-center gap-1.5 text-[11px] no-underline"
+        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium no-underline transition-colors"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          color: "var(--color-text)",
+          border: "1px solid var(--color-border)",
+        }}
       >
         <DiscordIcon />
         <span>Login mit Discord</span>
@@ -108,7 +117,12 @@ export function AuthButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        className="xp-button flex items-center gap-1.5 text-[11px]"
+        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+        style={{
+          backgroundColor: "var(--color-surface)",
+          color: "var(--color-text)",
+          border: "1px solid var(--color-border)",
+        }}
         onClick={() => setDropdownOpen(!dropdownOpen)}
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
@@ -117,44 +131,65 @@ export function AuthButton() {
           <img
             src={avatarUrl}
             alt=""
-            width={16}
-            height={16}
+            width={20}
+            height={20}
             className="rounded-full"
           />
         ) : (
-          <span>&#128100;</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         )}
         <span className="max-w-[100px] truncate">{username}</span>
-        <span className="text-[9px]">{dropdownOpen ? "\u25B2" : "\u25BC"}</span>
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
       </button>
 
       {dropdownOpen && (
         <div
-          className="absolute right-0 top-full z-50 mt-1 min-w-[160px] border border-[#808080] bg-[#ECE9D8] shadow-md"
+          className="absolute right-0 top-full z-50 mt-1.5 min-w-[180px] overflow-hidden rounded-lg shadow-lg animate-scale-in"
           style={{
-            borderRight: "1px solid #404040",
-            borderBottom: "1px solid #404040",
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
           }}
         >
           <a
             href="/profil"
-            className="block px-3 py-1.5 text-[11px] text-black no-underline hover:bg-[#316AC5] hover:text-white"
+            className="block px-4 py-2.5 text-sm no-underline transition-colors"
+            style={{ color: "var(--color-text)" }}
             onClick={() => setDropdownOpen(false)}
           >
             Profil
           </a>
           <a
             href="/meine-eintraege"
-            className="block px-3 py-1.5 text-[11px] text-black no-underline hover:bg-[#316AC5] hover:text-white"
+            className="block px-4 py-2.5 text-sm no-underline transition-colors"
+            style={{ color: "var(--color-text)" }}
             onClick={() => setDropdownOpen(false)}
           >
             Meine Eintr&auml;ge
           </a>
-          <div className="mx-2 border-t border-[#808080]" />
+          <div
+            className="mx-3"
+            style={{ borderTop: "1px solid var(--color-border)" }}
+          />
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="w-full px-3 py-1.5 text-left text-[11px] text-black hover:bg-[#316AC5] hover:text-white"
+              className="w-full px-4 py-2.5 text-left text-sm transition-colors"
+              style={{ color: "var(--color-text)" }}
               onClick={() => setDropdownOpen(false)}
             >
               Logout

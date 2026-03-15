@@ -2,94 +2,162 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AuthButton } from "@/components/auth/auth-button";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header
-      className="sticky top-0 z-50 w-full"
+      className="sticky top-0 z-50 w-full backdrop-blur-md transition-colors"
       style={{
-        background: "linear-gradient(180deg, #1F4ECC 0%, #3A92D8 100%)",
-        borderBottom: "2px solid #0A246A",
+        backgroundColor: "color-mix(in srgb, var(--color-surface) 80%, transparent)",
+        borderBottom: "1px solid var(--color-border)",
       }}
     >
-      <div className="mx-auto flex h-[38px] max-w-7xl items-center justify-between px-3">
-        {/* Left: Logo + Badge */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-white no-underline"
-          >
-            <span className="text-[15px] font-bold tracking-wide drop-shadow-[1px_1px_1px_rgba(0,0,0,0.4)]">
-              gleggmire.net
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-baseline gap-0.5 no-underline">
+            <span
+              className="text-xl font-bold tracking-tight"
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                color: "var(--color-text)",
+              }}
+            >
+              gleggmire
             </span>
             <span
-              className="hidden rounded-sm px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-white sm:inline-block"
-              style={{ background: "rgba(255,255,255,0.2)" }}
+              className="text-sm font-semibold"
+              style={{ color: "var(--color-accent)" }}
             >
-              Inoffizielles Fanprojekt
+              .net
             </span>
           </Link>
+          <span
+            className="hidden text-xs sm:inline-block"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            Inoffizielles Fanprojekt
+          </span>
         </div>
 
         {/* Center: Search (hidden on mobile) */}
         <div className="hidden flex-1 justify-center px-8 md:flex">
           <div className="relative w-full max-w-md">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <input
               type="text"
               placeholder="Glossar durchsuchen..."
-              className="xp-inset w-full bg-white px-3 py-1 text-[12px] text-black placeholder:text-gray-500 focus:outline-none"
+              className="w-full rounded-full py-2 pl-10 pr-4 text-sm transition-colors focus:outline-none"
+              style={{
+                backgroundColor: "var(--color-border)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text)",
+              }}
               aria-label="Globale Suche"
             />
-            <button
-              className="absolute right-0 top-0 flex h-full items-center px-2 text-[12px] text-gray-600 hover:text-black"
-              aria-label="Suchen"
-            >
-              &#128269;
-            </button>
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="hidden items-center gap-2 md:flex">
+        {/* Right: Actions (hidden on mobile) */}
+        <div className="hidden items-center gap-1 md:flex">
+          <ThemeToggle />
           <Link
             href="/zufall"
-            className="xp-button flex items-center gap-1 text-[11px] no-underline"
+            className="flex h-9 w-9 items-center justify-center rounded-lg no-underline transition-colors hover:bg-[var(--color-border)]"
             title="Zufaelliger Eintrag"
+            style={{ color: "var(--color-text-muted)" }}
           >
-            &#127922; Zufall
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="3" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none" />
+              <circle cx="16" cy="8" r="1.5" fill="currentColor" stroke="none" />
+              <circle cx="8" cy="16" r="1.5" fill="currentColor" stroke="none" />
+              <circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none" />
+              <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+            </svg>
           </Link>
-          <button className="xp-button text-[11px]">
-            &#128100; Login
-          </button>
+          <div className="ml-2">
+            <AuthButton />
+          </div>
         </div>
 
         {/* Mobile: Hamburger */}
-        <button
-          className="flex h-7 w-7 items-center justify-center rounded text-white md:hidden"
-          style={{ background: "rgba(255,255,255,0.15)" }}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Menu oeffnen"
-        >
-          <span className="text-[16px] leading-none">
-            {mobileMenuOpen ? "\u2715" : "\u2630"}
-          </span>
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-border)]"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu oeffnen"
+            style={{ color: "var(--color-text)" }}
+          >
+            {mobileMenuOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile dropdown menu */}
-      {mobileMenuOpen && (
-        <div
-          className="border-t border-[#0A246A] px-4 py-3 md:hidden"
-          style={{ background: "linear-gradient(180deg, #2B5FB5 0%, #1F4ECC 100%)" }}
-        >
+      {/* Mobile slide-out menu */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out md:hidden ${
+          mobileMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+        style={{ borderTop: mobileMenuOpen ? "1px solid var(--color-border)" : "none" }}
+      >
+        <div className="px-4 py-4">
           {/* Mobile search */}
-          <div className="mb-3">
+          <div className="relative mb-4">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <input
               type="text"
               placeholder="Glossar durchsuchen..."
-              className="xp-inset w-full bg-white px-3 py-1.5 text-[12px] text-black placeholder:text-gray-500 focus:outline-none"
+              className="w-full rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none"
+              style={{
+                backgroundColor: "var(--color-border)",
+                border: "1px solid var(--color-border)",
+                color: "var(--color-text)",
+              }}
               aria-label="Globale Suche"
             />
           </div>
@@ -106,28 +174,22 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded px-3 py-1.5 text-[12px] text-white no-underline hover:bg-white/10"
+                className="rounded-lg px-3 py-2 text-sm no-underline transition-colors"
+                style={{ color: "var(--color-text)" }}
                 onClick={() => setMobileMenuOpen(false)}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-border)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          <div className="mt-3 flex gap-2">
-            <Link
-              href="/zufall"
-              className="xp-button flex-1 text-center text-[11px] no-underline"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              &#127922; Zufall
-            </Link>
-            <button className="xp-button flex-1 text-[11px]">
-              &#128100; Login
-            </button>
+          <div className="mt-4 flex items-center gap-2">
+            <AuthButton />
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

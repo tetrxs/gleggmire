@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { XpWindow } from "@/components/ui/xp-window";
 import { GlossaryList } from "@/components/glossary/glossary-list";
 import { MOCK_TERMS, MOCK_DEFINITIONS, MOCK_TAGS } from "@/lib/mock-data";
 
 export const metadata: Metadata = {
   title: "Glossar — gleggmire.net",
+  description:
+    "Das Gleggmire-Glossar: Alle Begriffe, Definitionen und Insider aus dem Gleggmire-Universum.",
 };
 
 export default function GlossarPage() {
@@ -14,8 +15,21 @@ export default function GlossarPage() {
   const tags = MOCK_TAGS;
 
   return (
-    <XpWindow title="📖 Gleggmire-Enzyklopädie — Glossar.exe">
+    <main className="mx-auto max-w-5xl px-4 py-10">
+      <div className="mb-8">
+        <h1
+          className="text-3xl font-bold tracking-tight"
+          style={{ fontFamily: "var(--font-heading)" }}
+        >
+          Glossar
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-muted)" }}>
+          Das offizielle Gleggmire-Lexikon. Durchsuche, filtere und entdecke
+          Begriffe aus dem Gleggmire-Universum.
+        </p>
+      </div>
+
       <GlossaryList terms={terms} definitions={definitions} tags={tags} />
-    </XpWindow>
+    </main>
   );
 }

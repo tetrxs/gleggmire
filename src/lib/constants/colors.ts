@@ -1,41 +1,40 @@
-/** Windows XP "Luna" color constants for gleggmire.net */
+/** Design system color constants for gleggmire.net */
 
-export const XP_COLORS = {
-  /** XP-Blau gradient start */
-  blauStart: "#1F4ECC",
-  /** XP-Blau gradient end */
-  blauEnd: "#3A92D8",
-  /** XP-Gruen (Start button style) */
-  gruen: "#3A9E3A",
-  /** XP-Silber / Luna chrome */
-  silberLuna: "#D4D0C8",
-  /** Glegg brand orange */
-  gleggOrange: "#E8593C",
-  /** XP error red */
-  fehlerRot: "#CC0000",
-  /** XP Luna body / window background */
-  lunaBody: "#ECE9D8",
-  /** Desktop background blue */
-  desktopBg: "#3A6EA5",
-  /** Default text */
-  text: "#000000",
-
-  /** 3D border colors */
-  borderLight: "#FFFFFF",
-  borderDark: "#808080",
-  borderDarker: "#404040",
-
-  /** Title bar active gradient */
-  titlebarActiveStart: "#0A246A",
-  titlebarActiveEnd: "#3A6EA5",
-
-  /** Title bar inactive gradient */
-  titlebarInactiveStart: "#7A96DF",
-  titlebarInactiveEnd: "#A6CAF0",
-
-  /** Close button */
-  btnCloseBg: "#C75050",
-  btnCloseHover: "#E04343",
+export const COLORS = {
+  light: {
+    /** Off-white background */
+    bg: "#FAFAF9",
+    /** White surface (cards, modals) */
+    surface: "#FFFFFF",
+    /** Primary text */
+    text: "#1A1A1A",
+    /** Muted / secondary text */
+    textMuted: "#6B7280",
+    /** Border color */
+    border: "#E5E5E5",
+  },
+  dark: {
+    /** Near-black background */
+    bg: "#0F0F0F",
+    /** Dark surface (cards, modals) */
+    surface: "#1A1A1A",
+    /** Primary text */
+    text: "#FAFAF9",
+    /** Muted / secondary text */
+    textMuted: "#9CA3AF",
+    /** Border color */
+    border: "#2A2A2A",
+  },
+  /** Glegg brand accent (same in both modes) */
+  accent: "#E8593C",
+  /** Accent hover state */
+  accentHover: "#D14830",
+  /** Semantic: success */
+  success: "#22C55E",
+  /** Semantic: warning */
+  warning: "#F59E0B",
+  /** Semantic: error / danger */
+  error: "#EF4444",
 } as const;
 
-export type XpColorKey = keyof typeof XP_COLORS;
+export type ColorMode = "light" | "dark";
