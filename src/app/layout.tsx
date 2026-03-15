@@ -53,7 +53,7 @@ export default function RootLayout({
         style={{ backgroundColor: "var(--color-bg)", color: "var(--color-text)" }}
       >
         <Header />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-8 pt-[4.5rem]">
           {children}
         </main>
         <Footer />

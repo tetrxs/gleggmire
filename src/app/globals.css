@@ -2,7 +2,7 @@
 
 /* ============================================
    Design System – gleggmire.net
-   Clean, modern (Notion/Linear inspired)
+   Bold, editorial, Neo-Grotesk
    with hand-drawn sketch accents
    ============================================ */
 
@@ -87,14 +87,33 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--color-text);
+}
+
+h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+h2 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+h4 {
+  font-size: 1.25rem;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
-
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
 
 /* ============================================
    Selection
@@ -148,22 +167,19 @@ a, button, input, select, textarea,
 
 .card {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
 }
 
 .card-hover {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
+  transition: border-color 0.2s ease;
 }
 
 .card-hover:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: var(--color-text-muted);
+  border-color: var(--color-text);
 }
 
 /* ============================================
@@ -230,6 +246,73 @@ a, button, input, select, textarea,
 }
 
 /* ============================================
+   Pill / Outlined Utilities
+   ============================================ */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--color-text);
+  border-radius: 999px;
+  padding: 0.1em 0.5em;
+}
+
+.pill-accent {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ============================================
+   Button Utilities – Editorial / Neo-Grotesk
+   ============================================ */
+
+.btn-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid var(--color-text);
+  border-radius: 999px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  color: var(--color-text);
+  transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+  cursor: pointer;
+}
+
+.btn-outlined:hover {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.btn-filled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid var(--color-accent);
+  border-radius: 999px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--color-accent);
+  color: #fff;
+  transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+  cursor: pointer;
+}
+
+.btn-filled:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+/* ============================================
    Animations
    ============================================ */
 
@@ -258,4 +341,13 @@ a, button, input, select, textarea,
 
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
 }

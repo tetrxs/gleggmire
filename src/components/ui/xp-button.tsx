@@ -13,14 +13,16 @@ interface XpButtonProps
 
 const variantStyles: Record<XpButtonVariant, string> = {
   default: [
-    "bg-[#F3F4F6] text-[var(--color-text)] hover:bg-[#E5E7EB]",
-    "dark:bg-[#27272A] dark:hover:bg-[#3F3F46]",
+    "border-2 border-[var(--color-text)] bg-transparent text-[var(--color-text)]",
+    "hover:bg-[var(--color-text)] hover:text-[var(--color-bg)]",
   ].join(" "),
   primary: [
-    "bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)]",
+    "border-2 border-[var(--color-accent)] bg-[var(--color-accent)] text-white",
+    "hover:bg-[var(--color-accent-hover)] hover:border-[var(--color-accent-hover)]",
   ].join(" "),
   danger: [
-    "bg-[var(--color-error)] text-white hover:bg-[#DC2626]",
+    "border-2 border-[var(--color-error)] bg-[var(--color-error)] text-white",
+    "hover:bg-[#DC2626] hover:border-[#DC2626]",
   ].join(" "),
 };
 
@@ -38,9 +40,9 @@ export function XpButton({
       disabled={disabled}
       className={[
         "inline-flex items-center justify-center gap-2",
-        "rounded-lg px-4 py-2",
-        "text-sm font-medium",
-        "transition-all duration-150 ease-in-out",
+        "rounded-full px-6 py-2.5",
+        "text-sm font-semibold uppercase tracking-wider",
+        "transition-all duration-200 ease-[cubic-bezier(0.215,0.61,0.355,1)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2",
         "disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
         variantStyles[variant],
