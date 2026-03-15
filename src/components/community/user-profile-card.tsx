@@ -19,43 +19,34 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
   });
 
   return (
-    <XpWindow title={`👤 ${user.username} — profil.exe`}>
-      <div className="flex flex-col gap-4">
+    <XpWindow title={`${user.username} — Profil`}>
+      <div className="flex flex-col gap-5">
         {/* Header: Avatar + Name + Badges */}
         <div className="flex items-center gap-4">
-          {/* Large avatar */}
           <div
-            className="xp-raised flex h-16 w-16 shrink-0 items-center justify-center text-[20px] font-bold"
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
             style={{
               backgroundColor: user.is_admin
-                ? "var(--glegg-orange)"
+                ? "#E8593C"
                 : user.is_moderator
-                  ? "var(--xp-gruen)"
-                  : "var(--xp-blau-start)",
-              color: "#FFFFFF",
-              fontFamily: "Tahoma, Verdana, sans-serif",
+                  ? "#16a34a"
+                  : "#2563eb",
             }}
           >
             {initials}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-1">
-              <span className="xp-text-heading">{user.username}</span>
-              {user.isTrollDesMonats && <span title="Troll des Monats">👑</span>}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-lg font-bold text-[var(--color-text)]">{user.username}</span>
+              {user.isTrollDesMonats && <span title="Troll des Monats">&#x1F451;</span>}
               {user.is_admin && (
-                <span
-                  className="xp-raised px-1 text-[9px] font-bold"
-                  style={{ backgroundColor: "var(--glegg-orange)", color: "#FFFFFF" }}
-                >
+                <span className="rounded-full bg-[#E8593C] px-2 py-0.5 text-[10px] font-bold text-white">
                   ADMIN
                 </span>
               )}
               {user.is_moderator && !user.is_admin && (
-                <span
-                  className="xp-raised px-1 text-[9px] font-bold"
-                  style={{ backgroundColor: "var(--xp-gruen)", color: "#FFFFFF" }}
-                >
+                <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
                   MOD
                 </span>
               )}
@@ -65,10 +56,7 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
                 <BadgeDisplay key={b} badgeType={b} size="sm" earned />
               ))}
               {user.badges.length > 6 && (
-                <span
-                  className="xp-text-label"
-                  style={{ color: "var(--xp-border-dark)" }}
-                >
+                <span className="text-xs text-[var(--color-muted)]">
                   +{user.badges.length - 6}
                 </span>
               )}
@@ -77,54 +65,35 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
         </div>
 
         {/* Glegg-Score */}
-        <div
-          className="xp-inset p-2"
-          style={{ backgroundColor: "#F1EFE2" }}
-        >
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 dark:border-zinc-700">
           <GleggScoreDisplay score={user.glegg_score} />
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="xp-inset p-2" style={{ backgroundColor: "#FFFFFF" }}>
-            <span className="xp-text-label block" style={{ color: "var(--xp-border-dark)" }}>
-              Eintraege erstellt
-            </span>
-            <span className="xp-text-body font-bold">{user.stats.termsCreated}</span>
-          </div>
-          <div className="xp-inset p-2" style={{ backgroundColor: "#FFFFFF" }}>
-            <span className="xp-text-label block" style={{ color: "var(--xp-border-dark)" }}>
-              Clips verlinkt
-            </span>
-            <span className="xp-text-body font-bold">{user.stats.clipsLinked}</span>
-          </div>
-          <div className="xp-inset p-2" style={{ backgroundColor: "#FFFFFF" }}>
-            <span className="xp-text-label block" style={{ color: "var(--xp-border-dark)" }}>
-              Kommentare
-            </span>
-            <span className="xp-text-body font-bold">{user.stats.comments}</span>
-          </div>
-          <div className="xp-inset p-2" style={{ backgroundColor: "#FFFFFF" }}>
-            <span className="xp-text-label block" style={{ color: "var(--xp-border-dark)" }}>
-              Ratio-Wins
-            </span>
-            <span className="xp-text-body font-bold">{user.stats.ratioWins}</span>
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Eintraege erstellt", value: user.stats.termsCreated },
+            { label: "Clips verlinkt", value: user.stats.clipsLinked },
+            { label: "Kommentare", value: user.stats.comments },
+            { label: "Ratio-Wins", value: user.stats.ratioWins },
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 dark:border-zinc-700">
+              <span className="block text-xs text-[var(--color-muted)]">{stat.label}</span>
+              <span className="text-lg font-bold text-[var(--color-text)]">{stat.value}</span>
+            </div>
+          ))}
         </div>
 
         {/* Member since */}
-        <div
-          className="xp-inset px-2 py-1"
-          style={{ backgroundColor: "#F1EFE2" }}
-        >
-          <span className="xp-text-label">
-            Mitglied seit: <strong>{memberSince}</strong>
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 dark:border-zinc-700">
+          <span className="text-xs text-[var(--color-muted)]">
+            Mitglied seit: <strong className="text-[var(--color-text)]">{memberSince}</strong>
           </span>
         </div>
 
         {/* Badge showcase */}
         <div>
-          <span className="xp-text-label mb-2 block font-bold">
+          <span className="mb-2 block text-sm font-bold text-[var(--color-text)]">
             Badge-Sammlung ({user.badges.length}/{BADGES.length})
           </span>
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-6">

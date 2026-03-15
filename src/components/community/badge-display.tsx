@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BADGES, getBadgeByType } from "@/lib/constants/badges";
+import { getBadgeByType } from "@/lib/constants/badges";
 
 interface BadgeDisplayProps {
   badgeType: string;
@@ -34,20 +34,19 @@ export function BadgeDisplay({
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div
-        className={`${s.container} xp-raised flex items-center justify-center ${
+        className={`${s.container} flex items-center justify-center rounded-lg border border-[var(--color-border)] dark:border-zinc-700 ${
           earned ? "" : "grayscale opacity-40"
         }`}
-        style={{ backgroundColor: earned ? "#F1EFE2" : "var(--xp-silber-luna)" }}
+        style={{ backgroundColor: earned ? "var(--color-surface)" : "var(--color-bg)" }}
         title={badge.name}
       >
         <span>{badge.emoji}</span>
       </div>
       {size !== "sm" && (
         <span
-          className={`${s.label} mt-[2px] text-center leading-tight ${
+          className={`${s.label} mt-[2px] text-center leading-tight text-[var(--color-text)] ${
             earned ? "" : "opacity-40"
           }`}
-          style={{ fontFamily: "Tahoma, Verdana, sans-serif" }}
         >
           {badge.name}
         </span>
@@ -55,31 +54,18 @@ export function BadgeDisplay({
 
       {/* Tooltip */}
       {showTooltip && (
-        <div
-          className="xp-raised absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 p-2"
-          style={{
-            backgroundColor: "#FFFFE1",
-            fontFamily: "Tahoma, Verdana, sans-serif",
-            fontSize: "11px",
-          }}
-        >
-          <div className="font-bold">
+        <div className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs shadow-lg dark:border-zinc-700">
+          <div className="font-bold text-[var(--color-text)]">
             {badge.emoji} {badge.name}
           </div>
-          <div className="mt-1" style={{ color: "var(--xp-border-darker)" }}>
+          <div className="mt-1 text-[var(--color-muted)]">
             {badge.description}
           </div>
-          <div
-            className="mt-1 italic"
-            style={{ color: "var(--xp-border-dark)", fontSize: "10px" }}
-          >
+          <div className="mt-1 italic text-[var(--color-muted)] text-[10px]">
             {badge.condition}
           </div>
           {!earned && (
-            <div
-              className="mt-1 font-bold"
-              style={{ color: "var(--xp-fehler-rot)", fontSize: "10px" }}
-            >
+            <div className="mt-1 font-bold text-red-500 text-[10px]">
               Noch nicht freigeschaltet
             </div>
           )}
