@@ -1,6 +1,6 @@
 # Entwicklungsprotokoll — gleggmire.net
 
-## Status: Phase 1 abgeschlossen — Alle Features implementiert (Frontend mit Mock-Daten)
+## Status: Phase 1 + Redesign abgeschlossen — Bereit für Supabase-Integration
 
 ### Commits
 1. `8cd9ff4` — Initiales Setup: Next.js 16, Tailwind v4, XP Design-System, Layout, DB-Schema
@@ -8,6 +8,11 @@
 3. `3601113` — Clip-Archiv, Kommentar-System, Leaderboard & Community-Features
 4. `041d1c5` — Troll-Features & Easter Eggs
 5. `bdde653` — Discord OAuth, API Routes & Admin-Panel
+6. `5ebd517` — DEV_LOG aktualisiert: Phase 1 abgeschlossen
+7. `a6ab233` — Supabase DB live: Schema, RLS-Policies, ~79 Seed-Begriffe
+8. `a32baff` — Komplettes Redesign: Clean/Modern mit Sketch-Akzenten, Dark/Light Mode
+9. `d96cf58` — Redesign: Badge-Display & User-Profile-Card
+10. `8b415d7` — Redesign: Admin, Troll, Community & statische Seiten
 
 ### Implementierte Features (22 Routen)
 
@@ -52,12 +57,16 @@
 - [x] Moderations-Log (unveränderlich)
 - [x] Breaking-News-Formular (doppelte Bestätigung)
 
-#### Design & Layout
-- [x] Windows XP Design-System (XpWindow, XpButton, XpDialog)
-- [x] Header (XP-Toolbar), Footer (3-Spalten), Mobile Navigation
+#### Design & Layout (Redesign v2)
+- [x] Clean/Modern Design inspiriert von Notion/Linear
+- [x] Dark/Light Mode mit CSS Custom Properties
+- [x] Sketch-Akzente: handgezeichnete Pfeile, Unterstreichungen, Kreise, Divider
+- [x] Fonts: Space Grotesk (Headings) + Inter (Body)
+- [x] Farben: Off-White #FAFAF9, Off-Dark #0F0F0F, Accent #E8593C
+- [x] Theme-Toggle mit Sun/Moon-Icons
+- [x] Sticky Header mit Backdrop-Blur
+- [x] Responsive Mobile Navigation
 - [x] Impressum, Datenschutz, About
-- [x] XP-Farbpalette, 3D-Borders, Luna-Theme
-- [x] Kein Dark Mode (by design)
 
 #### Datenbank
 - [x] Vollständiges Schema (22 Tabellen, Migration SQL)
@@ -65,9 +74,9 @@
 - [x] System-User für Starter-Daten
 
 ### Nächste Phase (für Produktions-Launch)
-- [ ] Supabase-Projekt erstellen (EU-Region!) und Credentials eintragen
+- [x] Supabase-Projekt erstellt (EU-Region Frankfurt)
 - [ ] Mock-Daten durch echte Supabase-Queries ersetzen
-- [ ] Discord OAuth App erstellen und konfigurieren
+- [x] Discord OAuth App erstellt und konfiguriert
 - [ ] Upstash Redis einrichten (Rate Limiting)
 - [ ] Bild-Upload zu Supabase Storage
 - [ ] react-player für echte Video-Embeds
