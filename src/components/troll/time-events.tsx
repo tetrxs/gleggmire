@@ -12,10 +12,7 @@ export function TimeEvents() {
       const hours = now.getHours();
       const minutes = now.getMinutes();
 
-      // 4:20 check (AM or PM)
       setShow420((hours === 4 || hours === 16) && minutes >= 20 && minutes < 25);
-
-      // Night mode: 00:00 - 06:00
       setIsNight(hours >= 0 && hours < 6);
     }
 
@@ -32,19 +29,10 @@ export function TimeEvents() {
           className="fixed bottom-16 left-1/2 z-50 -translate-x-1/2 md:bottom-4"
           style={{ animation: "time-420-pulse 1.5s ease-in-out infinite" }}
         >
-          <div
-            className="xp-raised flex items-center gap-2 px-4 py-2 text-[13px] font-bold whitespace-nowrap"
-            style={{
-              backgroundColor: "var(--xp-gruen)",
-              color: "#FFFFFF",
-              fontFamily: "Tahoma, Verdana, sans-serif",
-            }}
-          >
-            <span className="text-[18px]">&#x1F33F;</span>
-            <span>
-              Es ist 4:20 &mdash; Zeit f&uuml;r einen Lungen-Torpedo
-            </span>
-            <span className="text-[18px]">&#x1F33F;</span>
+          <div className="flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg whitespace-nowrap">
+            <span className="text-lg">&#x1F33F;</span>
+            <span>Es ist 4:20 — Zeit fuer einen Lungen-Torpedo</span>
+            <span className="text-lg">&#x1F33F;</span>
           </div>
           <style>{`
             @keyframes time-420-pulse {

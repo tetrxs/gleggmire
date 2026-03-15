@@ -15,7 +15,6 @@ export function BreakingNews({ message, isActive }: BreakingNewsProps) {
     setVisible(isActive);
   }, [isActive]);
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       if (comebackRef.current) clearTimeout(comebackRef.current);
@@ -24,7 +23,6 @@ export function BreakingNews({ message, isActive }: BreakingNewsProps) {
 
   const handleClose = useCallback(() => {
     setVisible(false);
-    // Troll: it comes back after 5 seconds
     comebackRef.current = setTimeout(() => {
       if (isActive) setVisible(true);
     }, 5000);
@@ -34,62 +32,47 @@ export function BreakingNews({ message, isActive }: BreakingNewsProps) {
 
   return (
     <div
-      className="xp-raised-strong relative z-50 flex w-full items-center overflow-hidden"
+      className="relative z-50 flex w-full items-center overflow-hidden rounded-lg shadow-sm"
       style={{
-        backgroundColor: "var(--xp-fehler-rot)",
+        backgroundColor: "#ef4444",
         animation: "breaking-pulse 1.5s ease-in-out infinite",
-        minHeight: "32px",
+        minHeight: "36px",
       }}
     >
       {/* Label */}
-      <div
-        className="xp-raised relative z-10 shrink-0 px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
-        style={{
-          backgroundColor: "#FFFFFF",
-          color: "var(--xp-fehler-rot)",
-          fontFamily: "Tahoma, Verdana, sans-serif",
-        }}
-      >
+      <div className="relative z-10 shrink-0 rounded-md bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-600 ml-1">
         EILMELDUNG
       </div>
 
       {/* Marquee */}
       <div className="flex-1 overflow-hidden">
         <div
-          className="flex whitespace-nowrap py-1 text-[12px] font-bold text-white"
-          style={{
-            fontFamily: "Tahoma, Verdana, sans-serif",
-            animation: "breaking-scroll 15s linear infinite",
-          }}
+          className="flex whitespace-nowrap py-1 text-sm font-bold text-white"
+          style={{ animation: "breaking-scroll 15s linear infinite" }}
         >
-          <span className="px-8">&#x26A0;&#xFE0F; {message}</span>
-          <span className="px-8">&#x26A0;&#xFE0F; {message}</span>
-          <span className="px-8">&#x26A0;&#xFE0F; {message}</span>
+          <span className="px-8">{message}</span>
+          <span className="px-8">{message}</span>
+          <span className="px-8">{message}</span>
         </div>
       </div>
 
       {/* Close button (troll: comes back) */}
       <button
         onClick={handleClose}
-        className="xp-titlebar-btn xp-titlebar-btn-close relative z-10 mr-1 shrink-0"
+        className="relative z-10 mr-2 shrink-0 rounded-md p-1 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
         aria-label="Schliessen"
         type="button"
         title="Schliessen (vielleicht)"
       >
-        <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-          <path
-            d="M1 1L8 8M8 1L1 8"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M4 4L12 12M12 4L4 12" />
         </svg>
       </button>
 
       <style>{`
         @keyframes breaking-pulse {
-          0%, 100% { background-color: var(--xp-fehler-rot); }
-          50% { background-color: #FF2222; }
+          0%, 100% { background-color: #ef4444; }
+          50% { background-color: #dc2626; }
         }
 
         @keyframes breaking-scroll {

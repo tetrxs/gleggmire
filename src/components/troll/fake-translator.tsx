@@ -68,7 +68,6 @@ const INTERJECTIONS = [
 function translateText(input: string): string {
   if (!input.trim()) return "";
 
-  // Split into words while preserving whitespace and punctuation
   const tokens = input.split(/(\s+|[.,!?;:]+)/);
   let insertionCounter = 0;
 
@@ -82,7 +81,6 @@ function translateText(input: string): string {
     return token;
   });
 
-  // Add random interjections after every ~5-8 words
   const result: string[] = [];
   let wordCount = 0;
   const nextInsert = 5 + Math.floor(Math.random() * 4);
@@ -92,17 +90,14 @@ function translateText(input: string): string {
     if (token.trim() && !/^[.,!?;:]+$/.test(token)) {
       wordCount++;
       if (wordCount % nextInsert === 0) {
-        const interjection =
-          INTERJECTIONS[Math.floor(Math.random() * INTERJECTIONS.length)];
+        const interjection = INTERJECTIONS[Math.floor(Math.random() * INTERJECTIONS.length)];
         result.push(`, ${interjection},`);
       }
     }
   }
 
-  // Always end with a random interjection if text is long enough
   if (wordCount > 3) {
-    const ending =
-      INTERJECTIONS[Math.floor(Math.random() * INTERJECTIONS.length)];
+    const ending = INTERJECTIONS[Math.floor(Math.random() * INTERJECTIONS.length)];
     result.push(` (${ending})`);
   }
 
@@ -124,42 +119,13 @@ export function FakeTranslator() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-        >
-          <rect
-            x="2"
-            y="2"
-            width="20"
-            height="20"
-            rx="3"
-            fill="var(--xp-blau-start)"
-          />
-          <text
-            x="12"
-            y="16"
-            textAnchor="middle"
-            fill="white"
-            fontSize="10"
-            fontWeight="bold"
-            fontFamily="Tahoma, sans-serif"
-          >
-            GL
-          </text>
-        </svg>
-        <p className="xp-text-body">
-          Uebersetze normales Deutsch in authentisches Gleggmire-Deutsch.
-        </p>
-      </div>
+      <p className="text-sm text-[var(--color-text)]">
+        Uebersetze normales Deutsch in authentisches Gleggmire-Deutsch.
+      </p>
 
       {/* Input */}
       <div>
-        <label className="xp-text-label mb-1 block font-bold">
+        <label className="mb-1 block text-sm font-semibold text-[var(--color-text)]">
           Deutsch (Eingabe):
         </label>
         <textarea
@@ -167,25 +133,19 @@ export function FakeTranslator() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Gib deutschen Text ein..."
           rows={5}
-          className="xp-inset w-full resize-none p-2 text-[12px]"
-          style={{
-            backgroundColor: "#FFFFFF",
-            fontFamily: "Tahoma, Verdana, sans-serif",
-          }}
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E8593C] dark:border-zinc-700"
         />
       </div>
 
       {/* Buttons */}
       <div className="flex gap-2">
-        <XpButton variant="primary" onClick={handleTranslate}>
-          Uebersetzen
-        </XpButton>
+        <XpButton variant="primary" onClick={handleTranslate}>Uebersetzen</XpButton>
         <XpButton onClick={handleClear}>Leeren</XpButton>
       </div>
 
       {/* Output */}
       <div>
-        <label className="xp-text-label mb-1 block font-bold">
+        <label className="mb-1 block text-sm font-semibold text-[var(--color-text)]">
           Gleggmire-Deutsch (Ausgabe):
         </label>
         <textarea
@@ -193,20 +153,12 @@ export function FakeTranslator() {
           readOnly
           placeholder="Hier erscheint die Uebersetzung..."
           rows={5}
-          className="xp-inset w-full resize-none p-2 text-[12px]"
-          style={{
-            backgroundColor: "#F5F5DC",
-            fontFamily: "Tahoma, Verdana, sans-serif",
-          }}
+          className="w-full rounded-lg border border-[var(--color-border)] bg-amber-50 p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-none dark:bg-amber-950/20 dark:border-zinc-700"
         />
       </div>
 
-      <p
-        className="text-center text-[9px] italic"
-        style={{ color: "var(--xp-border-dark)" }}
-      >
-        Hinweis: Dieser Uebersetzer wurde von der Gleggmire-Akademie fuer
-        Sprachwissenschaften zertifiziert.
+      <p className="text-center text-[9px] italic text-[var(--color-muted)]">
+        Hinweis: Dieser Uebersetzer wurde von der Gleggmire-Akademie fuer Sprachwissenschaften zertifiziert.
       </p>
     </div>
   );

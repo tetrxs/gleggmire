@@ -11,14 +11,10 @@ import { BreakingNewsForm } from "./breaking-news-form";
 type AdminView = "dashboard" | "queue" | "users" | "log" | "news";
 
 const STATS = [
-  {
-    label: "Ausstehende Einreichungen",
-    value: 7,
-    color: "var(--glegg-orange)",
-  },
-  { label: "Aktive Disputes", value: 2, color: "var(--xp-fehler-rot)" },
-  { label: "Nutzer gesamt / gebannt", value: "10 / 0", color: "var(--xp-blau-start)" },
-  { label: "Mod-Aktionen heute", value: 3, color: "var(--xp-gruen)" },
+  { label: "Ausstehende Einreichungen", value: 7, color: "#E8593C" },
+  { label: "Aktive Disputes", value: 2, color: "#ef4444" },
+  { label: "Nutzer gesamt / gebannt", value: "10 / 0", color: "#2563eb" },
+  { label: "Mod-Aktionen heute", value: 3, color: "#16a34a" },
 ];
 
 export function AdminDashboard() {
@@ -27,10 +23,8 @@ export function AdminDashboard() {
   if (view === "queue") {
     return (
       <div>
-        <div className="mb-3">
-          <XpButton onClick={() => setView("dashboard")}>
-            {"<"} Zurueck zum Dashboard
-          </XpButton>
+        <div className="mb-4">
+          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
         </div>
         <ModerationQueue />
       </div>
@@ -40,10 +34,8 @@ export function AdminDashboard() {
   if (view === "users") {
     return (
       <div>
-        <div className="mb-3">
-          <XpButton onClick={() => setView("dashboard")}>
-            {"<"} Zurueck zum Dashboard
-          </XpButton>
+        <div className="mb-4">
+          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
         </div>
         <UserManagement />
       </div>
@@ -53,10 +45,8 @@ export function AdminDashboard() {
   if (view === "log") {
     return (
       <div>
-        <div className="mb-3">
-          <XpButton onClick={() => setView("dashboard")}>
-            {"<"} Zurueck zum Dashboard
-          </XpButton>
+        <div className="mb-4">
+          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
         </div>
         <ModerationLog />
       </div>
@@ -66,10 +56,8 @@ export function AdminDashboard() {
   if (view === "news") {
     return (
       <div>
-        <div className="mb-3">
-          <XpButton onClick={() => setView("dashboard")}>
-            {"<"} Zurueck zum Dashboard
-          </XpButton>
+        <div className="mb-4">
+          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
         </div>
         <BreakingNewsForm />
       </div>
@@ -77,25 +65,16 @@ export function AdminDashboard() {
   }
 
   return (
-    <XpWindow title="🔧 Admin-Panel — admin.exe">
+    <XpWindow title="Admin-Panel">
       {/* Stats Cards */}
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {STATS.map((stat) => (
           <div
             key={stat.label}
-            className="xp-raised p-3"
-            style={{ backgroundColor: "var(--xp-silber-luna)" }}
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4 dark:border-zinc-700"
           >
-            <div
-              className="xp-text-label mb-1"
-              style={{ color: "var(--xp-border-dark)" }}
-            >
-              {stat.label}
-            </div>
-            <div
-              className="text-xl font-bold"
-              style={{ color: stat.color }}
-            >
+            <div className="text-xs text-[var(--color-muted)] mb-1">{stat.label}</div>
+            <div className="text-2xl font-bold" style={{ color: stat.color }}>
               {stat.value}
             </div>
           </div>
@@ -103,11 +82,8 @@ export function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div
-        className="xp-inset p-3"
-        style={{ backgroundColor: "#F1EFE2" }}
-      >
-        <div className="xp-text-heading mb-3">Schnellaktionen</div>
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4 dark:border-zinc-700">
+        <div className="text-sm font-semibold text-[var(--color-text)] mb-3">Schnellaktionen</div>
         <div className="flex flex-wrap gap-2">
           <XpButton variant="primary" onClick={() => setView("queue")}>
             Moderations-Queue oeffnen
@@ -125,21 +101,12 @@ export function AdminDashboard() {
       </div>
 
       {/* System Info */}
-      <div className="mt-4">
-        <div
-          className="xp-inset p-2"
-          style={{
-            backgroundColor: "#FFFFFF",
-            fontFamily: "Consolas, monospace",
-            fontSize: "10px",
-            color: "var(--xp-border-dark)",
-          }}
-        >
-          <div>C:\gleggmire\admin&gt; status.bat</div>
+      <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 dark:border-zinc-700">
+        <div className="font-mono text-xs text-[var(--color-muted)] space-y-0.5">
           <div>System: gleggmire.net v1.0.0</div>
           <div>Admin-Modus: AKTIV</div>
           <div>Letzte Pruefung: {new Date().toLocaleString("de-DE")}</div>
-          <div className="mt-1 text-[var(--xp-gruen)]">
+          <div className="mt-1 text-emerald-600 dark:text-emerald-400">
             Alle Systeme nominal.
           </div>
         </div>

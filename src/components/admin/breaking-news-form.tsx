@@ -22,23 +22,20 @@ export function BreakingNewsForm() {
 
   return (
     <>
-      <XpWindow title="📢 Breaking News senden — alert.exe">
+      <XpWindow title="Breaking News senden">
         {/* Message Input */}
         <div className="mb-3">
           <label
-            className="xp-text-label mb-1 block"
-            style={{ color: "var(--xp-border-dark)" }}
+            className="mb-1 block text-sm"
+            style={{ color: "var(--color-text-muted)" }}
           >
             Nachricht:
           </label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="xp-inset w-full p-2"
+            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm"
             style={{
-              backgroundColor: "#FFFFFF",
-              fontSize: "11px",
-              fontFamily: "Tahoma, Verdana, sans-serif",
               minHeight: "80px",
               resize: "vertical",
             }}
@@ -46,12 +43,12 @@ export function BreakingNewsForm() {
             maxLength={280}
           />
           <div
-            className="xp-text-label mt-1 text-right"
+            className="mt-1 text-right text-xs"
             style={{
               color:
                 message.length > 250
-                  ? "var(--xp-fehler-rot)"
-                  : "var(--xp-border-dark)",
+                  ? "var(--color-error)"
+                  : "var(--color-text-muted)",
             }}
           >
             {message.length}/280
@@ -62,27 +59,25 @@ export function BreakingNewsForm() {
         {message.trim() && (
           <div className="mb-4">
             <div
-              className="xp-text-label mb-1"
-              style={{ color: "var(--xp-border-dark)" }}
+              className="mb-1 text-xs"
+              style={{ color: "var(--color-text-muted)" }}
             >
               Vorschau:
             </div>
             <div
-              className="xp-raised p-3"
+              className="rounded-xl p-3"
               style={{
                 background:
-                  "linear-gradient(90deg, #CC0000 0%, #990000 50%, #CC0000 100%)",
+                  "linear-gradient(90deg, #DC2626 0%, #B91C1C 50%, #DC2626 100%)",
                 color: "#FFFFFF",
                 fontWeight: 700,
-                fontSize: "12px",
-                textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
-                borderColor: "#660000",
+                fontSize: "13px",
               }}
             >
               <div className="mb-1 flex items-center gap-2">
                 <span
                   style={{
-                    animation: "xp-scale-bounce 1s infinite",
+                    animation: "breaking-label-pulse 1s infinite",
                     display: "inline-block",
                   }}
                 >
@@ -101,6 +96,12 @@ export function BreakingNewsForm() {
               </div>
               <div>{message}</div>
             </div>
+            <style>{`
+              @keyframes breaking-label-pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+              }
+            `}</style>
           </div>
         )}
 
@@ -118,18 +119,17 @@ export function BreakingNewsForm() {
         {/* Previous Breaking News */}
         <div className="mt-4">
           <div
-            className="xp-text-label mb-2"
-            style={{ color: "var(--xp-border-dark)" }}
+            className="mb-2 text-xs"
+            style={{ color: "var(--color-text-muted)" }}
           >
             Letzte Breaking News:
           </div>
           <div
-            className="xp-inset p-2"
-            style={{ backgroundColor: "#FFFFFF", fontSize: "11px" }}
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm"
           >
-            <div className="flex items-center justify-between border-b border-[var(--xp-silber-luna)] py-1">
+            <div className="flex items-center justify-between border-b border-[var(--color-border)] py-1">
               <span>Gleggmire ist live! Neuer Glossar-Drop incoming.</span>
-              <span style={{ color: "var(--xp-border-dark)" }}>
+              <span style={{ color: "var(--color-text-muted)" }}>
                 14.03.2026 22:45
               </span>
             </div>
@@ -137,7 +137,7 @@ export function BreakingNewsForm() {
               <span>
                 Server-Wartung am Wochenende. Downtime: ca. 2 Stunden.
               </span>
-              <span style={{ color: "var(--xp-border-dark)" }}>
+              <span style={{ color: "var(--color-text-muted)" }}>
                 10.03.2026 15:00
               </span>
             </div>
@@ -148,81 +148,59 @@ export function BreakingNewsForm() {
       {/* Step 1: "Bist du sicher?" */}
       {dialog.type === "confirm-first" && (
         <div
-          className="xp-overlay"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
           onClick={() => setDialog({ type: "none" })}
         >
           <div
-            className="xp-window-outer w-[420px]"
+            className="card w-[420px] max-w-[90vw] p-6 shadow-lg animate-scale-in"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
           >
-            <div className="xp-titlebar">
-              <span>Breaking News senden</span>
-              <button
-                onClick={() => setDialog({ type: "none" })}
-                className="xp-titlebar-btn xp-titlebar-btn-close"
-                type="button"
-              >
-                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                  <path
-                    d="M1 1L8 8M8 1L1 8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
-              </button>
-            </div>
-            <div className="xp-window p-5">
-              <div className="flex items-start gap-4">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M16 2L30 28H2L16 2Z"
-                    fill="#FFD700"
-                    stroke="#B8860B"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x="16"
-                    y="24"
-                    textAnchor="middle"
-                    fill="#000000"
-                    fontSize="18"
-                    fontWeight="bold"
-                    fontFamily="Tahoma, sans-serif"
-                  >
-                    !
-                  </text>
-                </svg>
-                <p className="xp-text-body pt-1">
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-semibold mb-1" style={{ fontFamily: "var(--font-heading)" }}>
+                  Breaking News senden
+                </h4>
+                <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                   Bist du sicher? Diese Nachricht wird an{" "}
                   <strong>alle Nutzer</strong> gesendet und als Banner auf
                   der Seite angezeigt.
                 </p>
               </div>
-              <div className="mt-5 flex justify-end gap-2">
-                <XpButton
-                  variant="danger"
-                  onClick={() =>
-                    setDialog({
-                      type: "confirm-final",
-                      confirmText: "",
-                    })
-                  }
-                >
-                  Ja, weiter
-                </XpButton>
-                <XpButton onClick={() => setDialog({ type: "none" })}>
-                  Abbrechen
-                </XpButton>
-              </div>
+              <button
+                onClick={() => setDialog({ type: "none" })}
+                className="shrink-0 rounded-lg p-1 hover:bg-[var(--color-border)] transition-colors"
+                aria-label="Schliessen"
+                type="button"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 4L12 12M12 4L4 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <XpButton onClick={() => setDialog({ type: "none" })}>
+                Abbrechen
+              </XpButton>
+              <XpButton
+                variant="danger"
+                onClick={() =>
+                  setDialog({
+                    type: "confirm-final",
+                    confirmText: "",
+                  })
+                }
+              >
+                Ja, weiter
+              </XpButton>
             </div>
           </div>
         </div>
@@ -231,92 +209,66 @@ export function BreakingNewsForm() {
       {/* Step 2: Type SENDEN to confirm */}
       {dialog.type === "confirm-final" && (
         <div
-          className="xp-overlay"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
           onClick={() => setDialog({ type: "none" })}
         >
           <div
-            className="xp-window-outer w-[420px]"
+            className="card w-[420px] max-w-[90vw] p-6 shadow-lg animate-scale-in"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
           >
-            <div
-              className="xp-titlebar"
-              style={{
-                background:
-                  "linear-gradient(180deg, #CC0000 0%, #990000 100%)",
-              }}
-            >
-              <span>ENDGUELTIGE BESTAETIGUNG</span>
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 dark:bg-red-950">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="15" y1="9" x2="9" y2="15" />
+                  <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-semibold mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+                  Endgueltige Bestaetigung
+                </h4>
+                <p className="text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>
+                  Tippe <strong>SENDEN</strong> ein, um die Breaking
+                  News zu bestaetigen:
+                </p>
+                <input
+                  type="text"
+                  value={dialog.confirmText}
+                  onChange={(e) =>
+                    setDialog({
+                      ...dialog,
+                      confirmText: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+                  placeholder="SENDEN"
+                />
+              </div>
               <button
                 onClick={() => setDialog({ type: "none" })}
-                className="xp-titlebar-btn xp-titlebar-btn-close"
+                className="shrink-0 rounded-lg p-1 hover:bg-[var(--color-border)] transition-colors"
+                aria-label="Schliessen"
                 type="button"
               >
-                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                  <path
-                    d="M1 1L8 8M8 1L1 8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 4L12 12M12 4L4 12" />
                 </svg>
               </button>
             </div>
-            <div className="xp-window p-5">
-              <div className="flex items-start gap-4">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <circle cx="16" cy="16" r="14" fill="#CC0000" />
-                  <circle cx="16" cy="16" r="12" fill="#FF3333" />
-                  <path
-                    d="M10 10L22 22M22 10L10 22"
-                    stroke="white"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="pt-1">
-                  <p className="xp-text-body mb-2">
-                    Tippe <strong>SENDEN</strong> ein, um die Breaking
-                    News zu bestaetigen:
-                  </p>
-                  <input
-                    type="text"
-                    value={dialog.confirmText}
-                    onChange={(e) =>
-                      setDialog({
-                        ...dialog,
-                        confirmText: e.target.value,
-                      })
-                    }
-                    className="xp-inset w-full px-2 py-1"
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      fontSize: "11px",
-                      fontFamily: "Tahoma, Verdana, sans-serif",
-                    }}
-                    placeholder="SENDEN"
-                  />
-                </div>
-              </div>
-              <div className="mt-5 flex justify-end gap-2">
-                <XpButton
-                  variant="danger"
-                  disabled={dialog.confirmText !== "SENDEN"}
-                  onClick={handleSend}
-                >
-                  BREAKING NEWS SENDEN
-                </XpButton>
-                <XpButton onClick={() => setDialog({ type: "none" })}>
-                  Abbrechen
-                </XpButton>
-              </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <XpButton onClick={() => setDialog({ type: "none" })}>
+                Abbrechen
+              </XpButton>
+              <XpButton
+                variant="danger"
+                disabled={dialog.confirmText !== "SENDEN"}
+                onClick={handleSend}
+              >
+                BREAKING NEWS SENDEN
+              </XpButton>
             </div>
           </div>
         </div>
@@ -325,64 +277,46 @@ export function BreakingNewsForm() {
       {/* Success Dialog */}
       {dialog.type === "sent" && (
         <div
-          className="xp-overlay"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
           onClick={() => setDialog({ type: "none" })}
         >
           <div
-            className="xp-window-outer w-[360px]"
+            className="card w-[360px] max-w-[90vw] p-6 shadow-lg animate-scale-in"
             onClick={(e) => e.stopPropagation()}
             role="alertdialog"
             aria-modal="true"
           >
-            <div className="xp-titlebar">
-              <span>Erfolgreich gesendet</span>
-              <button
-                onClick={() => setDialog({ type: "none" })}
-                className="xp-titlebar-btn xp-titlebar-btn-close"
-                type="button"
-              >
-                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                  <path
-                    d="M1 1L8 8M8 1L1 8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-              </button>
-            </div>
-            <div className="xp-window p-5">
-              <div className="flex items-start gap-4">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <circle cx="16" cy="16" r="14" fill="#1F4ECC" />
-                  <circle cx="16" cy="16" r="12" fill="#3A92D8" />
-                  <text
-                    x="16"
-                    y="22"
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="18"
-                    fontWeight="bold"
-                    fontFamily="serif"
-                  >
-                    i
-                  </text>
-                </svg>
-                <p className="xp-text-body pt-1">
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-semibold mb-1" style={{ fontFamily: "var(--font-heading)" }}>
+                  Erfolgreich gesendet
+                </h4>
+                <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                   Breaking News wurde erfolgreich gesendet!
                 </p>
               </div>
-              <div className="mt-5 flex justify-center">
-                <XpButton onClick={() => setDialog({ type: "none" })}>
-                  OK
-                </XpButton>
-              </div>
+              <button
+                onClick={() => setDialog({ type: "none" })}
+                className="shrink-0 rounded-lg p-1 hover:bg-[var(--color-border)] transition-colors"
+                aria-label="Schliessen"
+                type="button"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 4L12 12M12 4L4 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="mt-6 flex justify-center">
+              <XpButton variant="primary" onClick={() => setDialog({ type: "none" })}>
+                OK
+              </XpButton>
             </div>
           </div>
         </div>

@@ -16,16 +16,16 @@ const KONAMI_SEQUENCE = [
 ];
 
 const CHAOS_COLORS = [
-  "var(--xp-blau-start)",
-  "var(--xp-gruen)",
-  "var(--glegg-orange)",
-  "var(--xp-fehler-rot)",
-  "var(--xp-blau-end)",
+  "#2563eb",
+  "#16a34a",
+  "#E8593C",
+  "#ef4444",
+  "#8b5cf6",
   "#FFD700",
   "#FF00FF",
   "#00FF00",
-  "var(--xp-desktop-bg)",
-  "var(--xp-silber-luna)",
+  "#06b6d4",
+  "#f59e0b",
 ];
 
 const CHAOS_FONTS = ["Comic Sans MS", "Impact", "Papyrus"];
@@ -42,7 +42,6 @@ export function KonamiCode() {
     if (activeRef.current) return;
     activeRef.current = true;
 
-    // Inject chaos stylesheet
     const style = document.createElement("style");
     style.id = CHAOS_STYLE_ID;
     style.textContent = `
@@ -69,8 +68,7 @@ export function KonamiCode() {
         transition: transform 0.3s ease !important;
       }
 
-      body.konami-chaos .xp-window,
-      body.konami-chaos .xp-window-outer,
+      body.konami-chaos .card,
       body.konami-chaos main > * {
         animation: konami-wobble 0.5s ease-in-out infinite alternate;
       }
@@ -83,7 +81,6 @@ export function KonamiCode() {
     document.head.appendChild(style);
     document.body.classList.add("konami-chaos");
 
-    // Randomly cycle fonts on text elements
     let fontTick = 0;
     intervalRef.current = setInterval(() => {
       const font = CHAOS_FONTS[fontTick % CHAOS_FONTS.length];
@@ -91,7 +88,6 @@ export function KonamiCode() {
       fontTick++;
     }, 400);
 
-    // Revert after 10 seconds
     timeoutRef.current = setTimeout(() => {
       document.body.classList.remove("konami-chaos");
       document.body.style.fontFamily = "";
@@ -106,7 +102,6 @@ export function KonamiCode() {
     function handleKeyDown(e: KeyboardEvent) {
       bufferRef.current.push(e.key.toLowerCase());
 
-      // Keep only the last N keys
       if (bufferRef.current.length > KONAMI_SEQUENCE.length) {
         bufferRef.current = bufferRef.current.slice(-KONAMI_SEQUENCE.length);
       }
@@ -119,10 +114,7 @@ export function KonamiCode() {
           ]?.toLowerCase()
       );
 
-      if (
-        match &&
-        bufferRef.current.length === KONAMI_SEQUENCE.length
-      ) {
+      if (match && bufferRef.current.length === KONAMI_SEQUENCE.length) {
         bufferRef.current = [];
         activateChaos();
       }

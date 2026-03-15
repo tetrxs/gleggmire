@@ -4,7 +4,6 @@ import { useState } from "react";
 import { XpWindow } from "@/components/ui/xp-window";
 import { XpButton } from "@/components/ui/xp-button";
 import { BadgeDisplay } from "@/components/community/badge-display";
-import { GleggScoreDisplay } from "@/components/community/glegg-score-display";
 import { UserProfileCard } from "@/components/community/user-profile-card";
 import type { MockUserWithStats } from "@/lib/mock-users";
 
@@ -22,33 +21,13 @@ function getRankStyle(rank: number): {
 } {
   switch (rank) {
     case 1:
-      return {
-        bg: "#FFF8DC",
-        border: "#DAA520",
-        text: "#B8860B",
-        label: "🥇",
-      };
+      return { bg: "bg-amber-50 dark:bg-amber-950/30", border: "border-amber-400", text: "text-amber-700 dark:text-amber-400", label: "1." };
     case 2:
-      return {
-        bg: "#F5F5F5",
-        border: "#C0C0C0",
-        text: "#808080",
-        label: "🥈",
-      };
+      return { bg: "bg-zinc-100 dark:bg-zinc-800/50", border: "border-zinc-400", text: "text-zinc-600 dark:text-zinc-300", label: "2." };
     case 3:
-      return {
-        bg: "#FFF0E6",
-        border: "#CD7F32",
-        text: "#8B4513",
-        label: "🥉",
-      };
+      return { bg: "bg-orange-50 dark:bg-orange-950/30", border: "border-orange-400", text: "text-orange-700 dark:text-orange-400", label: "3." };
     default:
-      return {
-        bg: "#FFFFFF",
-        border: "var(--xp-border-dark)",
-        text: "var(--xp-text)",
-        label: `${rank}.`,
-      };
+      return { bg: "bg-[var(--color-bg)]", border: "border-[var(--color-border)] dark:border-zinc-700", text: "text-[var(--color-text)]", label: `${rank}.` };
   }
 }
 
@@ -61,7 +40,6 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
       case "score":
         return b.glegg_score - a.glegg_score;
       case "troll":
-        // Troll des Monats first, then by score
         if (a.isTrollDesMonats && !b.isTrollDesMonats) return -1;
         if (!a.isTrollDesMonats && b.isTrollDesMonats) return 1;
         return b.glegg_score - a.glegg_score;
@@ -70,38 +48,37 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
     }
   });
 
+  const tabs: { mode: Tab; label: string }[] = [
+    { mode: "score", label: "Top Glegg-Score" },
+    { mode: "troll", label: "Troll des Monats" },
+    { mode: "badges", label: "Badge-Sammler" },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <XpWindow title="🏆 Glegg-Leaderboard — ranking.exe">
-        <div className="flex flex-col gap-3">
+      <XpWindow title="Glegg-Leaderboard">
+        <div className="flex flex-col gap-4">
           {/* Tab bar */}
-          <div className="flex flex-wrap gap-1">
-            <XpButton
-              onClick={() => setActiveTab("score")}
-              className={activeTab === "score" ? "xp-button-pressed" : ""}
-            >
-              Top Glegg-Score
-            </XpButton>
-            <XpButton
-              onClick={() => setActiveTab("troll")}
-              className={activeTab === "troll" ? "xp-button-pressed" : ""}
-            >
-              Troll des Monats
-            </XpButton>
-            <XpButton
-              onClick={() => setActiveTab("badges")}
-              className={activeTab === "badges" ? "xp-button-pressed" : ""}
-            >
-              Badge-Sammler
-            </XpButton>
+          <div className="inline-flex rounded-lg border border-[var(--color-border)] p-1 dark:border-zinc-700">
+            {tabs.map(({ mode, label }) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setActiveTab(mode)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  activeTab === mode
+                    ? "bg-[#E8593C] text-white"
+                    : "text-[var(--color-muted)] hover:text-[var(--color-text)]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           {/* Tab description */}
-          <div
-            className="xp-inset px-2 py-1"
-            style={{ backgroundColor: "#F1EFE2" }}
-          >
-            <span className="xp-text-label">
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 dark:border-zinc-700">
+            <span className="text-sm text-[var(--color-muted)]">
               {activeTab === "score" && "Rangliste nach Glegg-Score — Wer hat am meisten abgeliefert?"}
               {activeTab === "troll" && "Der aktuelle Troll des Monats und die Anwaerter auf den Thron."}
               {activeTab === "badges" && "Wer hat die meisten Badges gesammelt? Die fleissigsten Sammler."}
@@ -109,7 +86,7 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
           </div>
 
           {/* Leaderboard list */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1.5">
             {sortedUsers.map((user, index) => {
               const rank = index + 1;
               const style = getRankStyle(rank);
@@ -121,36 +98,22 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
                   key={user.id}
                   type="button"
                   onClick={() => setSelectedUser(user)}
-                  className={`flex w-full items-center gap-3 p-2 text-left transition-colors hover:brightness-95 ${
-                    isTop3 ? "xp-raised-strong" : "xp-raised"
-                  }`}
-                  style={{
-                    backgroundColor: style.bg,
-                    borderColor: isTop3 ? style.border : undefined,
-                    fontFamily: "Tahoma, Verdana, sans-serif",
-                  }}
+                  className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-[var(--color-surface)] cursor-pointer ${style.bg} ${style.border}`}
                 >
                   {/* Rank */}
-                  <div
-                    className="flex w-8 shrink-0 items-center justify-center text-center font-bold"
-                    style={{
-                      fontSize: isTop3 ? "18px" : "13px",
-                      color: style.text,
-                    }}
-                  >
+                  <div className={`flex w-8 shrink-0 items-center justify-center text-center font-bold ${style.text} ${isTop3 ? "text-lg" : "text-sm"}`}>
                     {style.label}
                   </div>
 
                   {/* Avatar */}
                   <div
-                    className="xp-raised flex h-8 w-8 shrink-0 items-center justify-center text-[11px] font-bold"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
                     style={{
                       backgroundColor: user.is_admin
-                        ? "var(--glegg-orange)"
+                        ? "#E8593C"
                         : user.is_moderator
-                          ? "var(--xp-gruen)"
-                          : "var(--xp-blau-start)",
-                      color: "#FFFFFF",
+                          ? "#16a34a"
+                          : "#2563eb",
                     }}
                   >
                     {initials}
@@ -158,38 +121,20 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
 
                   {/* Username + badges */}
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="flex flex-wrap items-center gap-1">
-                      <span
-                        className={`truncate ${isTop3 ? "font-bold" : ""}`}
-                        style={{
-                          fontSize: isTop3 ? "14px" : "12px",
-                          color: style.text,
-                        }}
-                      >
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className={`truncate text-[var(--color-text)] ${isTop3 ? "font-bold text-sm" : "text-sm"}`}>
                         {user.username}
                       </span>
                       {user.isTrollDesMonats && (
-                        <span title="Troll des Monats">👑</span>
+                        <span title="Troll des Monats">&#x1F451;</span>
                       )}
                       {user.is_admin && (
-                        <span
-                          className="xp-raised px-1 text-[8px] font-bold"
-                          style={{
-                            backgroundColor: "var(--glegg-orange)",
-                            color: "#FFFFFF",
-                          }}
-                        >
+                        <span className="rounded-full bg-[#E8593C] px-1.5 py-0.5 text-[8px] font-bold text-white">
                           ADMIN
                         </span>
                       )}
                       {user.is_moderator && !user.is_admin && (
-                        <span
-                          className="xp-raised px-1 text-[8px] font-bold"
-                          style={{
-                            backgroundColor: "var(--xp-gruen)",
-                            color: "#FFFFFF",
-                          }}
-                        >
+                        <span className="rounded-full bg-emerald-600 px-1.5 py-0.5 text-[8px] font-bold text-white">
                           MOD
                         </span>
                       )}
@@ -199,10 +144,7 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
                           <BadgeDisplay key={b} badgeType={b} size="sm" earned />
                         ))}
                         {user.badges.length > 3 && (
-                          <span
-                            className="text-[9px]"
-                            style={{ color: "var(--xp-border-dark)" }}
-                          >
+                          <span className="text-[9px] text-[var(--color-muted)]">
                             +{user.badges.length - 3}
                           </span>
                         )}
@@ -213,32 +155,15 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
                   {/* Score / Badge count */}
                   <div className="flex shrink-0 flex-col items-end">
                     {activeTab === "badges" ? (
-                      <>
-                        <span
-                          className="font-bold"
-                          style={{
-                            fontSize: isTop3 ? "16px" : "13px",
-                            color: style.text,
-                          }}
-                        >
-                          {user.badges.length} Badges
-                        </span>
-                      </>
+                      <span className={`font-bold ${style.text} ${isTop3 ? "text-base" : "text-sm"}`}>
+                        {user.badges.length} Badges
+                      </span>
                     ) : (
                       <>
-                        <span
-                          className="font-bold"
-                          style={{
-                            fontSize: isTop3 ? "16px" : "13px",
-                            color: style.text,
-                          }}
-                        >
+                        <span className={`font-bold ${style.text} ${isTop3 ? "text-base" : "text-sm"}`}>
                           {user.glegg_score.toLocaleString("de-DE")}
                         </span>
-                        <span
-                          className="text-[9px]"
-                          style={{ color: "var(--xp-border-dark)" }}
-                        >
+                        <span className="text-[9px] text-[var(--color-muted)]">
                           Glegg-Score
                         </span>
                       </>
@@ -250,11 +175,8 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
           </div>
 
           {/* Footer */}
-          <div
-            className="xp-inset px-2 py-1"
-            style={{ backgroundColor: "#F1EFE2" }}
-          >
-            <span className="xp-text-label">
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 dark:border-zinc-700">
+            <span className="text-xs text-[var(--color-muted)]">
               {sortedUsers.length} Benutzer im Ranking
             </span>
           </div>
@@ -266,7 +188,7 @@ export function LeaderboardView({ users }: LeaderboardViewProps) {
         <div className="flex flex-col gap-2">
           <div className="flex justify-end">
             <XpButton onClick={() => setSelectedUser(null)}>
-              Profil schliessen ✕
+              Profil schliessen
             </XpButton>
           </div>
           <UserProfileCard user={selectedUser} />

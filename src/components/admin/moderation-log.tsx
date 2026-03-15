@@ -35,14 +35,14 @@ const ACTION_LABELS: Record<ActionType, string> = {
 };
 
 const ACTION_COLORS: Record<ActionType, string> = {
-  term_approved: "var(--xp-gruen)",
-  term_rejected: "var(--xp-fehler-rot)",
-  user_banned: "var(--xp-fehler-rot)",
-  user_unbanned: "var(--xp-gruen)",
-  moderator_added: "var(--xp-blau-start)",
-  moderator_removed: "var(--glegg-orange)",
-  score_adjusted: "var(--xp-blau-start)",
-  breaking_news: "var(--glegg-orange)",
+  term_approved: "#22C55E",
+  term_rejected: "#EF4444",
+  user_banned: "#EF4444",
+  user_unbanned: "#22C55E",
+  moderator_added: "#3B82F6",
+  moderator_removed: "#E8593C",
+  score_adjusted: "#3B82F6",
+  breaking_news: "#E8593C",
 };
 
 const MOCK_LOG: LogEntry[] = [
@@ -151,30 +151,22 @@ export function ModerationLog() {
   }, [filterMod, filterAction, filterDate]);
 
   return (
-    <XpWindow title="📜 Moderations-Log — audit.exe">
+    <XpWindow title="Moderations-Log">
       {/* Filters */}
-      <div
-        className="xp-inset mb-3 p-3"
-        style={{ backgroundColor: "#F1EFE2" }}
-      >
-        <div className="xp-text-label mb-2 font-bold">Filter:</div>
+      <div className="mb-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+        <div className="mb-2 text-sm font-bold">Filter:</div>
         <div className="flex flex-wrap gap-3">
           <div>
             <label
-              className="xp-text-label mb-1 block"
-              style={{ color: "var(--xp-border-dark)" }}
+              className="mb-1 block text-xs"
+              style={{ color: "var(--color-text-muted)" }}
             >
               Moderator:
             </label>
             <select
               value={filterMod}
               onChange={(e) => setFilterMod(e.target.value)}
-              className="xp-inset px-2 py-1"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontSize: "11px",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
+              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-sm"
             >
               <option value="all">Alle</option>
               {ALL_MODERATORS.map((mod) => (
@@ -187,20 +179,15 @@ export function ModerationLog() {
 
           <div>
             <label
-              className="xp-text-label mb-1 block"
-              style={{ color: "var(--xp-border-dark)" }}
+              className="mb-1 block text-xs"
+              style={{ color: "var(--color-text-muted)" }}
             >
               Aktion:
             </label>
             <select
               value={filterAction}
               onChange={(e) => setFilterAction(e.target.value)}
-              className="xp-inset px-2 py-1"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontSize: "11px",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
+              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-sm"
             >
               <option value="all">Alle</option>
               {ALL_ACTION_TYPES.map((action) => (
@@ -213,8 +200,8 @@ export function ModerationLog() {
 
           <div>
             <label
-              className="xp-text-label mb-1 block"
-              style={{ color: "var(--xp-border-dark)" }}
+              className="mb-1 block text-xs"
+              style={{ color: "var(--color-text-muted)" }}
             >
               Datum:
             </label>
@@ -222,12 +209,7 @@ export function ModerationLog() {
               type="date"
               value={filterDate}
               onChange={(e) => setFilterDate(e.target.value)}
-              className="xp-inset px-2 py-1"
-              style={{
-                backgroundColor: "#FFFFFF",
-                fontSize: "11px",
-                fontFamily: "Tahoma, Verdana, sans-serif",
-              }}
+              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-sm"
             />
           </div>
 
@@ -247,25 +229,24 @@ export function ModerationLog() {
 
       {/* Results count */}
       <div
-        className="xp-text-label mb-2"
-        style={{ color: "var(--xp-border-dark)" }}
+        className="mb-2 text-xs"
+        style={{ color: "var(--color-text-muted)" }}
       >
         {filteredLog.length} Eintraege
       </div>
 
       {/* Log Entries */}
       <div
-        className="xp-inset flex flex-col gap-0"
+        className="flex flex-col gap-0 overflow-hidden rounded-xl border border-[var(--color-border)]"
         style={{
-          backgroundColor: "#FFFFFF",
           maxHeight: "500px",
           overflowY: "auto",
         }}
       >
         {filteredLog.length === 0 && (
           <div
-            className="p-4 text-center xp-text-body"
-            style={{ color: "var(--xp-border-dark)" }}
+            className="p-4 text-center text-sm"
+            style={{ color: "var(--color-text-muted)" }}
           >
             Keine Eintraege gefunden.
           </div>
@@ -274,17 +255,15 @@ export function ModerationLog() {
         {filteredLog.map((entry, idx) => (
           <div
             key={entry.id}
-            className="flex gap-3 border-b px-3 py-2"
+            className="flex gap-3 border-b border-[var(--color-border)] px-3 py-2 text-sm"
             style={{
-              borderColor: "var(--xp-silber-luna)",
-              backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#F8F7F2",
-              fontSize: "11px",
+              backgroundColor: idx % 2 === 0 ? "var(--color-surface)" : "var(--color-bg)",
             }}
           >
             {/* Timestamp */}
             <div
-              className="w-32 shrink-0 font-mono"
-              style={{ color: "var(--xp-border-dark)" }}
+              className="w-32 shrink-0 font-mono text-xs"
+              style={{ color: "var(--color-text-muted)" }}
             >
               {new Date(entry.timestamp).toLocaleDateString("de-DE", {
                 day: "2-digit",
@@ -320,7 +299,7 @@ export function ModerationLog() {
             {/* Details */}
             <div
               className="min-w-0 flex-1"
-              style={{ color: "var(--xp-border-darker)" }}
+              style={{ color: "var(--color-text-muted)" }}
             >
               {entry.details}
             </div>
@@ -330,11 +309,8 @@ export function ModerationLog() {
 
       {/* Immutability Notice */}
       <div
-        className="mt-3 xp-text-label"
-        style={{
-          color: "var(--xp-border-dark)",
-          fontStyle: "italic",
-        }}
+        className="mt-3 text-xs italic"
+        style={{ color: "var(--color-text-muted)" }}
       >
         Hinweis: Das Moderations-Log ist unveraenderbar. Eintraege koennen
         nicht geloescht oder bearbeitet werden.

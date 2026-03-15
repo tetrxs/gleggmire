@@ -12,7 +12,7 @@ function formatCount(n: number): string {
 function Digit({ value, rolling }: { value: string; rolling: boolean }) {
   return (
     <span
-      className="xp-inset inline-flex items-center justify-center"
+      className="inline-flex items-center justify-center rounded-sm"
       style={{
         width: "16px",
         height: "22px",
@@ -54,7 +54,7 @@ export function VisitCounter() {
   return (
     <div className="flex flex-col items-center gap-1">
       <div
-        className="xp-raised flex items-center gap-[1px] px-2 py-1"
+        className="flex items-center gap-[1px] rounded-lg px-2 py-1"
         style={{ backgroundColor: "#1a1a1a" }}
       >
         {chars.map((char, i) => {
@@ -77,10 +77,7 @@ export function VisitCounter() {
       </div>
       <span
         className="text-[9px] uppercase tracking-widest"
-        style={{
-          color: "var(--xp-border-dark)",
-          fontFamily: "Tahoma, Verdana, sans-serif",
-        }}
+        style={{ color: "var(--color-text-muted)" }}
       >
         Besucher seit 2026
       </span>

@@ -66,7 +66,6 @@ export function AuthButton() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Close dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -86,11 +85,7 @@ export function AuthButton() {
 
   if (loading) {
     return (
-      <div
-        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm opacity-60"
-        style={{ color: "var(--color-text-muted)" }}
-        aria-busy="true"
-      >
+      <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[var(--color-muted)] opacity-60" aria-busy="true">
         ...
       </div>
     );
@@ -100,12 +95,7 @@ export function AuthButton() {
     return (
       <a
         href="/api/auth/login"
-        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium no-underline transition-colors"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          color: "var(--color-text)",
-          border: "1px solid var(--color-border)",
-        }}
+        className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)] dark:border-zinc-700 dark:hover:bg-zinc-700"
       >
         <DiscordIcon />
         <span>Login mit Discord</span>
@@ -117,24 +107,13 @@ export function AuthButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          color: "var(--color-text)",
-          border: "1px solid var(--color-border)",
-        }}
+        className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-border)] dark:border-zinc-700 dark:hover:bg-zinc-700"
         onClick={() => setDropdownOpen(!dropdownOpen)}
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
       >
         {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt=""
-            width={20}
-            height={20}
-            className="rounded-full"
-          />
+          <img src={avatarUrl} alt="" width={20} height={20} className="rounded-full" />
         ) : (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -158,38 +137,26 @@ export function AuthButton() {
       </button>
 
       {dropdownOpen && (
-        <div
-          className="absolute right-0 top-full z-50 mt-1.5 min-w-[180px] overflow-hidden rounded-lg shadow-lg animate-scale-in"
-          style={{
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-          }}
-        >
+        <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[180px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg dark:border-zinc-700">
           <a
             href="/profil"
-            className="block px-4 py-2.5 text-sm no-underline transition-colors"
-            style={{ color: "var(--color-text)" }}
+            className="block px-4 py-2.5 text-sm text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)] dark:hover:bg-zinc-700"
             onClick={() => setDropdownOpen(false)}
           >
             Profil
           </a>
           <a
             href="/meine-eintraege"
-            className="block px-4 py-2.5 text-sm no-underline transition-colors"
-            style={{ color: "var(--color-text)" }}
+            className="block px-4 py-2.5 text-sm text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)] dark:hover:bg-zinc-700"
             onClick={() => setDropdownOpen(false)}
           >
-            Meine Eintr&auml;ge
+            Meine Eintraege
           </a>
-          <div
-            className="mx-3"
-            style={{ borderTop: "1px solid var(--color-border)" }}
-          />
+          <div className="mx-3 border-t border-[var(--color-border)] dark:border-zinc-700" />
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="w-full px-4 py-2.5 text-left text-sm transition-colors"
-              style={{ color: "var(--color-text)" }}
+              className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-border)] dark:hover:bg-zinc-700"
               onClick={() => setDropdownOpen(false)}
             >
               Logout

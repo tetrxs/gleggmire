@@ -22,9 +22,7 @@ function ConfettiAnimation() {
   const pieces: ConfettiPiece[] = Array.from({ length: 40 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
-    color: ["#FF0000", "#FFD700", "#00FF00", "#1F4ECC", "#FF00FF", "#E8593C"][
-      i % 6
-    ],
+    color: ["#FF0000", "#FFD700", "#00FF00", "#2563eb", "#FF00FF", "#E8593C"][i % 6],
     delay: Math.random() * 0.5,
     duration: 1.5 + Math.random() * 1.5,
   }));
@@ -34,12 +32,11 @@ function ConfettiAnimation() {
       {pieces.map((p) => (
         <div
           key={p.id}
-          className="absolute top-0 h-3 w-2"
+          className="absolute top-0 h-3 w-2 rounded-sm"
           style={{
             left: `${p.x}%`,
             backgroundColor: p.color,
             animation: `confetti-fall ${p.duration}s ${p.delay}s ease-in forwards`,
-            borderRadius: "1px",
           }}
         />
       ))}
@@ -61,7 +58,6 @@ export function DeletionPetition({ termName, termId }: DeletionPetitionProps) {
   const [showFailed, setShowFailed] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load count from localStorage
   useEffect(() => {
     const stored = localStorage.getItem(`petition-${termId}`);
     if (stored) {
@@ -93,26 +89,17 @@ export function DeletionPetition({ termName, termId }: DeletionPetitionProps) {
 
       <div className="mt-4 flex items-center gap-3">
         <XpButton variant="danger" onClick={() => setDialogOpen(true)}>
-          Petition zum L&ouml;schen
+          Petition zum Loeschen
         </XpButton>
 
         {showFailed && (
-          <span
-            className="xp-inset inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold"
-            style={{
-              backgroundColor: "var(--xp-silber-luna)",
-              color: "var(--xp-fehler-rot)",
-            }}
-          >
+          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-950/30 dark:text-red-400">
             Petition gescheitert ({count}x)
           </span>
         )}
 
         {count > 0 && !showFailed && (
-          <span
-            className="text-[10px]"
-            style={{ color: "var(--xp-border-dark)" }}
-          >
+          <span className="text-[10px] text-[var(--color-muted)]">
             {count}/{THRESHOLD} Stimmen
           </span>
         )}
@@ -120,106 +107,37 @@ export function DeletionPetition({ termName, termId }: DeletionPetitionProps) {
 
       {/* Dialog */}
       {dialogOpen && (
-        <div className="xp-overlay" onClick={() => setDialogOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDialogOpen(false)}>
           <div
-            className="xp-window-outer w-[400px]"
+            className="card w-[400px] p-6"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="Petition zum Loeschen"
           >
-            {/* Title Bar */}
-            <div className="xp-titlebar">
-              <span>Petition zum L&ouml;schen</span>
-              <button
-                onClick={() => setDialogOpen(false)}
-                className="xp-titlebar-btn xp-titlebar-btn-close"
-                aria-label="Schliessen"
-                type="button"
-              >
-                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                  <path
-                    d="M1 1L8 8M8 1L1 8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
+            <p className="text-sm font-semibold text-[var(--color-text)] mb-3">Petition zum Loeschen</p>
+            <p className="text-sm text-[var(--color-text)] mb-3">
+              Du willst wirklich &bdquo;{termName}&rdquo; loeschen lassen? Begruende deine Petition:
+            </p>
+            <textarea
+              ref={textareaRef}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Warum soll dieser Begriff geloescht werden?"
+              rows={4}
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E8593C] dark:border-zinc-700"
+            />
+
+            <div className="mt-4 flex justify-end gap-2">
+              <XpButton onClick={() => setDialogOpen(false)}>Abbrechen</XpButton>
+              <XpButton variant="danger" onClick={handleSubmit} disabled={!reason.trim()}>
+                Einreichen
+              </XpButton>
             </div>
 
-            {/* Body */}
-            <div className="xp-window p-4">
-              <div className="flex items-start gap-3">
-                {/* Warning icon */}
-                <div className="shrink-0">
-                  <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M16 2L30 28H2L16 2Z"
-                      fill="#FFD700"
-                      stroke="#B8860B"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="16"
-                      y="24"
-                      textAnchor="middle"
-                      fill="#000000"
-                      fontSize="18"
-                      fontWeight="bold"
-                      fontFamily="Tahoma, sans-serif"
-                    >
-                      !
-                    </text>
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <p className="xp-text-body mb-3">
-                    Du willst wirklich &bdquo;{termName}&rdquo; l&ouml;schen
-                    lassen? Begr&uuml;nde deine Petition:
-                  </p>
-                  <textarea
-                    ref={textareaRef}
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="Warum soll dieser Begriff geloescht werden?"
-                    rows={4}
-                    className="xp-inset w-full resize-none p-2 text-[12px]"
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      fontFamily: "Tahoma, Verdana, sans-serif",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 flex justify-end gap-2">
-                <XpButton onClick={() => setDialogOpen(false)}>
-                  Abbrechen
-                </XpButton>
-                <XpButton
-                  variant="danger"
-                  onClick={handleSubmit}
-                  disabled={!reason.trim()}
-                >
-                  Einreichen
-                </XpButton>
-              </div>
-
-              <p
-                className="mt-3 text-center text-[9px] italic"
-                style={{ color: "var(--xp-border-dark)" }}
-              >
-                Hinweis: Deine Petition wird mit h&ouml;chster Priorit&auml;t
-                ignoriert.
-              </p>
-            </div>
+            <p className="mt-3 text-center text-[9px] italic text-[var(--color-muted)]">
+              Hinweis: Deine Petition wird mit hoechster Prioritaet ignoriert.
+            </p>
           </div>
         </div>
       )}
