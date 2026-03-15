@@ -60,12 +60,7 @@ export default function Header() {
             </svg>
           </Link>
           <ThemeToggle />
-          <div
-            className="ml-1 overflow-hidden rounded-full"
-            style={{
-              border: "1.5px solid var(--color-text)",
-            }}
-          >
+          <div className="ml-1">
             <AuthButton />
           </div>
         </div>
@@ -137,10 +132,7 @@ export default function Header() {
           </nav>
 
           <div className="mt-4 flex items-center gap-2">
-            <div
-              className="overflow-hidden rounded-full"
-              style={{ border: "1.5px solid var(--color-text)" }}
-            >
+            <div>
               <AuthButton />
             </div>
           </div>

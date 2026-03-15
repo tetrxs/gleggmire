@@ -95,7 +95,7 @@ export function AuthButton() {
     return (
       <a
         href="/api/auth/login"
-        className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)] dark:border-zinc-700 dark:hover:bg-zinc-700"
+        className="flex items-center gap-2 rounded-full border-[1.5px] border-[var(--color-text)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)]"
       >
         <DiscordIcon />
         <span>Login mit Discord</span>
@@ -107,7 +107,7 @@ export function AuthButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-border)] dark:border-zinc-700 dark:hover:bg-zinc-700"
+        className="flex items-center gap-2 rounded-full border-[1.5px] border-[var(--color-text)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-border)]"
         onClick={() => setDropdownOpen(!dropdownOpen)}
         aria-expanded={dropdownOpen}
         aria-haspopup="true"

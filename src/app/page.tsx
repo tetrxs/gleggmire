@@ -50,17 +50,17 @@ function TermPreviewCard({ term }: { term: TermWithPreview }) {
 
 const HERO_DECORATIONS = [
   // Oben links – groß
-  { src: "/images/elements/gleggmire_coin.png", className: "animate-float", style: { top: "1rem", left: "2%" }, width: 150, height: 150 },
-  // Oben rechts – groß
-  { src: "/images/elements/gleggmire_wanted.png", className: "animate-tilt-rock", style: { top: "2rem", right: "2%" }, width: 170, height: 170 },
+  { src: "/images/elements/gleggmire_coin.png", className: "animate-float", style: { top: "2rem", left: "1%" }, width: 140, height: 140 },
+  // Oben rechts – groß, weiter runter (weg von Navbar)
+  { src: "/images/elements/gleggmire_wanted.png", className: "animate-tilt-rock", style: { top: "5rem", right: "2%" }, width: 160, height: 160 },
   // Mitte links – mittel
-  { src: "/images/elements/gleggmire_warnining.png", className: "animate-float-slow", style: { top: "55%", left: "1%" }, width: 90, height: 90 },
-  // Unten rechts – mittel
-  { src: "/images/elements/gleggmire_badge.png", className: "animate-float-reverse", style: { bottom: "1rem", right: "5%" }, width: 100, height: 100 },
+  { src: "/images/elements/gleggmire_warnining.png", className: "animate-float-slow", style: { top: "50%", left: "2%" }, width: 85, height: 85 },
+  // Mitte rechts – klein (card)
+  { src: "/images/elements/gleggmire_card.png", className: "animate-float-reverse", style: { top: "45%", right: "3%" }, width: 70, height: 70 },
   // Unten links – groß
-  { src: "/images/elements/gleggmire_triangle.png", className: "animate-float-slow", style: { bottom: "0.5rem", left: "8%" }, width: 130, height: 130 },
-  // Oben rechts innen – klein
-  { src: "/images/elements/gleggmire_card.png", className: "animate-float", style: { top: "0.5rem", right: "16%" }, width: 60, height: 60 },
+  { src: "/images/elements/gleggmire_triangle.png", className: "animate-float-slow", style: { bottom: "1rem", left: "5%" }, width: 120, height: 120 },
+  // Unten rechts – mittel
+  { src: "/images/elements/gleggmire_badge.png", className: "animate-float", style: { bottom: "2rem", right: "6%" }, width: 95, height: 95 },
 ] as const;
 
 export default async function HomePage() {
