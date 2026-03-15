@@ -74,9 +74,9 @@ export default function Footer() {
               <Image
                 src="/images/gleggmire_title.png"
                 alt="GLEGGMIRE.NET"
-                width={210}
-                height={52}
-                className="h-[52px] w-auto"
+                width={280}
+                height={70}
+                className="h-[70px] w-auto"
               />
             </Link>
             <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>

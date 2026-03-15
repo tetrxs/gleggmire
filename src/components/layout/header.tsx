@@ -26,9 +26,9 @@ export default function Header() {
             <Image
               src="/images/gleggmire_title.png"
               alt="GLEGGMIRE.NET"
-              width={240}
-              height={60}
-              className="h-[60px] w-auto"
+              width={320}
+              height={80}
+              className="h-[80px] w-auto"
               priority
             />
           </Link>

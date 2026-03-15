@@ -90,7 +90,7 @@ function ClipPreviewCard({
 
 export default async function HomePage() {
   const latestTerms = await getLatestTerms(4);
-  const previewClips = MOCK_CLIPS.slice(0, 5);
+  const previewClips = MOCK_CLIPS.slice(0, 6);
 
   return (
     <div className="flex flex-col">
@@ -250,19 +250,19 @@ export default async function HomePage() {
           4. CLIPS VORSCHAU
           ============================ */}
       <section
-        className="mx-auto w-full max-w-6xl px-4 py-14"
+        className="mx-auto w-full max-w-6xl px-4 py-16"
         style={{ borderTop: "2px solid var(--color-border)" }}
       >
         {/* Section header */}
-        <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <h2
-              className="text-2xl font-bold tracking-tight sm:text-3xl"
+              className="text-3xl font-bold tracking-tight sm:text-4xl"
               style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
             >
               Aktuelle Clips
             </h2>
-            <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
               Die beliebtesten Community-Clips
             </p>
           </div>
@@ -275,7 +275,7 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        {/* Clips preview grid – 2 rows: 3 on top, 2 on bottom */}
+        {/* Clips preview grid – 2 rows: 3 columns on desktop */}
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {previewClips.map((c) => (
             <ClipPreviewCard
