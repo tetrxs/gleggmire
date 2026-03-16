@@ -4,29 +4,36 @@ import { apiRateLimit, checkRateLimit } from "@/lib/rate-limit";
 import { checkBanned } from "@/lib/utils/ban-check";
 
 /**
- * Helper: adjust a numeric column on term_definitions by a delta (+1 or -1).
- * Uses the service client to bypass RLS (term_definitions UPDATE is service_role only).
+ * Recount votes from the votes table and set absolute values on term_definitions.
+ * This is self-correcting: no race conditions, no drift over time.
  */
-async function adjustVoteCount(
-  definitionId: string,
-  field: "upvotes" | "downvotes",
-  delta: 1 | -1
-) {
+async function syncVoteCounts(definitionId: string) {
   const service = await createServiceClient();
 
-  const { data } = await service
-    .from("term_definitions")
-    .select(field)
-    .eq("id", definitionId)
-    .single();
+  const [{ count: upCount }, { count: downCount }] = await Promise.all([
+    service
+      .from("votes")
+      .select("*", { count: "exact", head: true })
+      .eq("entity_type", "definition")
+      .eq("entity_id", definitionId)
+      .eq("vote_type", "up"),
+    service
+      .from("votes")
+      .select("*", { count: "exact", head: true })
+      .eq("entity_type", "definition")
+      .eq("entity_id", definitionId)
+      .eq("vote_type", "down"),
+  ]);
 
-  if (!data) return;
+  const upvotes = upCount ?? 0;
+  const downvotes = downCount ?? 0;
 
-  const current = (data as Record<string, number>)[field] ?? 0;
   await service
     .from("term_definitions")
-    .update({ [field]: Math.max(0, current + delta) })
+    .update({ upvotes, downvotes })
     .eq("id", definitionId);
+
+  return { upvotes, downvotes };
 }
 
 export async function GET(
@@ -133,33 +140,45 @@ export async function POST(
     if (existingVote) {
       if (existingVote.vote_type === voteType) {
         // Toggle off: remove vote
-        await supabase.from("votes").delete().eq("id", existingVote.id);
+        const { error: deleteError } = await supabase
+          .from("votes")
+          .delete()
+          .eq("id", existingVote.id);
 
-        // Decrement the vote count on the definition
-        const field: "upvotes" | "downvotes" =
-          voteType === "up" ? "upvotes" : "downvotes";
-        await adjustVoteCount(definitionId, field, -1);
+        if (deleteError) {
+          return NextResponse.json(
+            { error: "Failed to remove vote" },
+            { status: 500 }
+          );
+        }
 
-        return NextResponse.json({ action: "removed" });
+        const counts = await syncVoteCounts(definitionId);
+        return NextResponse.json({
+          action: "removed",
+          vote_type: null,
+          ...counts,
+        });
       }
 
       // Switch vote: update existing
-      await supabase
+      const { error: updateError } = await supabase
         .from("votes")
         .update({ vote_type: voteType })
         .eq("id", existingVote.id);
 
-      // Adjust counts: increment new, decrement old
-      const incField: "upvotes" | "downvotes" =
-        voteType === "up" ? "upvotes" : "downvotes";
-      const decField: "upvotes" | "downvotes" =
-        voteType === "up" ? "downvotes" : "upvotes";
-      await Promise.all([
-        adjustVoteCount(definitionId, incField, 1),
-        adjustVoteCount(definitionId, decField, -1),
-      ]);
+      if (updateError) {
+        return NextResponse.json(
+          { error: "Failed to switch vote" },
+          { status: 500 }
+        );
+      }
 
-      return NextResponse.json({ action: "switched", vote_type: voteType });
+      const counts = await syncVoteCounts(definitionId);
+      return NextResponse.json({
+        action: "switched",
+        vote_type: voteType,
+        ...counts,
+      });
     }
 
     // New vote
@@ -177,11 +196,12 @@ export async function POST(
       );
     }
 
-    const field: "upvotes" | "downvotes" =
-      voteType === "up" ? "upvotes" : "downvotes";
-    await adjustVoteCount(definitionId, field, 1);
-
-    return NextResponse.json({ action: "voted", vote_type: voteType });
+    const counts = await syncVoteCounts(definitionId);
+    return NextResponse.json({
+      action: "voted",
+      vote_type: voteType,
+      ...counts,
+    });
   } catch (err) {
     console.error("Vote error:", err);
     return NextResponse.json(

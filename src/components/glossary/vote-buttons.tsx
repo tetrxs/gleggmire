@@ -46,7 +46,9 @@ export function VoteButtons({
       .finally(() => setReady(true));
   }, [entityType, entityId, isOwnContent]);
 
-  async function sendVote(voteType: "up" | "down") {
+  async function sendVote(
+    voteType: "up" | "down"
+  ): Promise<{ ok: false } | { ok: true; data: Record<string, unknown> }> {
     try {
       const endpoint =
         entityType === "comment"
@@ -57,14 +59,15 @@ export function VoteButtons({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vote_type: voteType }),
       });
-      if (!res.ok) return false;
-      return true;
+      if (!res.ok) return { ok: false };
+      const data = await res.json();
+      return { ok: true, data };
     } catch {
-      return false;
+      return { ok: false };
     }
   }
 
-  function handleUpvote() {
+  function handleVote(voteType: "up" | "down") {
     if (!user) { redirectToLogin(); return; }
     if (isOwnContent || loading || !ready) return;
     setLoading(true);
@@ -73,60 +76,45 @@ export function VoteButtons({
     const prevDown = downvotes;
     const prevVoted = voted;
 
-    if (voted === "up") {
+    // Optimistic update
+    if (voted === voteType) {
       // Toggle off
-      setUpvotes(Math.max(0, upvotes - 1));
+      if (voteType === "up") setUpvotes(Math.max(0, upvotes - 1));
+      else setDownvotes(Math.max(0, downvotes - 1));
       setVoted(null);
-    } else if (voted === "down") {
-      // Switch from down to up
-      setDownvotes(Math.max(0, downvotes - 1));
-      setUpvotes(upvotes + 1);
-      setVoted("up");
-    } else {
-      // New vote
-      setUpvotes(upvotes + 1);
-      setVoted("up");
-    }
-
-    sendVote("up").then((ok) => {
-      if (!ok) {
-        setUpvotes(prevUp);
-        setDownvotes(prevDown);
-        setVoted(prevVoted);
+    } else if (voted !== null) {
+      // Switch vote
+      if (voteType === "up") {
+        setDownvotes(Math.max(0, downvotes - 1));
+        setUpvotes(upvotes + 1);
+      } else {
+        setUpvotes(Math.max(0, upvotes - 1));
+        setDownvotes(downvotes + 1);
       }
-      setLoading(false);
-    });
-  }
-
-  function handleDownvote() {
-    if (!user) { redirectToLogin(); return; }
-    if (isOwnContent || loading || !ready) return;
-    setLoading(true);
-
-    const prevUp = upvotes;
-    const prevDown = downvotes;
-    const prevVoted = voted;
-
-    if (voted === "down") {
-      // Toggle off
-      setDownvotes(Math.max(0, downvotes - 1));
-      setVoted(null);
-    } else if (voted === "up") {
-      // Switch from up to down
-      setUpvotes(Math.max(0, upvotes - 1));
-      setDownvotes(downvotes + 1);
-      setVoted("down");
+      setVoted(voteType);
     } else {
       // New vote
-      setDownvotes(downvotes + 1);
-      setVoted("down");
+      if (voteType === "up") setUpvotes(upvotes + 1);
+      else setDownvotes(downvotes + 1);
+      setVoted(voteType);
     }
 
-    sendVote("down").then((ok) => {
-      if (!ok) {
+    sendVote(voteType).then((result) => {
+      if (!result.ok) {
+        // Rollback on failure
         setUpvotes(prevUp);
         setDownvotes(prevDown);
         setVoted(prevVoted);
+      } else {
+        // Reconcile with server truth
+        const { data } = result;
+        if (typeof data.upvotes === "number") setUpvotes(data.upvotes);
+        if (typeof data.downvotes === "number") setDownvotes(data.downvotes);
+        if (data.vote_type === "up" || data.vote_type === "down") {
+          setVoted(data.vote_type as "up" | "down");
+        } else if (data.vote_type === null || data.action === "removed") {
+          setVoted(null);
+        }
       }
       setLoading(false);
     });
@@ -139,7 +127,7 @@ export function VoteButtons({
       {/* GOEY (Like) */}
       <button
         type="button"
-        onClick={handleUpvote}
+        onClick={() => handleVote("up")}
         disabled={disabled}
         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150 ${
           disabled
@@ -180,7 +168,7 @@ export function VoteButtons({
       {/* Cope (Dislike) */}
       <button
         type="button"
-        onClick={handleDownvote}
+        onClick={() => handleVote("down")}
         disabled={disabled}
         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150 ${
           disabled
