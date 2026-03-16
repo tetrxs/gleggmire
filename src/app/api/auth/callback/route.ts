@@ -4,20 +4,25 @@ import { isAdmin } from "@/lib/constants/admin";
 import { apiRateLimit, checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const { success } = await checkRateLimit(apiRateLimit, ip);
-  if (!success) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
-
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   let next = searchParams.get("next") ?? "/";
   // Prevent open redirect: only allow relative paths
-  if (!next.startsWith("/") || next.startsWith("//")) {
+  if (!next.startsWith("/") || next.startsWith("//") || next.includes("://")) {
     next = "/";
   }
   const redirectTo = new URL(next, request.url);
+
+  try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const { success } = await checkRateLimit(apiRateLimit, ip);
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+  } catch (err) {
+    console.error("Rate limit check failed:", err);
+    // Continue without rate limiting rather than blocking auth
+  }
 
   if (!code) {
     redirectTo.pathname = "/";

@@ -3,20 +3,19 @@ import { createClient } from "@/lib/supabase/server";
 import { authRateLimit, checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const { success } = await checkRateLimit(authRateLimit, ip);
-  if (!success) {
-    return NextResponse.json({ error: "Too many login attempts" }, { status: 429 });
-  }
-
-  const { searchParams } = new URL(request.url);
-  let next = searchParams.get("next") ?? "/";
-  // Prevent open redirect: only allow relative paths
-  if (!next.startsWith("/") || next.startsWith("//")) {
-    next = "/";
-  }
-
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const { success } = await checkRateLimit(authRateLimit, ip);
+    if (!success) {
+      return NextResponse.json({ error: "Too many login attempts" }, { status: 429 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    let next = searchParams.get("next") ?? "/";
+    // Prevent open redirect: only allow relative paths
+    if (!next.startsWith("/") || next.startsWith("//") || next.includes("://")) {
+      next = "/";
+    }
     const supabase = await createClient();
 
     // Build redirect URL – prefer NEXT_PUBLIC_SITE_URL for production, fall back to request.url

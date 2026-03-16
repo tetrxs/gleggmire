@@ -56,9 +56,18 @@ export async function checkRateLimit(
   identifier: string
 ): Promise<{ success: boolean; reset?: number }> {
   if (!limiter) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn("Rate limiter unavailable in production — allowing request");
+    }
     return { success: true };
   }
 
-  const result = await limiter.limit(identifier);
-  return { success: result.success, reset: result.reset };
+  try {
+    const result = await limiter.limit(identifier);
+    return { success: result.success, reset: result.reset };
+  } catch (err) {
+    console.error("Rate limit check error:", err);
+    // Fail open: allow request if rate limiter is broken
+    return { success: true };
+  }
 }
