@@ -97,8 +97,8 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
 
     loadYouTubeApi().then(() => {
       if (destroyed || !document.getElementById(containerId)) return;
+      console.log("[YT-EMBED] Creating player:", { videoId, containerId, embedsAllowed });
       playerRef.current = new window.YT!.Player(containerId, {
-        host: "https://www.youtube-nocookie.com",
         videoId,
         width: "100%",
         playerVars: {
@@ -110,6 +110,7 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
           iv_load_policy: 3,
           mute: 1,
           playsinline: 1,
+          host: "https://www.youtube-nocookie.com",
         },
         events: {
           onReady: (event: { target: YTPlayer }) => {

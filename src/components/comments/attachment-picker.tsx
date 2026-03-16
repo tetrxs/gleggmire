@@ -81,8 +81,8 @@ function YouTubePickerView({
 
     loadYouTubeApi().then(() => {
       if (destroyed) return;
+      console.log("[YT-PICKER] Creating player:", { videoId, containerId: containerIdRef.current });
       playerRef.current = new window.YT!.Player(containerIdRef.current, {
-        host: "https://www.youtube-nocookie.com",
         videoId,
         height: "220",
         width: "100%",
@@ -93,6 +93,7 @@ function YouTubePickerView({
           disablekb: 1,
           showinfo: 0,
           playsinline: 1,
+          host: "https://www.youtube-nocookie.com",
         },
         events: {
           onReady: (event) => {
