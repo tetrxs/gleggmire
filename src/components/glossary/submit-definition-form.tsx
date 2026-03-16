@@ -9,11 +9,19 @@ const STORAGE_KEY_PREFIX = "gleggmire-def-draft-";
 
 type SourceType = "youtube" | "twitch" | "image" | "gif" | "other";
 
+interface SavedAttachment {
+  type: "youtube" | "twitch";
+  url: string;
+  startSeconds?: number;
+  title?: string;
+}
+
 interface FormData {
   definition: string;
   beispielsatz: string;
   sourceType: SourceType | "";
   sourceText: string;
+  savedAttachment?: SavedAttachment | null;
 }
 
 const EMPTY_FORM: FormData = {
@@ -21,6 +29,7 @@ const EMPTY_FORM: FormData = {
   beispielsatz: "",
   sourceType: "",
   sourceText: "",
+  savedAttachment: null,
 };
 
 const SOURCE_OPTIONS: { value: SourceType; label: string }[] = [
@@ -56,6 +65,10 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
       if (saved) {
         const parsed = JSON.parse(saved) as Partial<FormData>;
         setForm((prev) => ({ ...prev, ...parsed }));
+        // Restore attachment from saved draft
+        if (parsed.savedAttachment) {
+          setAttachment(parsed.savedAttachment as AttachmentData);
+        }
       }
     } catch {
       // ignore
@@ -102,6 +115,17 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
     // Build a descriptive source text from the attachment
     if (data.type === "youtube" || data.type === "twitch") {
       updateField("sourceText", data.url);
+      // Persist serializable attachment data for draft recovery
+      setForm((prev) => ({
+        ...prev,
+        sourceText: data.url,
+        savedAttachment: {
+          type: data.type as "youtube" | "twitch",
+          url: data.url,
+          startSeconds: data.startSeconds,
+          title: data.title,
+        },
+      }));
     } else {
       updateField("sourceText", data.file?.name ?? "Bild/GIF");
     }
@@ -253,7 +277,12 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
           <AttachmentPicker
             mode={form.sourceType}
             onAttach={handleAttach}
-            onCancel={() => { setShowPicker(false); updateField("sourceType", ""); }}
+            onCancel={() => { setShowPicker(false); if (!attachment) updateField("sourceType", ""); }}
+            initialUrl={attachment?.url ? (
+              attachment.startSeconds && attachment.startSeconds > 0
+                ? `${attachment.url}${attachment.url.includes("?") ? "&" : "?"}t=${attachment.startSeconds}`
+                : attachment.url
+            ) : undefined}
           />
         )}
 
@@ -269,11 +298,28 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
               </p>
               <p className="truncate text-[11px]" style={{ color: "var(--color-text-muted)" }}>
                 {attachment.type === "youtube" ? "YouTube" : attachment.type === "twitch" ? "Twitch" : "Datei"}
+                {attachment.type === "youtube" && attachment.startSeconds != null && attachment.startSeconds > 0 && (
+                  <> — ab {Math.floor(attachment.startSeconds / 60)}:{String(attachment.startSeconds % 60).padStart(2, "0")}</>
+                )}
               </p>
             </div>
+            {(attachment.type === "youtube" || attachment.type === "twitch") && (
+              <button
+                type="button"
+                onClick={() => { setShowPicker(true); }}
+                className="shrink-0 text-xs font-medium hover:underline"
+                style={{ color: "var(--color-text-muted)" }}
+              >
+                Aendern
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => { setAttachment(null); setShowPicker(true); }}
+              onClick={() => {
+                setAttachment(null);
+                setForm((prev) => ({ ...prev, savedAttachment: null, sourceText: "" }));
+                updateField("sourceType", "");
+              }}
               className="shrink-0 text-xs font-medium text-red-500 hover:underline"
             >
               Entfernen

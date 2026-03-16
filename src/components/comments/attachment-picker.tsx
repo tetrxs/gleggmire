@@ -18,6 +18,7 @@ interface AttachmentPickerProps {
   mode: "image" | "gif" | "youtube" | "twitch";
   onAttach: (data: AttachmentData) => void;
   onCancel: () => void;
+  initialUrl?: string;
 }
 
 interface VideoMeta {
@@ -28,6 +29,11 @@ interface VideoMeta {
 
 function isValidYouTubeUrl(url: string): boolean {
   return /^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]+/.test(url) || /^https?:\/\/youtu\.be\/[\w-]+/.test(url);
+}
+
+function extractStartSeconds(url: string): number {
+  const match = url.match(/[?&]t=(\d+)/);
+  return match ? Number(match[1]) : 0;
 }
 function isValidTwitchUrl(url: string): boolean {
   return /^https?:\/\/(www\.)?twitch\.tv\//.test(url) || /^https?:\/\/clips\.twitch\.tv\//.test(url);
@@ -51,13 +57,15 @@ function YouTubePickerView({
 }) {
   const [playerReady, setPlayerReady] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [clipStart, setClipStart] = useState(0);
+  const [clipStart, setClipStart] = useState(() => extractStartSeconds(url));
   const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(50);
+  const [muted, setMuted] = useState(false);
   const playerRef = useRef<YTPlayer | null>(null);
   const reactId = useId();
   const containerIdRef = useRef(`yt-picker-${videoId}-${reactId.replace(/:/g, "")}`);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const clipStartRef = useRef(0);
+  const clipStartRef = useRef(extractStartSeconds(url));
   const trackRef = useRef<HTMLDivElement>(null);
   const dragStartXRef = useRef(0);
   const dragStartValueRef = useRef(0);
@@ -83,7 +91,6 @@ function YouTubePickerView({
           controls: 0,
           disablekb: 1,
           showinfo: 0,
-          mute: 1,
           playsinline: 1,
           host: "https://www.youtube-nocookie.com",
         },
@@ -92,7 +99,9 @@ function YouTubePickerView({
             if (destroyed) return;
             setDuration(event.target.getDuration());
             setPlayerReady(true);
-            event.target.seekTo(0, true);
+            event.target.unMute();
+            event.target.setVolume(50);
+            event.target.seekTo(clipStartRef.current, true);
             event.target.playVideo();
           },
         },
@@ -163,9 +172,13 @@ function YouTubePickerView({
   }, [seekToClip]);
 
   function handleConfirm() {
+    // Strip any existing t= parameter from the URL to avoid duplicates
+    const cleanUrl = url.replace(/([?&])t=\d+(&|$)/, (_, prefix, suffix) =>
+      suffix === "&" ? prefix : prefix === "&" ? "" : ""
+    ).replace(/[?&]$/, "");
     onAttach({
       type: "youtube",
-      url,
+      url: cleanUrl,
       startSeconds: Math.floor(clipStart),
       title: meta?.title ?? `YouTube Video (${videoId})`,
     });
@@ -215,6 +228,49 @@ function YouTubePickerView({
       <div className="rounded-lg overflow-hidden border border-[var(--color-border)] bg-black">
         <div id={containerIdRef.current} />
       </div>
+
+      {/* Volume control */}
+      {playerReady && (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (muted) {
+                playerRef.current?.unMute();
+                playerRef.current?.setVolume(volume);
+                setMuted(false);
+              } else {
+                playerRef.current?.mute();
+                setMuted(true);
+              }
+            }}
+            className="shrink-0 flex items-center justify-center w-7 h-7 rounded text-sm transition-colors hover:bg-[var(--color-border)]"
+            style={{ color: "var(--color-text-muted)" }}
+            title={muted ? "Ton an" : "Ton aus"}
+          >
+            {muted || volume === 0 ? "\u{1F507}" : "\u{1F50A}"}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={muted ? 0 : volume}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVolume(v);
+              setMuted(v === 0);
+              if (v === 0) {
+                playerRef.current?.mute();
+              } else {
+                playerRef.current?.unMute();
+                playerRef.current?.setVolume(v);
+              }
+            }}
+            className="flex-1 h-1.5 accent-[#E8593C]"
+            style={{ cursor: "pointer" }}
+          />
+        </div>
+      )}
 
       {!playerReady && (
         <p className="text-xs text-[var(--color-text-muted)]">Player wird geladen...</p>
@@ -322,10 +378,10 @@ function YouTubePickerView({
   );
 }
 
-export function AttachmentPicker({ mode, onAttach, onCancel }: AttachmentPickerProps) {
-  const [url, setUrl] = useState("");
+export function AttachmentPicker({ mode, onAttach, onCancel, initialUrl }: AttachmentPickerProps) {
+  const [url, setUrl] = useState(initialUrl ?? "");
   const [error, setError] = useState("");
-  const [validated, setValidated] = useState(false);
+  const [validated, setValidated] = useState(!!initialUrl);
   const [meta, setMeta] = useState<VideoMeta | null>(null);
   const [loadingMeta, setLoadingMeta] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);

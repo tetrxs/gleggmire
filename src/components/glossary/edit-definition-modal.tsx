@@ -221,7 +221,12 @@ export function EditDefinitionModal({
             <AttachmentPicker
               mode={sourceType}
               onAttach={handleAttach}
-              onCancel={() => { setShowPicker(false); setSourceType(""); }}
+              onCancel={() => { setShowPicker(false); if (!attachment) setSourceType(""); }}
+              initialUrl={attachment?.url ? (
+                attachment.startSeconds && attachment.startSeconds > 0
+                  ? `${attachment.url}${attachment.url.includes("?") ? "&" : "?"}t=${attachment.startSeconds}`
+                  : attachment.url
+              ) : undefined}
             />
           )}
 

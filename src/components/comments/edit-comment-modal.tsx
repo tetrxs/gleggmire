@@ -160,6 +160,11 @@ export function EditCommentModal({ open, onClose, comment, onSaved }: EditCommen
             mode={pickerMode}
             onAttach={handleAttach}
             onCancel={() => setPickerMode(null)}
+            initialUrl={attachment?.url ? (
+              attachment.startSeconds && attachment.startSeconds > 0
+                ? `${attachment.url}${attachment.url.includes("?") ? "&" : "?"}t=${attachment.startSeconds}`
+                : attachment.url
+            ) : undefined}
           />
         )}
 
