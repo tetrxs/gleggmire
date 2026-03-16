@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
   if (!next.startsWith("/") || next.startsWith("//") || next.includes("://")) {
     next = "/";
   }
-  const redirectTo = new URL(next, request.url);
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.url;
+  const redirectTo = new URL(next, baseUrl);
 
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";

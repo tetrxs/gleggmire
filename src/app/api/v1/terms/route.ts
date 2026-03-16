@@ -28,6 +28,10 @@ export async function GET(request: NextRequest) {
     .eq("is_secret", false)
     .order("term", { ascending: true });
 
+  if (search && search.length > 200) {
+    return NextResponse.json({ error: "Suchbegriff zu lang" }, { status: 400 });
+  }
+
   if (search) {
     // Escape SQL LIKE wildcards in user input
     const escaped = search.replace(/[%_\\]/g, (ch) => `\\${ch}`);
@@ -186,7 +190,7 @@ export async function POST(request: NextRequest) {
   if (termError || !newTerm) {
     console.error("Term insert error:", termError);
     return NextResponse.json(
-      { error: "Fehler beim Erstellen des Begriffs: " + (termError?.message ?? "unbekannt") },
+      { error: "Fehler beim Erstellen des Begriffs" },
       { status: 500 }
     );
   }
@@ -211,7 +215,7 @@ export async function POST(request: NextRequest) {
     // Rollback: delete the term if definition insertion failed
     await supabase.from("glossary_terms").delete().eq("id", newTerm.id);
     return NextResponse.json(
-      { error: "Fehler beim Erstellen der Definition: " + defError.message },
+      { error: "Fehler beim Erstellen der Definition" },
       { status: 500 }
     );
   }

@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/constants/admin";
-
-async function checkAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-  const discordId = user.user_metadata?.provider_id ?? user.user_metadata?.sub;
-  return discordId ? isAdmin(discordId) : false;
-}
+import { createServiceClient } from "@/lib/supabase/server";
+import { checkAdminOrMod } from "@/lib/utils/auth-check";
 
 export async function GET(request: NextRequest) {
-  const admin = await checkAdmin();
+  const admin = await checkAdminOrMod();
   if (!admin) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
   }
@@ -33,14 +23,15 @@ export async function GET(request: NextRequest) {
     if (error.code === "42P01" || error.message?.includes("does not exist")) {
       return NextResponse.json({ suggestions: [] });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Suggestions fetch error:", error);
+    return NextResponse.json({ error: "Fehler beim Laden der Vorschlaege" }, { status: 500 });
   }
 
   return NextResponse.json({ suggestions: data ?? [] });
 }
 
 export async function DELETE(request: NextRequest) {
-  const admin = await checkAdmin();
+  const admin = await checkAdminOrMod();
   if (!admin) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
   }
@@ -61,7 +52,8 @@ export async function DELETE(request: NextRequest) {
       .eq("id", id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Suggestion delete error:", error);
+      return NextResponse.json({ error: "Fehler beim Loeschen des Vorschlags" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

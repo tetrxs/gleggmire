@@ -1,24 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/constants/admin";
+import { createServiceClient } from "@/lib/supabase/server";
+import { checkIsAdmin } from "@/lib/utils/auth-check";
 import { logModerationAction } from "@/lib/data/moderation-log";
 import { notifyDiscordUser } from "@/lib/discord";
-
-async function checkAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-  const discordId = user.user_metadata?.provider_id ?? user.user_metadata?.sub;
-  return discordId ? isAdmin(discordId) : false;
-}
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const admin = await checkAdmin();
+  const admin = await checkIsAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
   }
