@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { XpButton } from "@/components/ui/xp-button";
-import { loadYouTubeApi, extractYouTubeId, formatTime, CLIP_DURATION } from "@/lib/youtube-api";
+import { loadYouTubeApi, extractYouTubeId, formatTime, CLIP_DURATION, stripTimestamp } from "@/lib/youtube-api";
 import type { YTPlayer } from "@/lib/youtube-api";
 import type { AttachmentType } from "@/types/database";
 
@@ -173,7 +173,7 @@ function YouTubePickerView({
 
   function handleConfirm() {
     // Strip ALL existing t= parameters from the URL to avoid duplicates
-    const cleanUrl = url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
+    const cleanUrl = stripTimestamp(url);
     onAttach({
       type: "youtube",
       url: cleanUrl,

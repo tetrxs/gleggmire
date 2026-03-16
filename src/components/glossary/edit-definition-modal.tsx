@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { Modal } from "@/components/ui/modal";
 import { XpButton } from "@/components/ui/xp-button";
 import { AttachmentPicker, type AttachmentData } from "@/components/comments/attachment-picker";
+import { stripTimestamp } from "@/lib/youtube-api";
 import type { TermDefinition } from "@/types/database";
 
 interface EditDefinitionModalProps {
@@ -32,7 +33,7 @@ function parseOriginContext(origin?: string): {
     const tMatch = origin.match(/[?&]t=(\d+)/);
     const startSeconds = tMatch ? Number(tMatch[1]) : undefined;
     // Strip t= from URL so it is stored cleanly (startSeconds is separate)
-    const cleanUrl = origin.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
+    const cleanUrl = stripTimestamp(origin);
     return {
       sourceType: "youtube",
       sourceText: origin,
@@ -119,7 +120,7 @@ export function EditDefinitionModal({
       originContext = sourceText.trim();
     } else if (attachment) {
       // Ensure URL is clean before appending timestamp
-      let url = attachment.url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
+      let url = stripTimestamp(attachment.url);
       if (attachment.type === "youtube" && attachment.startSeconds && attachment.startSeconds > 0) {
         const sep = url.includes("?") ? "&" : "?";
         url = `${url}${sep}t=${attachment.startSeconds}`;

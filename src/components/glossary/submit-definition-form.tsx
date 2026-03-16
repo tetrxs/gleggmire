@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth, redirectToLogin } from "@/lib/hooks/use-auth";
 import { XpButton } from "@/components/ui/xp-button";
 import { AttachmentPicker, type AttachmentData } from "@/components/comments/attachment-picker";
+import { stripTimestamp } from "@/lib/youtube-api";
 
 const STORAGE_KEY_PREFIX = "gleggmire-def-draft-";
 
@@ -154,7 +155,7 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
         originContext = form.sourceText.trim();
       } else if (attachment) {
         // Ensure URL is clean before appending timestamp
-        let url = attachment.url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
+        let url = stripTimestamp(attachment.url);
         if (attachment.type === "youtube" && attachment.startSeconds && attachment.startSeconds > 0) {
           const sep = url.includes("?") ? "&" : "?";
           url = `${url}${sep}t=${attachment.startSeconds}`;

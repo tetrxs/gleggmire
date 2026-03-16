@@ -59,8 +59,18 @@ export function loadYouTubeApi(): Promise<void> {
 }
 
 export function extractYouTubeId(url: string): string | null {
-  const match = url.match(/youtube\.com\/watch\?v=([\w-]+)/) || url.match(/youtu\.be\/([\w-]+)/);
+  const match = url.match(/youtube\.com\/watch[?&].*?v=([\w-]+)/) || url.match(/youtu\.be\/([\w-]+)/);
   return match ? match[1] : null;
+}
+
+/** Strip all t= query params from a YouTube URL without breaking the query string. */
+export function stripTimestamp(url: string): string {
+  let result = url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
+  // If ? was consumed (was only before t=), first & should become ?
+  if (!result.includes("?") && result.includes("&")) {
+    result = result.replace("&", "?");
+  }
+  return result;
 }
 
 export function formatTime(seconds: number): string {
