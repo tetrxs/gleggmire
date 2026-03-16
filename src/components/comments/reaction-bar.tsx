@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth, redirectToLogin } from "@/lib/hooks/use-auth";
 import { REACTIONS } from "@/lib/constants/reactions";
 import type { ReactionType } from "@/types/database";
 
@@ -8,6 +9,7 @@ interface ReactionCount { type: ReactionType; count: number; }
 interface ReactionBarProps { reactions?: ReactionCount[]; commentId?: string; }
 
 export function ReactionBar({ reactions = [], commentId }: ReactionBarProps) {
+  const { user } = useAuth();
   const [localReactions, setLocalReactions] = useState<Map<ReactionType, { count: number; active: boolean }>>(() => {
     const map = new Map<ReactionType, { count: number; active: boolean }>();
     for (const r of reactions) map.set(r.type, { count: r.count, active: false });
@@ -15,6 +17,7 @@ export function ReactionBar({ reactions = [], commentId }: ReactionBarProps) {
   });
 
   async function toggleReaction(type: ReactionType) {
+    if (!user) { redirectToLogin(); return; }
     // Optimistic update
     const prev = new Map(localReactions);
     setLocalReactions((current) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useAuth, redirectToLogin } from "@/lib/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { XpButton } from "@/components/ui/xp-button";
 import { TagSelect } from "@/components/glossary/tag-select";
@@ -45,6 +46,7 @@ interface SubmitTermFormProps {
 }
 
 export function SubmitTermForm({ existingTerms: rawTerms, onSuccess }: SubmitTermFormProps) {
+  const { user } = useAuth();
   const existingTerms = useMemo(() => rawTerms.map((t) => ({
     id: t.id,
     term: t.term,
@@ -128,6 +130,7 @@ export function SubmitTermForm({ existingTerms: rawTerms, onSuccess }: SubmitTer
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (!user) { redirectToLogin(); return; }
       const newErrors: Record<string, string> = {};
       if (!form.begriff.trim()) newErrors.begriff = "Bitte gib einen Begriff ein.";
       if (!form.definition.trim()) newErrors.definition = "Bitte gib eine Definition ein.";

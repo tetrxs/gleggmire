@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useAuth, redirectToLogin } from "@/lib/hooks/use-auth";
 import { XpButton } from "@/components/ui/xp-button";
 import { AttachmentPicker, type AttachmentData } from "@/components/comments/attachment-picker";
 
@@ -36,6 +37,7 @@ interface SubmitDefinitionFormProps {
 }
 
 export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFormProps) {
+  const { user } = useAuth();
   const storageKey = STORAGE_KEY_PREFIX + termSlug;
 
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
@@ -108,6 +110,7 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (!user) { redirectToLogin(); return; }
 
       const newErrors: Record<string, string> = {};
       if (!form.definition.trim()) newErrors.definition = "Bitte gib eine Definition ein.";

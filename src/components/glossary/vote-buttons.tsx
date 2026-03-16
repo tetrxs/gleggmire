@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth, redirectToLogin } from "@/lib/hooks/use-auth";
 
 interface VoteButtonsProps {
   upvotes: number;
@@ -17,6 +18,7 @@ export function VoteButtons({
   entityId,
   isOwnContent = false,
 }: VoteButtonsProps) {
+  const { user } = useAuth();
   const [upvotes, setUpvotes] = useState(initialUpvotes ?? 0);
   const [downvotes, setDownvotes] = useState(initialDownvotes ?? 0);
   const [voted, setVoted] = useState<"up" | "down" | null>(null);
@@ -63,6 +65,7 @@ export function VoteButtons({
   }
 
   function handleUpvote() {
+    if (!user) { redirectToLogin(); return; }
     if (isOwnContent || loading || !ready) return;
     setLoading(true);
 
@@ -96,6 +99,7 @@ export function VoteButtons({
   }
 
   function handleDownvote() {
+    if (!user) { redirectToLogin(); return; }
     if (isOwnContent || loading || !ready) return;
     setLoading(true);
 

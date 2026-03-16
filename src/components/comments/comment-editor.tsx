@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useAuth, redirectToLogin } from "@/lib/hooks/use-auth";
 import { AttachmentPicker, type AttachmentData } from "@/components/comments/attachment-picker";
 import type { CommentEntityType } from "@/types/database";
 
@@ -16,6 +17,7 @@ interface CommentEditorProps {
 type PickerMode = "image" | "gif" | "youtube" | "twitch" | null;
 
 export function CommentEditor({ entityType, entityId, parentId, onSubmit, onCancel, compact = false }: CommentEditorProps) {
+  const { user } = useAuth();
   const [text, setText] = useState("");
   const [attachment, setAttachment] = useState<AttachmentData | null>(null);
   const [pickerMode, setPickerMode] = useState<PickerMode>(null);
@@ -28,6 +30,7 @@ export function CommentEditor({ entityType, entityId, parentId, onSubmit, onCanc
   const canSubmit = (text.trim().length > 0 || attachment !== null) && !submitting;
 
   async function handleSubmit() {
+    if (!user) { redirectToLogin(); return; }
     if (!canSubmit) return;
     setError(null);
     setSubmitting(true);
@@ -115,8 +118,9 @@ export function CommentEditor({ entityType, entityId, parentId, onSubmit, onCanc
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
+            onFocus={() => { if (!user) redirectToLogin(); }}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && canSubmit) { e.preventDefault(); handleSubmit(); } }}
-            placeholder={compact ? "Antworten..." : "Kommentar hinzufuegen..."}
+            placeholder={compact ? "Antworten..." : (user ? "Kommentar hinzufuegen..." : "Einloggen um zu kommentieren...")}
             rows={1}
             className="w-full resize-none rounded-lg border px-3 py-2 pr-10 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[#E8593C] focus:border-transparent"
             style={{
