@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest",
-    "test:run": "vitest run",
-    "bot": "node bot/index.mjs"
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.5",
