@@ -6,6 +6,7 @@ declare global {
       Player: new (
         elementId: string,
         config: {
+          host?: string;
           videoId: string;
           height?: string;
           width?: string;
