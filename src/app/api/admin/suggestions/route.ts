@@ -18,24 +18,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
   }
 
-  const status = request.nextUrl.searchParams.get("status") || "pending";
+  const offset = parseInt(request.nextUrl.searchParams.get("offset") || "0", 10);
+  const limit = Math.min(parseInt(request.nextUrl.searchParams.get("limit") || "10", 10), 50);
+
   const supabase = await createServiceClient();
 
   const { data, error } = await supabase
     .from("feature_suggestions")
     .select("*")
-    .eq("status", status)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .range(offset, offset + limit - 1);
 
   if (error) {
+    if (error.code === "42P01" || error.message?.includes("does not exist")) {
+      return NextResponse.json({ suggestions: [] });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ suggestions: data });
+  return NextResponse.json({ suggestions: data ?? [] });
 }
 
-export async function PATCH(request: NextRequest) {
+export async function DELETE(request: NextRequest) {
   const admin = await checkAdmin();
   if (!admin) {
     return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
@@ -43,30 +47,17 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, status, admin_notes } = body;
+    const { id } = body;
 
-    if (!id || !status) {
-      return NextResponse.json({ error: "ID und Status erforderlich" }, { status: 400 });
-    }
-
-    const validStatuses = ["pending", "approved", "rejected", "done"];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json({ error: "Ungueltiger Status" }, { status: 400 });
+    if (!id || typeof id !== "string") {
+      return NextResponse.json({ error: "ID erforderlich" }, { status: 400 });
     }
 
     const supabase = await createServiceClient();
 
-    const updateData: Record<string, unknown> = {
-      status,
-      updated_at: new Date().toISOString(),
-    };
-    if (admin_notes !== undefined) {
-      updateData.admin_notes = admin_notes;
-    }
-
     const { error } = await supabase
       .from("feature_suggestions")
-      .update(updateData)
+      .delete()
       .eq("id", id);
 
     if (error) {

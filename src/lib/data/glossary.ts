@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { calculateGleggScore } from "@/lib/utils/glegg-score";
 import type {
   GlossaryTerm,
   TermDefinition,
@@ -12,6 +13,9 @@ import type {
 export type TermWithPreview = GlossaryTerm & {
   definitions: TermDefinition[];
   tags: TermTag[];
+  commentCount: number;
+  creatorUsername: string;
+  creatorAvatarUrl: string | null;
 };
 
 export type TermFull = GlossaryTerm & {
@@ -51,23 +55,42 @@ export async function getApprovedTerms(): Promise<TermWithPreview[]> {
     if (error || !terms) return [];
 
     const termIds = terms.map((t) => t.id);
+    const creatorIds = [...new Set(terms.map((t) => t.created_by))];
 
-    const [{ data: definitions }, { data: tags }] = await Promise.all([
+    const [{ data: definitions }, { data: tags }, { data: comments }, { data: users }] = await Promise.all([
       supabase
         .from("term_definitions")
         .select("*")
-        .in("term_id", termIds),
+        .in("term_id", termIds)
+        .eq("status", "approved"),
       supabase
         .from("term_tags")
         .select("*")
         .in("term_id", termIds),
+      supabase
+        .from("comments")
+        .select("id, entity_id")
+        .eq("entity_type", "term")
+        .in("entity_id", termIds),
+      supabase
+        .from("users")
+        .select("id, username, avatar_url")
+        .in("id", creatorIds),
     ]);
 
-    return terms.map((term) => ({
-      ...term,
-      definitions: (definitions ?? []).filter((d) => d.term_id === term.id),
-      tags: (tags ?? []).filter((t) => t.term_id === term.id),
-    })) as TermWithPreview[];
+    const userMap = new Map((users ?? []).map((u) => [u.id, u]));
+
+    return terms.map((term) => {
+      const creator = userMap.get(term.created_by);
+      return {
+        ...term,
+        definitions: (definitions ?? []).filter((d) => d.term_id === term.id),
+        tags: (tags ?? []).filter((t) => t.term_id === term.id),
+        commentCount: (comments ?? []).filter((c) => c.entity_id === term.id).length,
+        creatorUsername: creator?.username ?? "Unbekannt",
+        creatorAvatarUrl: creator?.avatar_url ?? null,
+      };
+    }) as TermWithPreview[];
   } catch {
     return [];
   }
@@ -95,6 +118,7 @@ export async function getTermBySlug(slug: string): Promise<TermFull | null> {
           .from("term_definitions")
           .select("*")
           .eq("term_id", term.id)
+          .eq("status", "approved")
           .order("upvotes", { ascending: false }),
         supabase
           .from("term_aliases")
@@ -129,7 +153,8 @@ export async function getExistingTermsForMatching(): Promise<
 
     const { data: terms, error } = await supabase
       .from("glossary_terms")
-      .select("id, term, slug");
+      .select("id, term, slug")
+      .eq("status", "approved");
 
     if (error || !terms) return [];
 
@@ -174,17 +199,35 @@ export async function getLatestTerms(
     if (error || !terms) return [];
 
     const termIds = terms.map((t) => t.id);
+    const creatorIds = [...new Set(terms.map((t) => t.created_by))];
 
-    const [{ data: definitions }, { data: tags }] = await Promise.all([
-      supabase.from("term_definitions").select("*").in("term_id", termIds),
+    const [{ data: definitions }, { data: tags }, { data: comments }, { data: users }] = await Promise.all([
+      supabase.from("term_definitions").select("*").in("term_id", termIds).eq("status", "approved"),
       supabase.from("term_tags").select("*").in("term_id", termIds),
+      supabase
+        .from("comments")
+        .select("id, entity_id")
+        .eq("entity_type", "term")
+        .in("entity_id", termIds),
+      supabase
+        .from("users")
+        .select("id, username, avatar_url")
+        .in("id", creatorIds),
     ]);
 
-    return terms.map((term) => ({
-      ...term,
-      definitions: (definitions ?? []).filter((d) => d.term_id === term.id),
-      tags: (tags ?? []).filter((t) => t.term_id === term.id),
-    })) as TermWithPreview[];
+    const userMap = new Map((users ?? []).map((u) => [u.id, u]));
+
+    return terms.map((term) => {
+      const creator = userMap.get(term.created_by);
+      return {
+        ...term,
+        definitions: (definitions ?? []).filter((d) => d.term_id === term.id),
+        tags: (tags ?? []).filter((t) => t.term_id === term.id),
+        commentCount: (comments ?? []).filter((c) => c.entity_id === term.id).length,
+        creatorUsername: creator?.username ?? "Unbekannt",
+        creatorAvatarUrl: creator?.avatar_url ?? null,
+      };
+    }) as TermWithPreview[];
   } catch {
     return [];
   }
@@ -241,40 +284,93 @@ export async function getRecentEdits(
 }
 
 /**
- * Get terms with status 'pending' for the moderation queue.
- * Includes definitions and tags so moderators can review in full.
+ * Get all definitions submitted by a specific user.
  */
-export async function getPendingTerms(): Promise<TermWithPreview[]> {
+export async function getDefinitionsByUser(
+  userId: string
+): Promise<TermDefinition[]> {
   try {
     const supabase = await createClient();
 
-    const { data: terms, error } = await supabase
-      .from("glossary_terms")
+    const { data, error } = await supabase
+      .from("term_definitions")
       .select("*")
-      .eq("status", "pending")
-      .order("created_at", { ascending: true });
+      .eq("submitted_by", userId)
+      .order("created_at", { ascending: false });
 
-    if (error || !terms) return [];
-
-    const termIds = terms.map((t) => t.id);
-
-    const [{ data: definitions }, { data: tags }] = await Promise.all([
-      supabase
-        .from("term_definitions")
-        .select("*")
-        .in("term_id", termIds),
-      supabase
-        .from("term_tags")
-        .select("*")
-        .in("term_id", termIds),
-    ]);
-
-    return terms.map((term) => ({
-      ...term,
-      definitions: (definitions ?? []).filter((d) => d.term_id === term.id),
-      tags: (tags ?? []).filter((t) => t.term_id === term.id),
-    })) as TermWithPreview[];
+    if (error || !data) return [];
+    return data as TermDefinition[];
   } catch {
     return [];
   }
 }
+
+/**
+ * Get comment data for a user (attachment info for score calculation).
+ */
+export async function getCommentsByUser(
+  userId: string
+): Promise<{ attachment_type: string | null }[]> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("comments")
+      .select("attachment_type")
+      .eq("user_id", userId);
+
+    if (error || !data) return [];
+    return data;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get badge types earned by a user.
+ */
+export async function getUserBadges(userId: string): Promise<string[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("badges")
+      .select("badge_type")
+      .eq("user_id", userId);
+
+    if (error || !data) return [];
+    return data.map((b) => b.badge_type);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Calculate a user's Glegg-Score live from their activity data.
+ */
+export async function getUserGleggScore(userId: string): Promise<number> {
+  const supabase = await createClient();
+
+  const [
+    { count: approvedTermCount },
+    definitions,
+    comments,
+    badges,
+  ] = await Promise.all([
+    supabase
+      .from("glossary_terms")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", userId)
+      .eq("status", "approved"),
+    getDefinitionsByUser(userId),
+    getCommentsByUser(userId),
+    getUserBadges(userId),
+  ]);
+
+  return calculateGleggScore({
+    approvedTermCount: approvedTermCount ?? 0,
+    definitions,
+    comments,
+    badges,
+  });
+}
+

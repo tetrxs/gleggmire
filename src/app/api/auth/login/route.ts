@@ -10,7 +10,11 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const next = searchParams.get("next") ?? "/";
+  let next = searchParams.get("next") ?? "/";
+  // Prevent open redirect: only allow relative paths
+  if (!next.startsWith("/") || next.startsWith("//")) {
+    next = "/";
+  }
 
   try {
     const supabase = await createClient();
@@ -24,6 +28,7 @@ export async function GET(request: NextRequest) {
       provider: "discord",
       options: {
         redirectTo: redirectUrl.toString(),
+        scopes: "identify guilds.join",
       },
     });
 

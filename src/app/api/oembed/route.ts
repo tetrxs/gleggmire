@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiRateLimit, checkRateLimit } from "@/lib/rate-limit";
 
 interface OEmbedCacheEntry {
   data: OEmbedResponse;
@@ -41,6 +42,12 @@ function cleanExpiredCache() {
 }
 
 export async function GET(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const { success } = await checkRateLimit(apiRateLimit, ip);
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(request.url);
   const url = searchParams.get("url");
 

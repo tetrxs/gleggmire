@@ -24,20 +24,6 @@ export const BADGES: BadgeDefinition[] = [
     condition: "Have 10 terms approved",
   },
   {
-    type: "first_clip",
-    name: "Clip-Chimp",
-    emoji: "\uD83C\uDFAC",
-    description: "Hat den ersten Clip eingereicht",
-    condition: "Submit your first clip",
-  },
-  {
-    type: "clip_hoarder",
-    name: "Clip-Hoarder",
-    emoji: "\uD83D\uDCFC",
-    description: "25 Clips eingereicht",
-    condition: "Submit 25 clips",
-  },
-  {
     type: "first_definition",
     name: "Erklaerbar",
     emoji: "\uD83D\uDCA1",
@@ -94,11 +80,11 @@ export const BADGES: BadgeDefinition[] = [
     condition: "Be a member for over 1 year",
   },
   {
-    type: "linker",
-    name: "Verknuepfer",
-    emoji: "\uD83D\uDD17",
-    description: "10 Clip-Term-Verknuepfungen erstellt",
-    condition: "Create 10 clip-term links",
+    type: "definition_master",
+    name: "Definitions-Meister",
+    emoji: "\uD83C\uDF93",
+    description: "10 genehmigte Definitionen geschrieben",
+    condition: "Have 10 definitions approved",
   },
   {
     type: "high_score",
