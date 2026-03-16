@@ -29,7 +29,7 @@ interface TermDetailProps {
 
 
 function parseYouTubeOrigin(url: string): { videoId: string; startSeconds: number } | null {
-  const idMatch = url.match(/youtube\.com\/watch[?&].*?v=([\w-]+)/) || url.match(/youtu\.be\/([\w-]+)/);
+  const idMatch = url.match(/youtube\.com\/watch[?&].*?v=([\w-]{11})/) || url.match(/youtu\.be\/([\w-]{11})/);
   if (!idMatch) return null;
   const videoId = idMatch[1];
   const tMatch = url.match(/[?&]t=(\d+)/);

@@ -151,7 +151,7 @@ export function CommentItem({ comment, entityType, entityId, isReply = false, on
                 <img src={comment.attachment_url} alt="Anhang" className="max-w-full max-h-64 rounded-lg block" loading="lazy" />
               )}
               {comment.attachment_type === "youtube" && (() => {
-                const idMatch = comment.attachment_url!.match(/youtube\.com\/watch[?&].*?v=([\w-]+)/) || comment.attachment_url!.match(/youtu\.be\/([\w-]+)/);
+                const idMatch = comment.attachment_url!.match(/youtube\.com\/watch[?&].*?v=([\w-]{11})/) || comment.attachment_url!.match(/youtu\.be\/([\w-]{11})/);
                 const videoId = idMatch?.[1];
                 if (!videoId) return null;
                 return <YouTubeEmbed videoId={videoId} startSeconds={comment.attachment_start_seconds ?? 0} />;

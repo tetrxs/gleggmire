@@ -81,7 +81,6 @@ function YouTubePickerView({
 
     loadYouTubeApi().then(() => {
       if (destroyed) return;
-      console.log("[YT-PICKER] Creating player:", { videoId, containerId: containerIdRef.current });
       playerRef.current = new window.YT!.Player(containerIdRef.current, {
         videoId,
         height: "220",

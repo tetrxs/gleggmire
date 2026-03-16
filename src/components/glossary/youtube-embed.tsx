@@ -97,7 +97,6 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
 
     loadYouTubeApi().then(() => {
       if (destroyed || !document.getElementById(containerId)) return;
-      console.log("[YT-EMBED] Creating player:", { videoId, containerId, embedsAllowed });
       playerRef.current = new window.YT!.Player(containerId, {
         videoId,
         width: "100%",
