@@ -153,7 +153,8 @@ export function SubmitDefinitionForm({ termSlug, onSuccess }: SubmitDefinitionFo
       if (form.sourceType === "other" && form.sourceText.trim()) {
         originContext = form.sourceText.trim();
       } else if (attachment) {
-        let url = attachment.url;
+        // Ensure URL is clean before appending timestamp
+        let url = attachment.url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
         if (attachment.type === "youtube" && attachment.startSeconds && attachment.startSeconds > 0) {
           const sep = url.includes("?") ? "&" : "?";
           url = `${url}${sep}t=${attachment.startSeconds}`;

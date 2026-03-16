@@ -31,10 +31,12 @@ function parseOriginContext(origin?: string): {
     // Extract start seconds from ?t= or &t=
     const tMatch = origin.match(/[?&]t=(\d+)/);
     const startSeconds = tMatch ? Number(tMatch[1]) : undefined;
+    // Strip t= from URL so it is stored cleanly (startSeconds is separate)
+    const cleanUrl = origin.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
     return {
       sourceType: "youtube",
       sourceText: origin,
-      attachment: { type: "youtube", url: origin, startSeconds, title: "YouTube-Video" },
+      attachment: { type: "youtube", url: cleanUrl, startSeconds, title: "YouTube-Video" },
     };
   }
 
@@ -116,7 +118,8 @@ export function EditDefinitionModal({
     if (sourceType === "other" && sourceText.trim()) {
       originContext = sourceText.trim();
     } else if (attachment) {
-      let url = attachment.url;
+      // Ensure URL is clean before appending timestamp
+      let url = attachment.url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
       if (attachment.type === "youtube" && attachment.startSeconds && attachment.startSeconds > 0) {
         const sep = url.includes("?") ? "&" : "?";
         url = `${url}${sep}t=${attachment.startSeconds}`;
@@ -246,7 +249,7 @@ export function EditDefinitionModal({
               </div>
               <button
                 type="button"
-                onClick={() => { setAttachment(null); setShowPicker(true); }}
+                onClick={() => { setShowPicker(true); }}
                 className="shrink-0 text-xs font-medium hover:underline"
                 style={{ color: "var(--color-text-muted)" }}
               >

@@ -172,10 +172,8 @@ function YouTubePickerView({
   }, [seekToClip]);
 
   function handleConfirm() {
-    // Strip any existing t= parameter from the URL to avoid duplicates
-    const cleanUrl = url.replace(/([?&])t=\d+(&|$)/, (_, prefix, suffix) =>
-      suffix === "&" ? prefix : prefix === "&" ? "" : ""
-    ).replace(/[?&]$/, "");
+    // Strip ALL existing t= parameters from the URL to avoid duplicates
+    const cleanUrl = url.replace(/[?&]t=\d+/g, "").replace(/\?$/, "");
     onAttach({
       type: "youtube",
       url: cleanUrl,
