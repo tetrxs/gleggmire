@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useId } from "react";
 import { loadYouTubeApi, formatTime, CLIP_DURATION } from "@/lib/youtube-api";
 import { useYouTubeMute } from "@/lib/youtube-mute-context";
+import { useCookieConsent } from "@/components/ui/cookie-consent";
 import type { YTPlayer } from "@/lib/youtube-api";
 
 interface YouTubeEmbedProps {
@@ -11,7 +12,71 @@ interface YouTubeEmbedProps {
   title?: string;
 }
 
+function EmbedBlockedPlaceholder({ videoId, startSeconds, title }: YouTubeEmbedProps) {
+  const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}${(startSeconds ?? 0) > 0 ? `&t=${startSeconds}` : ""}`;
+
+  return (
+    <div className="space-y-1.5">
+      {title && (
+        <div className="flex items-center gap-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+          <span className="truncate font-medium" style={{ color: "var(--color-text)" }}>{title}</span>
+          <span>&middot;</span>
+          <a
+            href={youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 underline transition-colors hover:text-[var(--color-accent)]"
+          >
+            Ganzes Video
+          </a>
+        </div>
+      )}
+      <div
+        className="flex flex-col items-center justify-center gap-3 rounded-lg border"
+        style={{
+          maxWidth: "400px",
+          aspectRatio: "16 / 9",
+          borderColor: "var(--color-border)",
+          backgroundColor: "var(--color-surface)",
+        }}
+      >
+        <div className="text-center">
+          <p className="text-sm font-medium" style={{ color: "var(--color-text-muted)" }}>
+            YouTube-Inhalte wurden blockiert
+          </p>
+          <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Erfordert Einwilligung fuer Drittanbieter-Embeds
+          </p>
+        </div>
+        <button
+          onClick={() => window.dispatchEvent(new Event("open-cookie-settings"))}
+          className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
+          style={{
+            border: "1px solid var(--color-border)",
+            color: "var(--color-text)",
+            backgroundColor: "var(--color-bg)",
+          }}
+        >
+          Einstellungen oeffnen
+        </button>
+      </div>
+      {!title && (
+        <a
+          href={youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs underline transition-colors hover:text-[var(--color-accent)]"
+          style={{ color: "var(--color-text-muted)" }}
+        >
+          Ganzes Video
+        </a>
+      )}
+    </div>
+  );
+}
+
 export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedProps) {
+  const { prefs } = useCookieConsent();
   const reactId = useId();
   const containerId = `yt-embed-${videoId}-${reactId.replace(/:/g, "")}`;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -21,11 +86,13 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
   const isVisibleRef = useRef(false);
   const { globalMuted } = useYouTubeMute();
 
+  const embedsAllowed = prefs?.embeds === true;
   const clipStart = startSeconds;
   const clipEnd = startSeconds + CLIP_DURATION;
 
   // Create player
   useEffect(() => {
+    if (!embedsAllowed) return;
     let destroyed = false;
 
     loadYouTubeApi().then(() => {
@@ -60,11 +127,11 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
       playerRef.current?.destroy();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, containerId]);
+  }, [videoId, containerId, embedsAllowed]);
 
   // IntersectionObserver: auto-play when visible, pause when not
   useEffect(() => {
-    if (!ready || !containerRef.current) return;
+    if (!embedsAllowed || !ready || !containerRef.current) return;
     const el = containerRef.current;
 
     const observer = new IntersectionObserver(
@@ -88,21 +155,21 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [ready, clipStart, globalMuted]);
+  }, [embedsAllowed, ready, clipStart, globalMuted]);
 
   // Sync mute state: unmute only if visible AND global mute is off
   useEffect(() => {
-    if (!ready || !playerRef.current) return;
+    if (!embedsAllowed || !ready || !playerRef.current) return;
     if (globalMuted || !isVisibleRef.current) {
       playerRef.current.mute();
     } else {
       playerRef.current.unMute();
     }
-  }, [ready, globalMuted]);
+  }, [embedsAllowed, ready, globalMuted]);
 
   // Loop logic
   useEffect(() => {
-    if (!ready) return;
+    if (!embedsAllowed || !ready) return;
     intervalRef.current = setInterval(() => {
       if (!playerRef.current || !isVisibleRef.current) return;
       const t = playerRef.current.getCurrentTime();
@@ -113,7 +180,11 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [ready, clipStart, clipEnd]);
+  }, [embedsAllowed, ready, clipStart, clipEnd]);
+
+  if (!embedsAllowed) {
+    return <EmbedBlockedPlaceholder videoId={videoId} startSeconds={startSeconds} title={title} />;
+  }
 
   const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}${startSeconds > 0 ? `&t=${startSeconds}` : ""}`;
 
