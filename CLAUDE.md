@@ -20,7 +20,7 @@ Fan-Community-Plattform für den YouTuber Gleggmire. Glossar (Urban Dictionary-S
 
 ## Wichtige Regeln
 - DSGVO: Supabase EU-Region, IP-Logs 90 Tage auto-delete, youtube-nocookie.com
-- Kein Dark Mode (by design — XP hatte keinen)
+- Dark Mode verfuegbar (ThemeToggle im Header)
 - Admin-Erkennung: Nur über Discord-ID-Whitelist im Backend-Code
 - Standard-Admin Discord ID: `303835609762627586`
 - YouTube Embeds: Immer `youtube-nocookie.com`

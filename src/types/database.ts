@@ -2,11 +2,9 @@
 
 export type TermStatus = "pending" | "approved" | "disputed" | "locked";
 
-export type CommentEntityType = "term" | "clip";
+export type CommentEntityType = "term";
 
 export type AttachmentType = "image" | "gif" | "youtube" | "twitch";
-
-export type ClipSource = "youtube" | "twitch";
 
 export type VoteType = "up" | "down";
 
@@ -23,8 +21,6 @@ export interface GlossaryTerm {
   id: string;
   slug: string;
   term: string;
-  phonetic?: string;
-  word_type?: string;
   status: TermStatus;
   created_by: string;
   created_at: string;
@@ -44,6 +40,8 @@ export interface TermDefinition {
   downvotes: number;
   cope_meter_sum: number;
   cope_meter_count: number;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
 }
 
 export interface Comment {
@@ -63,27 +61,6 @@ export interface Comment {
   timecode_seconds?: number;
 }
 
-export interface Clip {
-  id: string;
-  source: ClipSource;
-  external_url: string;
-  external_id: string;
-  title: string;
-  duration_seconds: number;
-  thumbnail_url: string;
-  submitted_by: string;
-  submitted_at: string;
-  upvotes: number;
-}
-
-export interface ClipTermLink {
-  clip_id: string;
-  term_id: string;
-  start_seconds?: number;
-  linked_by: string;
-  upvotes: number;
-}
-
 export interface User {
   id: string;
   discord_id: string;
@@ -97,6 +74,7 @@ export interface User {
   banned_by?: string;
   banned_at?: string;
   ban_reason?: string;
+  notifications_enabled: boolean;
   joined_at: string;
 }
 
