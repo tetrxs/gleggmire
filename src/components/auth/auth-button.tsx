@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ADMIN_DISCORD_IDS } from "@/lib/constants/admin";
 import type { User } from "@supabase/supabase-js";
 
 function DiscordIcon() {
@@ -23,6 +24,10 @@ export function AuthButton() {
   const [user, setUser] = useState<User | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isMod, setIsMod] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [togglingNotifications, setTogglingNotifications] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -40,6 +45,19 @@ export function AuthButton() {
             user.user_metadata?.name ??
             "User"
         );
+        const discordId = user.user_metadata?.provider_id ?? user.user_metadata?.sub;
+        setIsAdmin(discordId ? ADMIN_DISCORD_IDS.includes(discordId) : false);
+
+        // Check moderator status + notifications from DB
+        supabase
+          .from("users")
+          .select("is_moderator, notifications_enabled")
+          .eq("id", user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            setIsMod(data?.is_moderator === true);
+            setNotificationsEnabled(data?.notifications_enabled ?? true);
+          });
       }
       setLoading(false);
     });
@@ -57,9 +75,24 @@ export function AuthButton() {
             currentUser.user_metadata?.name ??
             "User"
         );
+        const discordId = currentUser.user_metadata?.provider_id ?? currentUser.user_metadata?.sub;
+        setIsAdmin(discordId ? ADMIN_DISCORD_IDS.includes(discordId) : false);
+
+        supabase
+          .from("users")
+          .select("is_moderator, notifications_enabled")
+          .eq("id", currentUser.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            setIsMod(data?.is_moderator === true);
+            setNotificationsEnabled(data?.notifications_enabled ?? true);
+          });
       } else {
         setAvatarUrl(null);
         setUsername("");
+        setIsAdmin(false);
+        setIsMod(false);
+        setNotificationsEnabled(true);
       }
     });
 
@@ -85,7 +118,7 @@ export function AuthButton() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[var(--color-muted)] opacity-60" aria-busy="true">
+      <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[var(--color-text-muted)] opacity-60" aria-busy="true">
         ...
       </div>
     );
@@ -95,7 +128,7 @@ export function AuthButton() {
     return (
       <a
         href="/api/auth/login"
-        className="flex items-center gap-2 rounded-full border-[1.5px] border-[var(--color-text)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)]"
+        className="flex items-center gap-2 rounded-full border-2 border-[var(--color-text)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)]"
       >
         <DiscordIcon />
         <span>Login mit Discord</span>
@@ -107,18 +140,30 @@ export function AuthButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        className="flex items-center gap-2 rounded-full border-[1.5px] border-[var(--color-text)] bg-[var(--color-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-border)]"
+        className="flex items-center gap-2.5 py-1.5 text-[15px] font-medium text-[var(--color-text)] transition-colors"
         onClick={() => setDropdownOpen(!dropdownOpen)}
         aria-expanded={dropdownOpen}
         aria-haspopup="true"
       >
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" width={20} height={20} className="rounded-full" />
+          <img
+            src={avatarUrl}
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-full"
+            style={{ border: "2px solid var(--color-border)" }}
+          />
         ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-full"
+            style={{ border: "2px solid var(--color-border)", color: "var(--color-text-muted)" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
         )}
         <span className="max-w-[100px] truncate">{username}</span>
         <svg
@@ -137,31 +182,83 @@ export function AuthButton() {
       </button>
 
       {dropdownOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 min-w-[180px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg dark:border-zinc-700">
+        <div className="absolute right-0 top-full z-50 mt-2 min-w-[180px] dropdown">
           <a
             href="/profil"
-            className="block px-4 py-2.5 text-sm text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)] dark:hover:bg-zinc-700"
+            className="dropdown-item flex items-center gap-2 no-underline"
             onClick={() => setDropdownOpen(false)}
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
             Profil
           </a>
           <a
             href="/meine-eintraege"
-            className="block px-4 py-2.5 text-sm text-[var(--color-text)] no-underline transition-colors hover:bg-[var(--color-border)] dark:hover:bg-zinc-700"
+            className="dropdown-item flex items-center gap-2 no-underline"
             onClick={() => setDropdownOpen(false)}
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
             Meine Eintraege
           </a>
-          <div className="mx-3 border-t border-[var(--color-border)] dark:border-zinc-700" />
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-text)] transition-colors hover:bg-[var(--color-border)] dark:hover:bg-zinc-700"
-              onClick={() => setDropdownOpen(false)}
-            >
-              Logout
-            </button>
-          </form>
+          {(isAdmin || isMod) && (
+            <>
+              <div className="dropdown-divider" />
+              <a
+                href="/admin"
+                className="dropdown-item flex items-center gap-2 font-medium no-underline"
+                style={{ color: "var(--color-accent)" }}
+                onClick={() => setDropdownOpen(false)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                Moderation
+              </a>
+            </>
+          )}
+          <div className="dropdown-divider" />
+          <button
+            type="button"
+            className="dropdown-item flex w-full cursor-pointer items-center gap-2 text-left"
+            disabled={togglingNotifications}
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (togglingNotifications) return;
+              setTogglingNotifications(true);
+              const newValue = !notificationsEnabled;
+              setNotificationsEnabled(newValue);
+              try {
+                const res = await fetch("/api/v1/notifications", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ enabled: newValue }),
+                });
+                if (!res.ok) setNotificationsEnabled(!newValue);
+              } catch {
+                setNotificationsEnabled(!newValue);
+              } finally {
+                setTogglingNotifications(false);
+              }
+            }}
+          >
+            {notificationsEnabled ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M13.73 21a2 2 0 0 1-3.46 0" /><path d="M18.63 13A17.89 17.89 0 0 1 18 8" /><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14" /><path d="M18 8a6 6 0 0 0-9.33-5" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+            )}
+            <span>Benachrichtigungen</span>
+          </button>
+          <div className="dropdown-divider" />
+          <button
+            type="button"
+            className="dropdown-item flex w-full items-center gap-2 text-left"
+            onClick={async () => {
+              setDropdownOpen(false);
+              const supabase = createClient();
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+            Logout
+          </button>
         </div>
       )}
     </div>

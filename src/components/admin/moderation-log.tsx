@@ -3,318 +3,179 @@
 import { useState, useMemo } from "react";
 import { XpWindow } from "@/components/ui/xp-window";
 import { XpButton } from "@/components/ui/xp-button";
+import type { ModerationLogEntry } from "@/lib/data/moderation-log";
 
-type ActionType =
-  | "term_approved"
-  | "term_rejected"
-  | "user_banned"
-  | "user_unbanned"
-  | "moderator_added"
-  | "moderator_removed"
-  | "score_adjusted"
-  | "breaking_news";
-
-interface LogEntry {
-  id: string;
-  timestamp: string;
-  moderator: string;
-  actionType: ActionType;
-  target: string;
-  details: string;
-}
-
-const ACTION_LABELS: Record<ActionType, string> = {
+const ACTION_LABELS: Record<string, string> = {
   term_approved: "Begriff freigeschaltet",
   term_rejected: "Begriff abgelehnt",
+  term_submitted: "Begriff eingereicht",
   user_banned: "Nutzer gebannt",
   user_unbanned: "Nutzer entsperrt",
   moderator_added: "Moderator ernannt",
   moderator_removed: "Moderator entfernt",
-  score_adjusted: "Score angepasst",
-  breaking_news: "Breaking News gesendet",
+  breaking_news: "Breaking News",
+  definition_submitted: "Definition eingereicht",
+  comment_posted: "Kommentar geschrieben",
+  term_self_deleted: "Begriff vom Ersteller geloescht",
+  term_edited: "Begriff bearbeitet",
+  report_dismiss: "Report abgelehnt",
+  report_delete: "Report: Inhalt geloescht",
+  report_warn: "Report: Verwarnung",
+  report_temp_ban: "Report: Temp. Bann",
+  report_perm_ban: "Report: Perm. Bann",
 };
 
-const ACTION_COLORS: Record<ActionType, string> = {
+const ACTION_COLORS: Record<string, string> = {
   term_approved: "#22C55E",
   term_rejected: "#EF4444",
+  term_submitted: "#3B82F6",
   user_banned: "#EF4444",
   user_unbanned: "#22C55E",
   moderator_added: "#3B82F6",
   moderator_removed: "#E8593C",
-  score_adjusted: "#3B82F6",
   breaking_news: "#E8593C",
+  definition_submitted: "#3B82F6",
+  comment_posted: "#71717a",
+  term_self_deleted: "#8B5CF6",
+  term_edited: "#3B82F6",
+  report_dismiss: "#71717a",
+  report_delete: "#F97316",
+  report_warn: "#F59E0B",
+  report_temp_ban: "#EF4444",
+  report_perm_ban: "#991B1B",
 };
 
-const MOCK_LOG: LogEntry[] = [
-  {
-    id: "log-1",
-    timestamp: "2026-03-15T14:30:00Z",
-    moderator: "GleggLord420",
-    actionType: "term_approved",
-    target: "Snench-Alarm",
-    details: "Begriff in Glossar aufgenommen.",
-  },
-  {
-    id: "log-2",
-    timestamp: "2026-03-15T13:15:00Z",
-    moderator: "GleggLord420",
-    actionType: "term_rejected",
-    target: "ASDF123",
-    details: "Spam / kein realer Begriff.",
-  },
-  {
-    id: "log-3",
-    timestamp: "2026-03-15T11:00:00Z",
-    moderator: "KanackenKoenig",
-    actionType: "user_banned",
-    target: "SpamBot9000",
-    details: "Automatisierter Spam in Kommentaren. Bann dauerhaft.",
-  },
-  {
-    id: "log-4",
-    timestamp: "2026-03-14T22:45:00Z",
-    moderator: "GleggLord420",
-    actionType: "breaking_news",
-    target: "Alle Nutzer",
-    details: "Gleggmire ist live! Neuer Glossar-Drop incoming.",
-  },
-  {
-    id: "log-5",
-    timestamp: "2026-03-14T18:30:00Z",
-    moderator: "GleggVerified",
-    actionType: "moderator_added",
-    target: "SnenchMeister",
-    details: "Zum Moderator ernannt fuer herausragende Community-Beitraege.",
-  },
-  {
-    id: "log-6",
-    timestamp: "2026-03-14T16:00:00Z",
-    moderator: "KanackenKoenig",
-    actionType: "term_approved",
-    target: "Glegg-Pause",
-    details: "Community-Voting war ueberwiegend positiv. Freigeschaltet.",
-  },
-  {
-    id: "log-7",
-    timestamp: "2026-03-13T20:15:00Z",
-    moderator: "GleggLord420",
-    actionType: "score_adjusted",
-    target: "CopeLordSupreme",
-    details: "Score von 1580 auf 1680 angepasst (+100 Bonus Event).",
-  },
-  {
-    id: "log-8",
-    timestamp: "2026-03-13T14:00:00Z",
-    moderator: "GleggVerified",
-    actionType: "user_unbanned",
-    target: "ReformedUser42",
-    details: "Bann nach 30 Tagen aufgehoben. Verwarnung bleibt bestehen.",
-  },
-  {
-    id: "log-9",
-    timestamp: "2026-03-12T10:30:00Z",
-    moderator: "KanackenKoenig",
-    actionType: "moderator_removed",
-    target: "InactiveMod",
-    details: "Moderator-Status entfernt wegen Inaktivitaet (90+ Tage).",
-  },
-  {
-    id: "log-10",
-    timestamp: "2026-03-11T08:00:00Z",
-    moderator: "GleggLord420",
-    actionType: "term_approved",
-    target: "Kanalratte",
-    details: "Qualitativ hochwertige Einreichung. Sofort freigeschaltet.",
-  },
-];
+interface ModerationLogProps {
+  entries?: ModerationLogEntry[];
+}
 
-const ALL_MODERATORS = [...new Set(MOCK_LOG.map((e) => e.moderator))];
-const ALL_ACTION_TYPES = [...new Set(MOCK_LOG.map((e) => e.actionType))];
+const PAGE_SIZE = 10;
 
-export function ModerationLog() {
+export function ModerationLog({ entries = [] }: ModerationLogProps) {
   const [filterMod, setFilterMod] = useState<string>("all");
   const [filterAction, setFilterAction] = useState<string>("all");
   const [filterDate, setFilterDate] = useState<string>("");
+  const [page, setPage] = useState(0);
+
+  const allModerators = useMemo(() => [...new Set(entries.map((e) => e.moderator))], [entries]);
+  const allActionTypes = useMemo(() => [...new Set(entries.map((e) => e.action))], [entries]);
 
   const filteredLog = useMemo(() => {
-    return MOCK_LOG.filter((entry) => {
-      if (filterMod !== "all" && entry.moderator !== filterMod)
-        return false;
-      if (filterAction !== "all" && entry.actionType !== filterAction)
-        return false;
+    return entries.filter((entry) => {
+      if (filterMod !== "all" && entry.moderator !== filterMod) return false;
+      if (filterAction !== "all" && entry.action !== filterAction) return false;
       if (filterDate) {
         const entryDate = entry.timestamp.split("T")[0];
         if (entryDate !== filterDate) return false;
       }
       return true;
     });
+  }, [entries, filterMod, filterAction, filterDate]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLog.length / PAGE_SIZE));
+  const pagedEntries = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    return filteredLog.slice(start, start + PAGE_SIZE);
+  }, [filteredLog, page]);
+
+  // Reset page when filters change
+  useMemo(() => {
+    setPage(0);
   }, [filterMod, filterAction, filterDate]);
 
   return (
     <XpWindow title="Moderations-Log">
       {/* Filters */}
-      <div className="mb-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+      <div className="mb-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
         <div className="mb-2 text-sm font-bold">Filter:</div>
         <div className="flex flex-wrap gap-3">
           <div>
-            <label
-              className="mb-1 block text-xs"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Moderator:
-            </label>
-            <select
-              value={filterMod}
-              onChange={(e) => setFilterMod(e.target.value)}
-              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-            >
+            <label className="mb-1 block text-xs" style={{ color: "var(--color-text-muted)" }}>Moderator:</label>
+            <select value={filterMod} onChange={(e) => setFilterMod(e.target.value)} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-sm">
               <option value="all">Alle</option>
-              {ALL_MODERATORS.map((mod) => (
-                <option key={mod} value={mod}>
-                  {mod}
-                </option>
-              ))}
+              {allModerators.map((mod) => <option key={mod} value={mod}>{mod}</option>)}
             </select>
           </div>
-
           <div>
-            <label
-              className="mb-1 block text-xs"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Aktion:
-            </label>
-            <select
-              value={filterAction}
-              onChange={(e) => setFilterAction(e.target.value)}
-              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-            >
+            <label className="mb-1 block text-xs" style={{ color: "var(--color-text-muted)" }}>Aktion:</label>
+            <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-sm">
               <option value="all">Alle</option>
-              {ALL_ACTION_TYPES.map((action) => (
-                <option key={action} value={action}>
-                  {ACTION_LABELS[action as ActionType]}
-                </option>
-              ))}
+              {allActionTypes.map((action) => <option key={action} value={action}>{ACTION_LABELS[action] ?? action}</option>)}
             </select>
           </div>
-
           <div>
-            <label
-              className="mb-1 block text-xs"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              Datum:
-            </label>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-sm"
-            />
+            <label className="mb-1 block text-xs" style={{ color: "var(--color-text-muted)" }}>Datum:</label>
+            <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-sm" />
           </div>
-
           <div className="flex items-end">
-            <XpButton
-              onClick={() => {
-                setFilterMod("all");
-                setFilterAction("all");
-                setFilterDate("");
-              }}
-            >
-              Filter zuruecksetzen
+            <XpButton onClick={() => { setFilterMod("all"); setFilterAction("all"); setFilterDate(""); }}>
+              Zuruecksetzen
             </XpButton>
           </div>
         </div>
       </div>
 
-      {/* Results count */}
-      <div
-        className="mb-2 text-xs"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        {filteredLog.length} Eintraege
-      </div>
+      <div className="mb-3 text-xs" style={{ color: "var(--color-text-muted)" }}>{filteredLog.length} Eintraege</div>
 
-      {/* Log Entries */}
-      <div
-        className="flex flex-col gap-0 overflow-hidden rounded-xl border border-[var(--color-border)]"
-        style={{
-          maxHeight: "500px",
-          overflowY: "auto",
-        }}
-      >
-        {filteredLog.length === 0 && (
-          <div
-            className="p-4 text-center text-sm"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            Keine Eintraege gefunden.
-          </div>
-        )}
-
-        {filteredLog.map((entry, idx) => (
-          <div
-            key={entry.id}
-            className="flex gap-3 border-b border-[var(--color-border)] px-3 py-2 text-sm"
-            style={{
-              backgroundColor: idx % 2 === 0 ? "var(--color-surface)" : "var(--color-bg)",
-            }}
-          >
-            {/* Timestamp */}
+      {/* Log Entries as Cards */}
+      {pagedEntries.length === 0 ? (
+        <div
+          className="flex h-32 items-center justify-center rounded-xl text-sm"
+          style={{ border: "2px dashed var(--color-border)", color: "var(--color-text-muted)" }}
+        >
+          Keine Eintraege gefunden.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {pagedEntries.map((entry) => (
             <div
-              className="w-32 shrink-0 font-mono text-xs"
-              style={{ color: "var(--color-text-muted)" }}
+              key={entry.id}
+              className="rounded-xl border p-4"
+              style={{
+                backgroundColor: "var(--color-surface)",
+                borderColor: "var(--color-border)",
+              }}
             >
-              {new Date(entry.timestamp).toLocaleDateString("de-DE", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "2-digit",
-              })}{" "}
-              {new Date(entry.timestamp).toLocaleTimeString("de-DE", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: ACTION_COLORS[entry.action] ?? "var(--color-text)" }}
+                >
+                  {ACTION_LABELS[entry.action] ?? entry.action}
+                </span>
+                <span className="shrink-0 text-xs font-mono" style={{ color: "var(--color-text-muted)" }}>
+                  {new Date(entry.timestamp).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" })}{" "}
+                  {new Date(entry.timestamp).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                <span>Moderator: <strong style={{ color: "var(--color-text)" }}>{entry.moderator}</strong></span>
+                <span>Typ: <strong style={{ color: "var(--color-text)" }}>{entry.targetType}</strong></span>
+              </div>
+              {entry.details && (
+                <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  {entry.details}
+                </p>
+              )}
             </div>
+          ))}
+        </div>
+      )}
 
-            {/* Moderator */}
-            <div className="w-28 shrink-0 font-bold">
-              {entry.moderator}
-            </div>
-
-            {/* Action */}
-            <div className="w-40 shrink-0">
-              <span
-                className="font-bold"
-                style={{
-                  color: ACTION_COLORS[entry.actionType],
-                }}
-              >
-                {ACTION_LABELS[entry.actionType]}
-              </span>
-            </div>
-
-            {/* Target */}
-            <div className="w-28 shrink-0 font-bold">{entry.target}</div>
-
-            {/* Details */}
-            <div
-              className="min-w-0 flex-1"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              {entry.details}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Immutability Notice */}
-      <div
-        className="mt-3 text-xs italic"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        Hinweis: Das Moderations-Log ist unveraenderbar. Eintraege koennen
-        nicht geloescht oder bearbeitet werden.
-      </div>
+      {/* Pagination */}
+      {filteredLog.length > PAGE_SIZE && (
+        <div className="mt-4 flex items-center justify-between">
+          <XpButton disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+            Zurueck
+          </XpButton>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Seite {page + 1} / {totalPages}
+          </span>
+          <XpButton disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>
+            Weiter
+          </XpButton>
+        </div>
+      )}
     </XpWindow>
   );
 }

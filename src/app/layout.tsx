@@ -3,14 +3,14 @@ import { Space_Grotesk, Lilita_One } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import MobileNav from "@/components/layout/mobile-nav";
 import { KonamiCode } from "@/components/troll/konami-code";
 import { TimeEvents } from "@/components/troll/time-events";
 import { CookieConsentBanner } from "@/components/ui/cookie-consent";
 import { SuggestionModal } from "@/components/ui/suggestion-modal";
 import { TermSubmitModal } from "@/components/glossary/term-submit-modal";
-import { RouletteModal } from "@/components/glossary/roulette-modal";
+
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { DiscordServerCheck } from "@/components/ui/discord-server-check";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -28,7 +28,7 @@ const lilitaOne = Lilita_One({
 export const metadata: Metadata = {
   title: "gleggmire.net — Das Gleggmire-Glossar",
   description:
-    "Inoffizielles Fan-Projekt: Das umfassende Glossar und Clip-Archiv rund um den YouTuber Gleggmire. Von der Community, fuer die Community.",
+    "Inoffizielles Fan-Projekt: Das umfassende Community-Lexikon rund um den YouTuber Gleggmire. Von der Community, fuer die Community.",
   icons: {
     icon: "/images/favicon.png",
   },
@@ -58,21 +58,21 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="flex min-h-screen flex-col pb-[68px] md:pb-0"
+        className="flex min-h-screen flex-col"
         style={{ backgroundColor: "var(--color-bg)", color: "var(--color-text)" }}
       >
         <Header />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-8">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-8">
           {children}
         </main>
         <Footer />
-        <MobileNav />
         <KonamiCode />
         <TimeEvents />
         <CookieConsentBanner />
         <SuggestionModal />
         <TermSubmitModal />
-        <RouletteModal />
+
+        <DiscordServerCheck />
         <ScrollToTop />
       </body>
     </html>

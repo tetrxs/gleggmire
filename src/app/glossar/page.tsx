@@ -12,17 +12,23 @@ export const metadata: Metadata = {
 export default async function GlossarPage() {
   const termsWithPreview = await getApprovedTerms();
 
-  const terms = termsWithPreview.map(({ definitions, tags, ...term }) => term);
+  const terms = termsWithPreview.map(({ definitions, tags, commentCount, creatorUsername, creatorAvatarUrl, ...term }) => term);
   const definitions = termsWithPreview.flatMap((t) => t.definitions);
   const tags = termsWithPreview.flatMap((t) => t.tags);
 
+  const commentCounts: Record<string, number> = {};
+  const creators: Record<string, { username: string; avatarUrl: string | null }> = {};
+  for (const t of termsWithPreview) {
+    commentCounts[t.id] = t.commentCount;
+    creators[t.id] = { username: t.creatorUsername, avatarUrl: t.creatorAvatarUrl };
+  }
+
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
+    <div className="py-10">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1
             className="text-3xl font-bold tracking-tight"
-            style={{ fontFamily: "var(--font-heading)" }}
           >
             Glossar
           </h1>
@@ -38,7 +44,7 @@ export default async function GlossarPage() {
         </OpenModalButton>
       </div>
 
-      <GlossaryList terms={terms} definitions={definitions} tags={tags} />
-    </main>
+      <GlossaryList terms={terms} definitions={definitions} tags={tags} commentCounts={commentCounts} creators={creators} />
+    </div>
   );
 }

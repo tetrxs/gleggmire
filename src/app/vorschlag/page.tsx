@@ -48,7 +48,7 @@ export default function VorschlagPage() {
   };
 
   return (
-    <main className="mx-auto max-w-xl px-4 py-10">
+    <div className="py-10">
       <div className="mb-8 flex flex-col items-center gap-3 text-center">
         <Image
           src="/images/gleggmire_coin.png"
@@ -60,7 +60,6 @@ export default function VorschlagPage() {
         <h1
           className="text-2xl font-bold uppercase tracking-tight sm:text-3xl"
           style={{
-            fontFamily: "var(--font-heading)",
             color: "var(--color-text)",
           }}
         >
@@ -83,7 +82,7 @@ export default function VorschlagPage() {
           <div className="mb-3 text-4xl">&#10084;&#65039;</div>
           <h2
             className="mb-2 text-lg font-bold uppercase"
-            style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+            style={{ color: "var(--color-text)" }}
           >
             Danke fuer deinen Vorschlag!
           </h2>
@@ -233,6 +232,6 @@ export default function VorschlagPage() {
           </button>
         </form>
       )}
-    </main>
+    </div>
   );
 }

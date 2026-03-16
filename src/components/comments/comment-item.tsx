@@ -1,18 +1,23 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { VoteButtons } from "@/components/glossary/vote-buttons";
-import { ReactionBar } from "@/components/comments/reaction-bar";
 import { CommentEditor } from "@/components/comments/comment-editor";
+import { EditCommentModal } from "@/components/comments/edit-comment-modal";
 import { getAnonymousName } from "@/lib/constants/anonymous-names";
-import type { CommentWithMeta } from "@/lib/mock-comments";
+import type { CommentWithMeta } from "@/lib/data/comments";
 import type { CommentEntityType } from "@/types/database";
+import { YouTubeEmbed } from "@/components/glossary/youtube-embed";
+import { UserLink } from "@/components/ui/user-link";
 
 interface CommentItemProps {
   comment: CommentWithMeta;
   entityType: CommentEntityType;
   entityId: string;
   isReply?: boolean;
+  onReplySubmit?: (reply: Record<string, unknown>) => void;
+  currentUserId?: string;
+  onDeleted?: (commentId: string) => void;
+  onEdited?: (commentId: string, updated: Record<string, unknown>) => void;
 }
 
 function usernameColor(name: string): string {
@@ -40,8 +45,26 @@ function formatTimestamp(isoString: string): string {
   return `vor ${Math.floor(diffDays / 30)}mo`;
 }
 
-export function CommentItem({ comment, entityType, entityId, isReply = false }: CommentItemProps) {
+export function CommentItem({ comment, entityType, entityId, isReply = false, onReplySubmit, currentUserId, onDeleted, onEdited }: CommentItemProps) {
   const [showReplyEditor, setShowReplyEditor] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const isOwner = currentUserId && !comment.is_anonymous && comment.user_id === currentUserId;
+
+  async function handleDelete() {
+    if (!confirm("Kommentar wirklich loeschen?")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/v1/comments/${comment.id}`, { method: "DELETE" });
+      if (res.ok) {
+        onDeleted?.(comment.id);
+      }
+    } catch {
+      // silently fail
+    }
+    setDeleting(false);
+  }
 
   const displayName = useMemo(() => {
     if (comment.is_anonymous) return getAnonymousName(comment.id);
@@ -51,86 +74,187 @@ export function CommentItem({ comment, entityType, entityId, isReply = false }: 
   const avatarColor = usernameColor(displayName);
   const initials = getInitials(displayName);
 
+  const hasReplies = comment.replies && comment.replies.length > 0;
+
   return (
-    <div className={isReply ? "ml-8 pl-4 border-l-2 border-[var(--color-border)] dark:border-zinc-700" : ""}>
-      <div className="card p-4 space-y-3">
-        {/* Header */}
-        <div className="flex items-center gap-2.5">
-          <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold" style={{ backgroundColor: avatarColor }}>
+    <div id={`comment-${comment.id}`} className={isReply ? "relative pl-10" : ""}>
+      {/* Thread connector for replies */}
+      {isReply && (
+        <div
+          className="absolute left-4 top-0 bottom-0 w-px"
+          style={{ backgroundColor: "var(--color-border)" }}
+        />
+      )}
+
+      {/* Comment — flat layout like YouTube/Instagram */}
+      <div className={`flex gap-3 ${isReply ? "pt-3" : "py-3"}`}>
+        {/* Avatar (only for anonymous — non-anonymous avatar is inside UserLink) */}
+        {comment.is_anonymous ? (
+          <div
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold mt-0.5"
+            style={{ backgroundColor: avatarColor }}
+          >
             {initials}
           </div>
-          <div className="flex items-center gap-2 min-w-0 text-sm">
-            <span className="font-semibold text-[var(--color-text)] truncate max-w-[180px]">{displayName}</span>
-            {comment.is_anonymous && (
-              <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">ANON</span>
-            )}
-            <span className="text-[var(--color-muted)]">&middot;</span>
-            <span className="text-[var(--color-muted)] shrink-0 text-xs">{formatTimestamp(comment.created_at)}</span>
-          </div>
-        </div>
-
-        {/* Text */}
-        {comment.text && <p className="text-sm leading-relaxed whitespace-pre-wrap text-[var(--color-text)]">{comment.text}</p>}
-
-        {/* Attachment */}
-        {comment.attachment_type && comment.attachment_url && (
-          <div className="overflow-hidden rounded-lg bg-zinc-900">
-            {(comment.attachment_type === "image" || comment.attachment_type === "gif") && (
-              <img src={comment.attachment_url} alt="Kommentar-Anhang" className="max-w-full max-h-64 mx-auto block" loading="lazy" />
-            )}
-            {comment.attachment_type === "youtube" && (
-              <div className="flex flex-col items-center justify-center py-8 text-white">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 mb-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
-                </div>
-                <p className="text-sm font-semibold">YouTube Video</p>
-                <p className="text-xs text-zinc-400 mt-1 truncate max-w-full px-4">{comment.attachment_url}</p>
-                {comment.attachment_start_seconds !== undefined && comment.attachment_start_seconds > 0 && (
-                  <p className="text-xs text-zinc-500 mt-1">Start: {Math.floor(comment.attachment_start_seconds / 60)}:{String(comment.attachment_start_seconds % 60).padStart(2, "0")}</p>
-                )}
-              </div>
-            )}
-            {comment.attachment_type === "twitch" && (
-              <div className="flex flex-col items-center justify-center py-8 text-white">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 mb-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
-                </div>
-                <p className="text-sm font-semibold">Twitch Clip</p>
-                <p className="text-xs text-zinc-400 mt-1 truncate max-w-full px-4">{comment.attachment_url}</p>
-              </div>
-            )}
+        ) : comment.avatar_url ? (
+          <img
+            src={comment.avatar_url}
+            alt={displayName}
+            className="shrink-0 w-8 h-8 rounded-full object-cover mt-0.5"
+          />
+        ) : (
+          <div
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold mt-0.5"
+            style={{ backgroundColor: avatarColor }}
+          >
+            {initials}
           </div>
         )}
 
-        <ReactionBar reactions={comment.reactions} />
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          {/* Name + time */}
+          <div className="flex items-center gap-2 text-[13px]">
+            {!comment.is_anonymous && comment.user_id ? (
+              <UserLink
+                userId={comment.user_id}
+                username={displayName}
+                hideAvatar
+                size="sm"
+              />
+            ) : (
+              <span className="font-semibold text-[var(--color-text)]">
+                {displayName}
+              </span>
+            )}
+            {comment.is_anonymous && (
+              <span className="rounded-full bg-zinc-200 px-1.5 py-0.5 text-[9px] font-semibold text-zinc-500">
+                ANON
+              </span>
+            )}
+            <span className="text-[var(--color-text-muted)] text-xs">
+              {formatTimestamp(comment.created_at)}
+            </span>
+          </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <VoteButtons upvotes={comment.upvotes} downvotes={comment.downvotes} entityType="comment" entityId={comment.id} />
-          {!isReply && (
-            <button
-              type="button"
-              onClick={() => setShowReplyEditor((v) => !v)}
-              className="rounded-lg px-3 py-1 text-xs font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-border)] hover:text-[var(--color-text)] dark:hover:bg-zinc-700"
-            >
-              {showReplyEditor ? "Abbrechen" : "Antworten"}
-            </button>
+          {/* Text */}
+          {comment.text && (
+            <p className="mt-0.5 text-sm leading-relaxed whitespace-pre-wrap text-[var(--color-text)]">
+              {comment.text}
+            </p>
           )}
+
+          {/* Attachment */}
+          {comment.attachment_type && comment.attachment_url && (
+            <div className="mt-2">
+              {(comment.attachment_type === "image" || comment.attachment_type === "gif") && (
+                <img src={comment.attachment_url} alt="Anhang" className="max-w-full max-h-64 rounded-lg block" loading="lazy" />
+              )}
+              {comment.attachment_type === "youtube" && (() => {
+                const idMatch = comment.attachment_url!.match(/youtube\.com\/watch\?v=([\w-]+)/) || comment.attachment_url!.match(/youtu\.be\/([\w-]+)/);
+                const videoId = idMatch?.[1];
+                if (!videoId) return null;
+                return <YouTubeEmbed videoId={videoId} startSeconds={comment.attachment_start_seconds ?? 0} />;
+              })()}
+              {comment.attachment_type === "twitch" && (
+                <a
+                  href={comment.attachment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-100 transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                  Twitch Clip
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Actions row */}
+          <div className="mt-1 flex items-center gap-2">
+            {!isReply && (
+              <button
+                type="button"
+                onClick={() => setShowReplyEditor((v) => !v)}
+                className="text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+              >
+                {showReplyEditor ? "Abbrechen" : "Antworten"}
+              </button>
+            )}
+            {isOwner && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setEditModalOpen(true)}
+                  className="rounded p-1 text-[var(--color-text-muted)] transition-colors hover:bg-blue-50 hover:text-blue-500"
+                  title="Kommentar bearbeiten"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="rounded p-1 text-[var(--color-text-muted)] transition-colors hover:bg-red-50 hover:text-red-500"
+                  title="Kommentar loeschen"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Reply editor */}
       {showReplyEditor && !isReply && (
-        <div className="ml-8 mt-2">
-          <CommentEditor entityType={entityType} entityId={entityId} parentId={comment.id} compact onCancel={() => setShowReplyEditor(false)} onSubmit={() => setShowReplyEditor(false)} />
+        <div className="pl-11 pb-2">
+          <CommentEditor
+            entityType={entityType}
+            entityId={entityId}
+            parentId={comment.id}
+            compact
+            onCancel={() => setShowReplyEditor(false)}
+            onSubmit={(reply) => { setShowReplyEditor(false); onReplySubmit?.(reply); }}
+          />
         </div>
       )}
 
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-2 space-y-2">
-          {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} entityType={entityType} entityId={entityId} isReply />
+      {/* Replies */}
+      {hasReplies && (
+        <div className="relative">
+          {comment.replies!.map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              entityType={entityType}
+              entityId={entityId}
+              isReply
+              currentUserId={currentUserId}
+              onDeleted={onDeleted}
+              onEdited={onEdited}
+            />
           ))}
         </div>
+      )}
+
+      {/* Edit Comment Modal */}
+      {editModalOpen && (
+        <EditCommentModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          comment={comment}
+          onSaved={(updated) => {
+            setEditModalOpen(false);
+            onEdited?.(comment.id, updated);
+          }}
+        />
       )}
     </div>
   );

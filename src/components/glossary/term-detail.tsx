@@ -1,40 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {
   GlossaryTerm,
   TermDefinition,
   TermAlias,
   TermTag,
 } from "@/types/database";
-import { XpWindow } from "@/components/ui/xp-window";
-import { XpButton } from "@/components/ui/xp-button";
-import { XpDialog } from "@/components/ui/xp-dialog";
 import { VoteButtons } from "@/components/glossary/vote-buttons";
 import { DisputeBanner } from "@/components/glossary/dispute-banner";
-import { CopeOMeter } from "@/components/glossary/cope-o-meter";
-import { SketchUnderline } from "@/components/ui/sketch-elements";
+import { SubmitDefinitionForm } from "@/components/glossary/submit-definition-form";
+import { ReportModal } from "@/components/glossary/report-modal";
+import { getTagClasses } from "@/lib/constants/tags";
+import { YouTubeEmbed } from "@/components/glossary/youtube-embed";
+import { UserLink } from "@/components/ui/user-link";
+import type { UserInfo } from "@/lib/data/users";
+import type { CommentWithMeta } from "@/lib/data/comments";
 
 interface TermDetailProps {
   term: GlossaryTerm;
   definitions: TermDefinition[];
   aliases: TermAlias[];
   tags: TermTag[];
+  comments?: CommentWithMeta[];
+  userInfoMap?: Record<string, UserInfo>;
+  currentUserId?: string;
 }
 
-const TAG_CLASSES: Record<string, string> = {
-  meme: "bg-pink-50 text-pink-700 dark:bg-pink-950 dark:text-pink-300",
-  insider: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-  gameplay: "bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
-  community: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
-  catchphrase: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
-  meta: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
-  rage: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300",
-  wholesome: "bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
-};
 
-function getTagClasses(tag: string) {
-  return TAG_CLASSES[tag.toLowerCase()] ?? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+function parseYouTubeOrigin(url: string): { videoId: string; startSeconds: number } | null {
+  const idMatch = url.match(/youtube\.com\/watch\?v=([\w-]+)/) || url.match(/youtu\.be\/([\w-]+)/);
+  if (!idMatch) return null;
+  const videoId = idMatch[1];
+  const tMatch = url.match(/[?&]t=(\d+)/);
+  const startSeconds = tMatch ? Number(tMatch[1]) : 0;
+  return { videoId, startSeconds };
+}
+
+function DefinitionOrigin({ originContext, videoTitle }: { originContext: string; videoTitle?: string }) {
+  const isUrl = /^https?:\/\//i.test(originContext);
+  const isYouTube = originContext.includes("youtube") || originContext.includes("youtu.be");
+  const isTwitch = originContext.includes("twitch");
+
+  if (isUrl && isYouTube) {
+    const parsed = parseYouTubeOrigin(originContext);
+    if (parsed) {
+      return (
+        <div className="mt-3">
+          <YouTubeEmbed videoId={parsed.videoId} startSeconds={parsed.startSeconds} title={videoTitle} />
+        </div>
+      );
+    }
+  }
+
+  if (!isUrl) {
+    return (
+      <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+        Herkunft:{" "}
+        <span className="font-medium" style={{ color: "var(--color-text)" }}>{originContext}</span>
+      </p>
+    );
+  }
+
+  return (
+    <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+      Herkunft:{" "}
+      <a href={originContext} target="_blank" rel="noopener noreferrer"
+        className="font-medium underline transition-colors hover:text-[var(--color-accent)]"
+        style={{ color: "var(--color-text)" }}>
+        {isTwitch ? "Twitch-Clip" : "Link"} &#x2197;
+      </a>
+    </p>
+  );
 }
 
 export function TermDetail({
@@ -42,309 +79,226 @@ export function TermDetail({
   definitions,
   aliases,
   tags,
+  comments = [],
+  userInfoMap = {},
+  currentUserId,
 }: TermDetailProps) {
-  const [disputeDialog, setDisputeDialog] = useState(false);
-  const [reportDialog, setReportDialog] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
-  const totalUpvotes = definitions.reduce((sum, d) => sum + d.upvotes, 0);
-  const totalDownvotes = definitions.reduce((sum, d) => sum + d.downvotes, 0);
-  const isRatiod = totalDownvotes > totalUpvotes;
+  // Auto-open definition form when navigated with #add-definition hash
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#add-definition") {
+      setShowAddForm(true);
+    }
+  }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Ratio'd Banner */}
-      {isRatiod && (
-        <div className="overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-center shadow-lg">
-          <p className="text-lg font-bold tracking-[4px] text-white animate-pulse">
-            RATIO&apos;D
-          </p>
-        </div>
-      )}
-
+    <div>
       {/* Dispute Banner */}
       <DisputeBanner status={term.status} />
 
-      {/* Header Section */}
-      <section>
-        <div className="flex flex-wrap items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <h1
-              className="text-3xl font-bold tracking-tight"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              {term.term}
-            </h1>
-            <SketchUnderline className="mt-1 max-w-[200px] text-[var(--color-accent)]" />
-          </div>
-
-          {/* Badges */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            {term.word_type && (
-              <span
-                className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
-                style={{
-                  backgroundColor: "var(--color-border)",
-                  color: "var(--color-muted)",
-                }}
-              >
-                {term.word_type}
-              </span>
-            )}
-
-            {term.verified_by_gleggmire && (
-              <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-[var(--color-accent)] text-white">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                </svg>
-                Verifiziert
-              </span>
-            )}
-
-            {term.status === "disputed" && (
-              <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
-                Bestritten
-              </span>
-            )}
-
-            {term.status === "locked" && (
-              <span className="rounded-full bg-gray-200 px-2.5 py-0.5 text-[11px] font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                Gesperrt
-              </span>
-            )}
-          </div>
-        </div>
-
-        {term.phonetic && (
-          <p className="mt-2 font-mono text-sm" style={{ color: "var(--color-muted)" }}>
-            [{term.phonetic}]
-          </p>
-        )}
-      </section>
-
-      {/* Aliases */}
-      {aliases.length > 0 && (
-        <section>
-          <p className="text-sm" style={{ color: "var(--color-muted)" }}>
-            <span className="font-medium" style={{ color: "var(--color-text)" }}>
-              Auch bekannt als:
-            </span>{" "}
-            {aliases.map((a) => a.alias).join(", ")}
-          </p>
-        </section>
-      )}
-
-      {/* Tags */}
-      {tags.length > 0 && (
-        <section className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span
-              key={tag.id}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${getTagClasses(tag.tag)}`}
-            >
-              #{tag.tag}
-            </span>
-          ))}
-        </section>
-      )}
-
-      <div className="pb-1" style={{ borderBottom: "1px solid var(--color-border)" }} />
-
-      {/* Definitions */}
-      <section className="space-y-4">
-        <h2
-          className="text-lg font-semibold"
-          style={{ fontFamily: "var(--font-heading)" }}
+      {/* ============================
+          TERM HEADER
+          ============================ */}
+      <div className="mb-1">
+        <div className="flex items-start justify-between gap-3">
+        <h1
+          className="text-3xl font-bold tracking-tight sm:text-4xl"
+          style={{ color: "var(--color-text)" }}
         >
-          Definitionen
-        </h2>
-
-        {definitions.map((def, index) => (
-          <div
-            key={def.id}
-            className="space-y-4 pb-5"
-            style={{
-              borderBottom: index < definitions.length - 1 ? "1px solid var(--color-border)" : "none",
-            }}
-          >
-            {/* Definition number + text */}
-            <div className="text-sm leading-relaxed">
-              <span
-                className="mr-1.5 font-bold text-[var(--color-accent)]"
-              >
-                {index + 1}.
-              </span>
-              {def.definition}
-            </div>
-
-            {/* Example sentence */}
-            {def.example_sentence && (
-              <p className="text-sm italic pl-4 border-l-2" style={{ color: "var(--color-muted)", borderColor: "var(--color-border)" }}>
-                &ldquo;{def.example_sentence}&rdquo;
-              </p>
-            )}
-
-            {/* Origin context */}
-            {def.origin_context && (
-              <p className="text-xs" style={{ color: "var(--color-muted)" }}>
-                <span className="font-medium">Herkunft:</span> {def.origin_context}
-              </p>
-            )}
-
-            {/* Vote buttons */}
-            <VoteButtons
-              upvotes={def.upvotes}
-              downvotes={def.downvotes}
-              entityType="definition"
-              entityId={def.id}
-            />
-
-            {/* Cope Meter */}
-            {def.cope_meter_count > 0 && (
-              <CopeOMeter
-                sum={def.cope_meter_sum}
-                count={def.cope_meter_count}
-              />
-            )}
-
-            {/* Submitted by */}
-            <p
-              className="text-right text-[11px]"
-              style={{ color: "var(--color-muted)" }}
-            >
-              Eingereicht von{" "}
-              <span className="font-medium" style={{ color: "var(--color-text)" }}>
-                {def.submitted_by}
-              </span>
-            </p>
-          </div>
-        ))}
-
-        {definitions.length === 0 && (
-          <div
-            className="rounded-xl border border-dashed p-6 text-center"
-            style={{ borderColor: "var(--color-border)" }}
-          >
-            <p className="text-sm" style={{ color: "var(--color-muted)" }}>
-              Noch keine Definitionen vorhanden. Sei der Erste!
-            </p>
-          </div>
-        )}
-      </section>
-
-      <div className="pb-1" style={{ borderBottom: "1px solid var(--color-border)" }} />
-
-      {/* Approved-o-Meter */}
-      <XpWindow title="Gleggmire-Approved-o-Meter">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium">Gesamt-Bewertung:</span>
-            <div className="flex items-center gap-4 tabular-nums">
-              <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-semibold">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {totalUpvotes}
-              </span>
-              <span className="inline-flex items-center gap-1 text-red-500 dark:text-red-400 font-semibold">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {totalDownvotes}
-              </span>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div
-            className="h-2.5 w-full overflow-hidden rounded-full"
-            style={{ backgroundColor: "var(--color-border)" }}
-          >
-            <div
-              className="h-full rounded-full transition-all duration-500 ease-out"
-              style={{
-                width:
-                  totalUpvotes + totalDownvotes > 0
-                    ? `${(totalUpvotes / (totalUpvotes + totalDownvotes)) * 100}%`
-                    : "50%",
-                backgroundColor: isRatiod ? "#EF4444" : "#22C55E",
-              }}
-            />
-          </div>
-
-          <p
-            className="text-center text-xs font-medium"
-            style={{
-              color: isRatiod ? "#EF4444" : "#22C55E",
-            }}
-          >
-            {isRatiod
-              ? "Dieser Begriff wurde von der Community ratio'd. Cope harder."
-              : "Dieser Begriff ist Gleggmire-approved. W."}
-          </p>
+          {term.term}
+          {aliases.length > 0 && (
+            <span className="ml-2 text-lg font-normal" style={{ color: "var(--color-text-muted)" }}>
+              ({aliases.map((a) => a.alias).join(", ")})
+            </span>
+          )}
+        </h1>
+        <button
+          type="button"
+          onClick={() => setShowReportModal(true)}
+          className="shrink-0 mt-2 rounded-lg p-2 text-[var(--color-text-muted)] transition-colors hover:bg-red-50 hover:text-red-500"
+          title="Inhalt melden"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+            <line x1="4" y1="22" x2="4" y2="15" />
+          </svg>
+        </button>
         </div>
-      </XpWindow>
 
-      <div className="pb-1" style={{ borderBottom: "1px solid var(--color-border)" }} />
+      </div>
 
-      {/* Action Buttons */}
-      <section className="flex flex-wrap gap-3">
-        <XpButton variant="danger" onClick={() => setDisputeDialog(true)}>
-          Bestreiten
-        </XpButton>
-        <XpButton onClick={() => setReportDialog(true)}>
-          Melden
-        </XpButton>
-      </section>
-
-      {/* Metadata Footer */}
-      <section
-        className="pt-4 space-y-1.5 text-xs"
-        style={{
-          borderTop: "1px solid var(--color-border)",
-          color: "var(--color-muted)",
-        }}
-      >
-        <p>
-          <span className="font-medium">Erstellt von:</span> {term.created_by}
-        </p>
-        <p>
-          <span className="font-medium">Erstellt am:</span>{" "}
+      {/* Meta line */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
+        <span className="inline-flex items-center gap-1">
+          von{" "}
+          <UserLink
+            userId={term.created_by}
+            username={userInfoMap[term.created_by]?.username ?? term.created_by}
+            avatarUrl={userInfoMap[term.created_by]?.avatar_url}
+            size="sm"
+          />
+        </span>
+        <span>&middot;</span>
+        <span>
           {new Date(term.created_at).toLocaleDateString("de-DE", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
           })}
-        </p>
-        <p>
-          <span className="font-medium">Zuletzt aktualisiert:</span>{" "}
-          {new Date(term.updated_at).toLocaleDateString("de-DE", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </p>
-      </section>
+        </span>
+        {term.status === "disputed" && (
+          <>
+            <span>&middot;</span>
+            <span className="font-semibold text-red-600">Umstritten</span>
+          </>
+        )}
+        {term.status === "locked" && (
+          <>
+            <span>&middot;</span>
+            <span className="font-semibold text-gray-500">Gesperrt</span>
+          </>
+        )}
+      </div>
 
-      {/* Dialogs */}
-      <XpDialog
-        type="warning"
-        title="Begriff bestreiten"
-        message="Möchtest du diesen Begriff wirklich bestreiten? Gleggmire wird persönlich über das Schicksal dieses Eintrags entscheiden. Dein Cope-Level wird notiert."
-        open={disputeDialog}
-        onClose={() => setDisputeDialog(false)}
+      {/* Tags */}
+      {tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <span
+              key={tag.id}
+              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${getTagClasses(tag.tag)}`}
+            >
+              #{tag.tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* ============================
+          DEFINITIONEN
+          ============================ */}
+      <div className="mt-8 space-y-4">
+        <h2 className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+          Definitionen ({definitions.length})
+        </h2>
+
+        {definitions.length === 0 && !showAddForm && (
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            Noch keine Definitionen vorhanden.
+          </p>
+        )}
+
+        {definitions.map((def, idx) => (
+          <div key={def.id} id={`definition-${def.id}`}>
+            {/* Divider between definitions */}
+            {idx > 0 && (
+              <div className="my-6 h-px" style={{ backgroundColor: "var(--color-border)" }} />
+            )}
+
+            {/* Author + date — same style as term header meta line */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
+              <span className="inline-flex items-center gap-1">
+                von{" "}
+                <UserLink
+                  userId={def.submitted_by}
+                  username={userInfoMap[def.submitted_by]?.username ?? def.submitted_by}
+                  avatarUrl={userInfoMap[def.submitted_by]?.avatar_url}
+                  size="sm"
+                />
+              </span>
+              <span>&middot;</span>
+              <span>
+                {new Date(def.created_at).toLocaleDateString("de-DE", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+
+            {/* Definition text */}
+            <p className="text-[15px] leading-relaxed" style={{ color: "var(--color-text)" }}>
+              {def.definition}
+            </p>
+
+            {/* Example sentence */}
+            {def.example_sentence && (
+              <div className="mt-5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "var(--color-text-muted)" }}>
+                  Beispielsatz:
+                </p>
+                <p
+                  className="pl-3 text-sm italic leading-relaxed"
+                  style={{
+                    color: "var(--color-text-muted)",
+                    borderLeft: "2px solid var(--color-accent)",
+                  }}
+                >
+                  &ldquo;{def.example_sentence}&rdquo;
+                </p>
+              </div>
+            )}
+
+            {/* Origin — YouTube inline embed or link */}
+            {def.origin_context && (
+              <div className="mt-5">
+                <DefinitionOrigin originContext={def.origin_context} />
+              </div>
+            )}
+
+            {/* Votes */}
+            <div className="mt-4">
+              <VoteButtons
+                upvotes={def.upvotes}
+                downvotes={def.downvotes}
+                entityType="definition"
+                entityId={def.id}
+                isOwnContent={currentUserId === def.submitted_by}
+              />
+            </div>
+          </div>
+        ))}
+
+        {/* Divider before add button */}
+        {definitions.length > 0 && (
+          <div className="my-6 h-px" style={{ backgroundColor: "var(--color-border)" }} />
+        )}
+
+        {/* Add definition */}
+        {showAddForm ? (
+          <div>
+            <p className="mb-4 text-sm font-semibold" style={{ color: "var(--color-text)" }}>
+              Neue Definition hinzufuegen
+            </p>
+            <SubmitDefinitionForm
+              termSlug={term.slug}
+              onSuccess={() => setShowAddForm(false)}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowAddForm(true)}
+            className="text-sm font-medium transition-colors hover:text-[var(--color-accent)]"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            + Definition hinzufuegen
+          </button>
+        )}
+      </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        open={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        termId={term.id}
+        termName={term.term}
+        definitions={definitions}
+        comments={comments}
       />
 
-      <XpDialog
-        type="info"
-        title="Meldung eingegangen"
-        message="Ihre Meldung wurde von Gleggmire persönlich geprüft und mit freundlichem Kopfschütteln abgelehnt."
-        open={reportDialog}
-        onClose={() => setReportDialog(false)}
-      />
     </div>
   );
 }

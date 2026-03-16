@@ -10,84 +10,79 @@ interface Suggestion {
   description: string;
   discord_username: string | null;
   contact_info: string | null;
-  status: "pending" | "approved" | "rejected" | "done";
-  admin_notes: string | null;
   created_at: string;
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "Ausstehend", color: "#F59E0B" },
-  approved: { label: "Akzeptiert", color: "#22C55E" },
-  rejected: { label: "Abgelehnt", color: "#EF4444" },
-  done: { label: "Umgesetzt", color: "#2563eb" },
-};
+const PAGE_SIZE = 10;
 
 export function SuggestionsManager() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>("pending");
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const fetchSuggestions = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`/api/admin/suggestions?status=${filter}`);
+      const res = await fetch(`/api/admin/suggestions?offset=${page * PAGE_SIZE}&limit=${PAGE_SIZE}`);
       if (res.ok) {
         const data = await res.json();
-        setSuggestions(data.suggestions ?? []);
+        const items = data.suggestions ?? [];
+        setSuggestions(items);
+        setHasMore(items.length === PAGE_SIZE);
+      } else {
+        setSuggestions([]);
+        if (res.status === 500) {
+          setError("Tabelle 'feature_suggestions' existiert noch nicht oder ist nicht erreichbar. Bitte Migration ausfuehren.");
+        }
       }
     } catch (err) {
       console.error("Failed to fetch suggestions:", err);
+      setSuggestions([]);
+      setError("Verbindungsfehler beim Laden der Vorschlaege.");
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [page]);
 
   useEffect(() => {
     fetchSuggestions();
   }, [fetchSuggestions]);
 
-  const updateStatus = async (id: string, newStatus: string, notes?: string) => {
+  const handleDelete = async (id: string) => {
     try {
       const res = await fetch("/api/admin/suggestions", {
-        method: "PATCH",
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus, admin_notes: notes }),
+        body: JSON.stringify({ id }),
       });
       if (res.ok) {
-        fetchSuggestions();
+        setSuggestions((prev) => prev.filter((s) => s.id !== id));
       }
     } catch (err) {
-      console.error("Failed to update suggestion:", err);
+      console.error("Failed to delete suggestion:", err);
     }
+    setDeleteConfirm(null);
   };
 
   return (
     <XpWindow title="Feature-Vorschlaege">
-      {/* Filter tabs */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {["pending", "approved", "rejected", "done"].map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className="rounded-full px-3 py-1 text-xs font-bold uppercase transition-colors"
-            style={{
-              backgroundColor: filter === s ? STATUS_LABELS[s].color : "var(--color-bg)",
-              color: filter === s ? "#fff" : "var(--color-text-muted)",
-              border: `1px solid ${filter === s ? STATUS_LABELS[s].color : "var(--color-border)"}`,
-            }}
-          >
-            {STATUS_LABELS[s].label}
-          </button>
-        ))}
-      </div>
+      {error && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm text-amber-800">{error}</p>
+        </div>
+      )}
 
       {loading ? (
         <p className="py-8 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
           Laden...
         </p>
-      ) : suggestions.length === 0 ? (
+      ) : suggestions.length === 0 && !error ? (
         <p className="py-8 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
-          Keine Vorschlaege mit Status &quot;{STATUS_LABELS[filter]?.label}&quot;.
+          Keine Vorschlaege vorhanden.
         </p>
       ) : (
         <div className="space-y-3">
@@ -104,14 +99,8 @@ export function SuggestionsManager() {
                 <h4 className="text-sm font-bold" style={{ color: "var(--color-text)" }}>
                   {s.title}
                 </h4>
-                <span
-                  className="shrink-0 rounded-full px-2 py-0.5 text-xs font-bold"
-                  style={{
-                    backgroundColor: STATUS_LABELS[s.status].color,
-                    color: "#fff",
-                  }}
-                >
-                  {STATUS_LABELS[s.status].label}
+                <span className="shrink-0 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  {new Date(s.created_at).toLocaleDateString("de-DE")}
                 </span>
               </div>
 
@@ -119,32 +108,48 @@ export function SuggestionsManager() {
                 {s.description}
               </p>
 
-              <div className="mb-3 flex flex-wrap gap-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                {s.discord_username && <span>Discord: <strong>{s.discord_username}</strong></span>}
-                {s.contact_info && <span>Kontakt: <strong>{s.contact_info}</strong></span>}
-                <span>{new Date(s.created_at).toLocaleDateString("de-DE")}</span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-                {s.status === "pending" && (
-                  <>
-                    <XpButton variant="primary" onClick={() => updateStatus(s.id, "approved")}>
-                      Akzeptieren
-                    </XpButton>
-                    <XpButton variant="danger" onClick={() => updateStatus(s.id, "rejected")}>
-                      Ablehnen
-                    </XpButton>
-                  </>
-                )}
-                {s.status === "approved" && (
-                  <XpButton onClick={() => updateStatus(s.id, "done")}>
-                    Als umgesetzt markieren
-                  </XpButton>
-                )}
+              <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-3 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  {s.discord_username && <span>Discord: <strong>{s.discord_username}</strong></span>}
+                  {s.contact_info && <span>Kontakt: <strong>{s.contact_info}</strong></span>}
+                </div>
+                <XpButton variant="danger" onClick={() => setDeleteConfirm(s.id)}>
+                  Loeschen
+                </XpButton>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && (suggestions.length > 0 || page > 0) && (
+        <div className="mt-4 flex items-center justify-between">
+          <XpButton disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+            Zurueck
+          </XpButton>
+          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Seite {page + 1}
+          </span>
+          <XpButton disabled={!hasMore} onClick={() => setPage((p) => p + 1)}>
+            Weiter
+          </XpButton>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)}>
+          <div className="card w-[400px] max-w-[90vw] p-6 shadow-lg" onClick={(e) => e.stopPropagation()} role="alertdialog" aria-modal="true">
+            <h4 className="text-base font-semibold mb-2">Vorschlag loeschen</h4>
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+              Diesen Feature-Vorschlag wirklich loeschen?
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <XpButton onClick={() => setDeleteConfirm(null)}>Abbrechen</XpButton>
+              <XpButton variant="danger" onClick={() => handleDelete(deleteConfirm)}>Ja, loeschen</XpButton>
+            </div>
+          </div>
         </div>
       )}
     </XpWindow>

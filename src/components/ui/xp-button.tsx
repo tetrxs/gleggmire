@@ -22,7 +22,7 @@ const variantStyles: Record<XpButtonVariant, string> = {
   ].join(" "),
   danger: [
     "border-2 border-[var(--color-error)] bg-[var(--color-error)] text-white",
-    "hover:bg-[#DC2626] hover:border-[#DC2626]",
+    "hover:bg-red-700 hover:border-red-700",
   ].join(" "),
 };
 

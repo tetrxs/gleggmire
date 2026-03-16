@@ -34,7 +34,7 @@ export function BadgeDisplay({
       onMouseLeave={() => setShowTooltip(false)}
     >
       <div
-        className={`${s.container} flex items-center justify-center rounded-lg border border-[var(--color-border)] dark:border-zinc-700 ${
+        className={`${s.container} flex items-center justify-center rounded-lg border border-[var(--color-border)] ${
           earned ? "" : "grayscale opacity-40"
         }`}
         style={{ backgroundColor: earned ? "var(--color-surface)" : "var(--color-bg)" }}
@@ -54,14 +54,14 @@ export function BadgeDisplay({
 
       {/* Tooltip */}
       {showTooltip && (
-        <div className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs shadow-lg dark:border-zinc-700">
+        <div className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs shadow-lg">
           <div className="font-bold text-[var(--color-text)]">
             {badge.emoji} {badge.name}
           </div>
-          <div className="mt-1 text-[var(--color-muted)]">
+          <div className="mt-1 text-[var(--color-text-muted)]">
             {badge.description}
           </div>
-          <div className="mt-1 italic text-[var(--color-muted)] text-[10px]">
+          <div className="mt-1 italic text-[var(--color-text-muted)] text-[10px]">
             {badge.condition}
           </div>
           {!earned && (

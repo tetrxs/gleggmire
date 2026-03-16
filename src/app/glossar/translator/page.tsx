@@ -9,15 +9,14 @@ export const metadata: Metadata = {
 
 export default function TranslatorPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <div className="py-10">
       <div className="mb-8">
         <h1
           className="text-3xl font-bold tracking-tight"
-          style={{ fontFamily: "var(--font-heading)" }}
         >
           Glegg-Translator
         </h1>
-        <p className="mt-2 text-sm" style={{ color: "var(--color-muted)" }}>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
           Übersetze normales Deutsch in authentisches Gleggmire-Deutsch.
           Zertifiziert von der Gleggmire-Akademie für Sprachwissenschaften.
         </p>
@@ -32,6 +31,6 @@ export default function TranslatorPage() {
       >
         <FakeTranslator />
       </div>
-    </main>
+    </div>
   );
 }

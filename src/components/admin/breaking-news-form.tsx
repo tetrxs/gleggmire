@@ -158,7 +158,7 @@ export function BreakingNewsForm() {
             aria-modal="true"
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
@@ -166,7 +166,7 @@ export function BreakingNewsForm() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-base font-semibold mb-1" style={{ fontFamily: "var(--font-heading)" }}>
+                <h4 className="text-base font-semibold mb-1">
                   Breaking News senden
                 </h4>
                 <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -219,7 +219,7 @@ export function BreakingNewsForm() {
             aria-modal="true"
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 dark:bg-red-950">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="15" y1="9" x2="9" y2="15" />
@@ -227,7 +227,7 @@ export function BreakingNewsForm() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-base font-semibold mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+                <h4 className="text-base font-semibold mb-2">
                   Endgueltige Bestaetigung
                 </h4>
                 <p className="text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>
@@ -287,7 +287,7 @@ export function BreakingNewsForm() {
             aria-modal="true"
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="16" x2="12" y2="12" />
@@ -295,7 +295,7 @@ export function BreakingNewsForm() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-base font-semibold mb-1" style={{ fontFamily: "var(--font-heading)" }}>
+                <h4 className="text-base font-semibold mb-1">
                   Erfolgreich gesendet
                 </h4>
                 <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>

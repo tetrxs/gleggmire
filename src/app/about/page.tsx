@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
+    <div className="py-10">
       <h1 className="text-2xl font-bold text-[var(--color-text)] mb-6">Ueber gleggmire.net</h1>
 
       {/* Hero visual */}
@@ -44,14 +44,14 @@ export default function AboutPage() {
         <section>
           <h2 className="text-base font-semibold mb-2">Was ist gleggmire.net?</h2>
           <p className="leading-relaxed">
-            gleggmire.net ist eine interaktive Fan-Community-Plattform fuer den YouTuber Gleggmire. Die Seite bietet ein von der Community gepflegtes Glossar, Clip-Einreichungen, Leaderboards und mehr.
+            gleggmire.net ist eine interaktive Fan-Community-Plattform fuer den YouTuber Gleggmire. Die Seite bietet ein von der Community gepflegtes Glossar, Definitionen, Leaderboards und mehr.
           </p>
         </section>
 
         {/* Fan-Disclaimer */}
-        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4 dark:border-zinc-700">
+        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4">
           <h2 className="text-base font-semibold mb-2">Fan-Disclaimer</h2>
-          <p className="leading-relaxed text-[var(--color-muted)]">
+          <p className="leading-relaxed text-[var(--color-text-muted)]">
             Diese Seite ist ein inoffizielles Fan-Projekt der Gleggmire-Community und steht in keiner Verbindung zu Gleggmire oder dessen offiziellen Kanaelen. Alle Inhalte wurden von der Community erstellt und gepflegt. Das Glossar erhebt keinen Anspruch auf Vollstaendigkeit oder Richtigkeit. Bei Problemen, Beschwerden oder Fragen bitte direkt ueber Discord melden:{" "}
             <span className="font-bold text-[var(--color-text)]">tetrxs</span>
           </p>
@@ -78,6 +78,6 @@ export default function AboutPage() {
           </p>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

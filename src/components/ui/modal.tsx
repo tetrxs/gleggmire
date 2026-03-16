@@ -49,7 +49,7 @@ export function Modal({
         <div className="shrink-0 px-6 pt-6 pb-4 flex items-center justify-between">
           <h3
             className="text-lg font-bold uppercase tracking-tight"
-            style={{ fontFamily: "var(--font-heading)", color: "var(--color-text)" }}
+            style={{ color: "var(--color-text)" }}
           >
             {title}
           </h3>

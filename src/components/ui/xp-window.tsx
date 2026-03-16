@@ -13,10 +13,7 @@ export function XpWindow({ title, children, className = "" }: XpWindowProps) {
     <div className={`card overflow-hidden ${className}`}>
       {/* Title Bar */}
       <div className="flex items-center gap-3 px-5 pt-5 pb-3">
-        <h3
-          className="sketch-underline text-lg font-semibold tracking-tight"
-          style={{ fontFamily: "var(--font-heading)" }}
-        >
+        <h3 className="text-lg font-semibold tracking-tight">
           {title}
         </h3>
       </div>

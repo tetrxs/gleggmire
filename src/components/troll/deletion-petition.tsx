@@ -93,13 +93,13 @@ export function DeletionPetition({ termName, termId }: DeletionPetitionProps) {
         </XpButton>
 
         {showFailed && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-950/30 dark:text-red-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-600">
             Petition gescheitert ({count}x)
           </span>
         )}
 
         {count > 0 && !showFailed && (
-          <span className="text-[10px] text-[var(--color-muted)]">
+          <span className="text-[10px] text-[var(--color-text-muted)]">
             {count}/{THRESHOLD} Stimmen
           </span>
         )}
@@ -125,7 +125,7 @@ export function DeletionPetition({ termName, termId }: DeletionPetitionProps) {
               onChange={(e) => setReason(e.target.value)}
               placeholder="Warum soll dieser Begriff geloescht werden?"
               rows={4}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E8593C] dark:border-zinc-700"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E8593C]"
             />
 
             <div className="mt-4 flex justify-end gap-2">
@@ -135,7 +135,7 @@ export function DeletionPetition({ termName, termId }: DeletionPetitionProps) {
               </XpButton>
             </div>
 
-            <p className="mt-3 text-center text-[9px] italic text-[var(--color-muted)]">
+            <p className="mt-3 text-center text-[9px] italic text-[var(--color-text-muted)]">
               Hinweis: Deine Petition wird mit hoechster Prioritaet ignoriert.
             </p>
           </div>

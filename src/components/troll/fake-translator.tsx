@@ -133,7 +133,7 @@ export function FakeTranslator() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Gib deutschen Text ein..."
           rows={5}
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E8593C] dark:border-zinc-700"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] resize-none focus:outline-none focus:ring-2 focus:ring-[#E8593C]"
         />
       </div>
 
@@ -153,11 +153,11 @@ export function FakeTranslator() {
           readOnly
           placeholder="Hier erscheint die Uebersetzung..."
           rows={5}
-          className="w-full rounded-lg border border-[var(--color-border)] bg-amber-50 p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-muted)] resize-none dark:bg-amber-950/20 dark:border-zinc-700"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-amber-50 p-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] resize-none"
         />
       </div>
 
-      <p className="text-center text-[9px] italic text-[var(--color-muted)]">
+      <p className="text-center text-[9px] italic text-[var(--color-text-muted)]">
         Hinweis: Dieser Uebersetzer wurde von der Gleggmire-Akademie fuer Sprachwissenschaften zertifiziert.
       </p>
     </div>

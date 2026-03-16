@@ -19,7 +19,7 @@ function DialogIcon({ type }: { type: DialogType }) {
   switch (type) {
     case "error":
       return (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 dark:bg-red-950">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50">
           <svg
             width={size}
             height={size}
@@ -39,7 +39,7 @@ function DialogIcon({ type }: { type: DialogType }) {
       );
     case "warning":
       return (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
           <svg
             width={size}
             height={size}
@@ -59,7 +59,7 @@ function DialogIcon({ type }: { type: DialogType }) {
       );
     case "info":
       return (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50">
           <svg
             width={size}
             height={size}
@@ -129,7 +129,6 @@ export function XpDialog({
           <div className="flex-1 min-w-0">
             <h4
               className="text-base font-semibold mb-1"
-              style={{ fontFamily: "var(--font-heading)" }}
             >
               {title || titleMap[type]}
             </h4>

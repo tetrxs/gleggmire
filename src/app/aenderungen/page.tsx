@@ -22,15 +22,14 @@ export default async function AenderungenPage() {
   const edits = await getRecentEdits();
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
+    <div className="py-10">
       <div className="mb-8">
         <h1
           className="text-3xl font-bold tracking-tight"
-          style={{ fontFamily: "var(--font-heading)" }}
         >
           Änderungsprotokoll
         </h1>
-        <p className="mt-2 text-sm" style={{ color: "var(--color-muted)" }}>
+        <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
           Alle Bearbeitungen an Glossar-Einträgen werden hier öffentlich
           protokolliert — Wikipedia-Style.
         </p>
@@ -47,7 +46,7 @@ export default async function AenderungenPage() {
         <div
           className="hidden sm:grid sm:grid-cols-5 gap-4 px-5 py-3 text-xs font-medium border-b"
           style={{
-            color: "var(--color-muted)",
+            color: "var(--color-text-muted)",
             borderColor: "var(--color-border)",
           }}
         >
@@ -67,15 +66,15 @@ export default async function AenderungenPage() {
           >
             <span
               className="font-mono text-xs tabular-nums"
-              style={{ color: "var(--color-muted)" }}
+              style={{ color: "var(--color-text-muted)" }}
             >
-              <span className="sm:hidden text-[10px] font-sans font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+              <span className="sm:hidden text-[10px] font-sans font-medium mr-1" style={{ color: "var(--color-text-muted)" }}>
                 Datum:
               </span>
               {formatDate(edit.edited_at)}
             </span>
             <span className="text-sm">
-              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-text-muted)" }}>
                 Begriff:
               </span>
               <Link
@@ -86,27 +85,27 @@ export default async function AenderungenPage() {
               </Link>
             </span>
             <span className="text-sm">
-              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-text-muted)" }}>
                 Feld:
               </span>
               <span
                 className="inline-block rounded-md px-2 py-0.5 text-[11px] font-medium"
                 style={{
                   backgroundColor: "var(--color-border)",
-                  color: "var(--color-muted)",
+                  color: "var(--color-text-muted)",
                 }}
               >
                 {edit.field_changed}
               </span>
             </span>
             <span className="text-sm">
-              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-muted)" }}>
+              <span className="sm:hidden text-[10px] font-medium mr-1" style={{ color: "var(--color-text-muted)" }}>
                 Bearbeiter:
               </span>
               {edit.edited_by.slice(0, 8)}...
             </span>
-            <span className="text-sm italic" style={{ color: "var(--color-muted)" }}>
-              <span className="sm:hidden text-[10px] font-medium mr-1 not-italic" style={{ color: "var(--color-muted)" }}>
+            <span className="text-sm italic" style={{ color: "var(--color-text-muted)" }}>
+              <span className="sm:hidden text-[10px] font-medium mr-1 not-italic" style={{ color: "var(--color-text-muted)" }}>
                 Begründung:
               </span>
               {edit.reason ?? "—"}
@@ -115,11 +114,11 @@ export default async function AenderungenPage() {
         ))}
 
         {edits.length === 0 && (
-          <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--color-muted)" }}>
+          <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--color-text-muted)" }}>
             Noch keine Änderungen vorhanden.
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

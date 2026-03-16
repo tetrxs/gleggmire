@@ -12,6 +12,8 @@ interface GlossaryListProps {
   terms: GlossaryTerm[];
   definitions: TermDefinition[];
   tags: TermTag[];
+  commentCounts?: Record<string, number>;
+  creators?: Record<string, { username: string; avatarUrl: string | null }>;
 }
 
 const SORT_OPTIONS: { value: SortMode; label: string }[] = [
@@ -21,7 +23,7 @@ const SORT_OPTIONS: { value: SortMode; label: string }[] = [
   { value: "oldest", label: "Älteste" },
 ];
 
-export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
+export function GlossaryList({ terms, definitions, tags, commentCounts, creators }: GlossaryListProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("az");
@@ -56,13 +58,12 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
   }, [tags]);
 
   // Build lookup maps
-  const definitionMap = useMemo(() => {
-    const map = new Map<string, TermDefinition>();
+  const definitionsMap = useMemo(() => {
+    const map = new Map<string, TermDefinition[]>();
     for (const def of definitions) {
-      const existing = map.get(def.term_id);
-      if (!existing || def.upvotes > existing.upvotes) {
-        map.set(def.term_id, def);
-      }
+      const list = map.get(def.term_id) ?? [];
+      list.push(def);
+      map.set(def.term_id, list);
     }
     return map;
   }, [definitions]);
@@ -131,7 +132,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
           height="18"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="var(--color-muted)"
+          stroke="var(--color-text-muted)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -157,7 +158,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Sort pills */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "var(--color-muted)" }}>
+          <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
             Sortierung:
           </span>
           <div className="flex gap-1">
@@ -186,7 +187,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
         {/* Result count */}
         <span
           className="text-xs tabular-nums"
-          style={{ color: "var(--color-muted)" }}
+          style={{ color: "var(--color-text-muted)" }}
         >
           {filteredTerms.length} Begriffe
         </span>
@@ -194,7 +195,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
 
       {/* Tag filter pills */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium" style={{ color: "var(--color-muted)" }}>
+        <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
           Kategorie:
         </span>
         <button
@@ -245,7 +246,7 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
       {/* Cards grid */}
       {filteredTerms.length === 0 ? (
         <div className="flex h-40 items-center justify-center rounded-xl border border-dashed" style={{ borderColor: "var(--color-border)" }}>
-          <p className="text-sm" style={{ color: "var(--color-muted)" }}>
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
             Keine Begriffe gefunden. Versuch einen anderen Suchbegriff.
           </p>
         </div>
@@ -256,8 +257,11 @@ export function GlossaryList({ terms, definitions, tags }: GlossaryListProps) {
               <GlossaryCard
                 key={term.id}
                 term={term}
-                definition={definitionMap.get(term.id)}
+                definitions={definitionsMap.get(term.id) ?? []}
                 tags={tagMap.get(term.id) ?? []}
+                commentCount={commentCounts?.[term.id]}
+                creatorUsername={creators?.[term.id]?.username}
+                creatorAvatarUrl={creators?.[term.id]?.avatarUrl}
               />
             ))}
           </div>

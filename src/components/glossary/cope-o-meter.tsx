@@ -9,7 +9,7 @@ export function CopeOMeter({ sum, count }: CopeOMeterProps) {
   if (count === 0) {
     return (
       <div className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium" style={{ color: "var(--color-muted)" }}>
+        <span className="text-[11px] font-medium" style={{ color: "var(--color-text-muted)" }}>
           Cope-O-Meter
         </span>
         <div
@@ -18,7 +18,7 @@ export function CopeOMeter({ sum, count }: CopeOMeterProps) {
         >
           <div className="h-full w-0 rounded-full" />
         </div>
-        <span className="text-[10px]" style={{ color: "var(--color-muted)" }}>
+        <span className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>
           Noch keine Bewertungen
         </span>
       </div>
@@ -44,10 +44,10 @@ export function CopeOMeter({ sum, count }: CopeOMeterProps) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium" style={{ color: "var(--color-muted)" }}>
+        <span className="text-[11px] font-medium" style={{ color: "var(--color-text-muted)" }}>
           Cope-O-Meter
         </span>
-        <span className="text-[10px] tabular-nums" style={{ color: "var(--color-muted)" }}>
+        <span className="text-[10px] tabular-nums" style={{ color: "var(--color-text-muted)" }}>
           {clamped}% &mdash; {label}
         </span>
       </div>

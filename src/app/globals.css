@@ -10,10 +10,12 @@
   /* Background & Surface */
   --color-bg: #FAFAF9;
   --color-surface: #FFFFFF;
+  --color-surface-alt: #F3F3F1;
 
   /* Text */
   --color-text: #1A1A1A;
   --color-text-muted: #6B7280;
+  --color-muted: #6B7280;
 
   /* Border */
   --color-border: #E5E5E5;
@@ -31,8 +33,10 @@
 .dark {
   --color-bg: #0F0F0F;
   --color-surface: #1A1A1A;
+  --color-surface-alt: #141414;
   --color-text: #FAFAF9;
   --color-text-muted: #9CA3AF;
+  --color-muted: #9CA3AF;
   --color-border: #2A2A2A;
   --color-accent: #E8593C;
   --color-accent-hover: #D14830;
@@ -144,7 +148,8 @@ a, button, input, select, textarea,
 }
 
 /* ============================================
-   Card Utilities
+   Card Utilities – Single source of truth for
+   all card-like containers (border, radius, bg)
    ============================================ */
 
 .card {
@@ -294,6 +299,66 @@ a, button, input, select, textarea,
   border-color: var(--color-accent-hover);
 }
 
+/* Button size modifier – small */
+.btn-outlined.btn-sm,
+.btn-filled.btn-sm {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.75rem;
+}
+
+/* Link-style button – text with arrow */
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-link:hover {
+  opacity: 0.7;
+}
+
+/* ============================================
+   Dropdown Menu
+   ============================================ */
+
+.dropdown {
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
+  background-color: var(--color-surface);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--color-bg);
+}
+
+.dropdown-divider {
+  margin: 0 0.75rem;
+  border-top: 2px solid var(--color-border);
+}
+
 /* ============================================
    Animations
    ============================================ */
@@ -383,12 +448,13 @@ a, button, input, select, textarea,
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
-/* Roulette glow on selected term */
-@keyframes roulette-glow {
-  0%, 100% { box-shadow: 0 0 0 2px var(--color-accent); }
-  50% { box-shadow: 0 0 16px 4px rgba(232, 89, 60, 0.4); }
+/* Highlight animation for hash-linked elements (reports, etc.) */
+@keyframes report-highlight {
+  0% { background-color: rgba(232, 89, 60, 0.25); }
+  100% { background-color: transparent; }
 }
 
-.animate-roulette-glow {
-  animation: roulette-glow 1.5s ease-in-out infinite;
+.report-highlight {
+  animation: report-highlight 2s ease-out;
+  border-radius: 0.75rem;
 }

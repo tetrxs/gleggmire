@@ -1,131 +1,103 @@
 "use client";
 
 import { useState } from "react";
-import { XpWindow } from "@/components/ui/xp-window";
-import { XpButton } from "@/components/ui/xp-button";
-import { ModerationQueue } from "./moderation-queue";
+import { ReportsView } from "./reports-view";
 import { UserManagement } from "./user-management";
 import { ModerationLog } from "./moderation-log";
-import { BreakingNewsForm } from "./breaking-news-form";
 import { SuggestionsManager } from "./suggestions-manager";
+import type { UserWithStats } from "@/lib/data/users";
+import type { ModerationLogEntry } from "@/lib/data/moderation-log";
 
-type AdminView = "dashboard" | "queue" | "users" | "log" | "news" | "suggestions";
+type AdminView = "dashboard" | "reports" | "users" | "log" | "suggestions";
 
-const STATS = [
-  { label: "Ausstehende Einreichungen", value: 7, color: "#E8593C" },
-  { label: "Aktive Disputes", value: 2, color: "#ef4444" },
-  { label: "Nutzer gesamt / gebannt", value: "10 / 0", color: "#2563eb" },
-  { label: "Mod-Aktionen heute", value: 3, color: "#16a34a" },
+const ALL_NAV_ITEMS: { view: AdminView; label: string; adminOnly?: boolean }[] = [
+  { view: "dashboard", label: "Dashboard" },
+  { view: "reports", label: "Reports" },
+  { view: "users", label: "Nutzerverwaltung", adminOnly: true },
+  { view: "log", label: "Moderations-Log" },
+  { view: "suggestions", label: "Vorschlaege", adminOnly: true },
 ];
 
-export function AdminDashboard() {
-  const [view, setView] = useState<AdminView>("dashboard");
+interface AdminDashboardProps {
+  allUsers: UserWithStats[];
+  moderationLog?: ModerationLogEntry[];
+  pendingReportsCount?: number;
+  authLevel?: "admin" | "mod";
+}
 
-  if (view === "queue") {
-    return (
-      <div>
-        <div className="mb-4">
-          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
-        </div>
-        <ModerationQueue />
-      </div>
-    );
-  }
+export function AdminDashboard({ allUsers, moderationLog = [], pendingReportsCount = 0, authLevel = "admin" }: AdminDashboardProps) {
+  const [view, setView] = useState<AdminView>(authLevel === "mod" ? "reports" : "dashboard");
 
-  if (view === "users") {
-    return (
-      <div>
-        <div className="mb-4">
-          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
-        </div>
-        <UserManagement />
-      </div>
-    );
-  }
-
-  if (view === "log") {
-    return (
-      <div>
-        <div className="mb-4">
-          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
-        </div>
-        <ModerationLog />
-      </div>
-    );
-  }
-
-  if (view === "news") {
-    return (
-      <div>
-        <div className="mb-4">
-          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
-        </div>
-        <BreakingNewsForm />
-      </div>
-    );
-  }
-
-  if (view === "suggestions") {
-    return (
-      <div>
-        <div className="mb-4">
-          <XpButton onClick={() => setView("dashboard")}>Zurueck zum Dashboard</XpButton>
-        </div>
-        <SuggestionsManager />
-      </div>
-    );
-  }
+  const NAV_ITEMS = ALL_NAV_ITEMS.filter((item) => !item.adminOnly || authLevel === "admin");
 
   return (
-    <XpWindow title="Admin-Panel">
-      {/* Stats Cards */}
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {STATS.map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4 dark:border-zinc-700"
-          >
-            <div className="text-xs text-[var(--color-muted)] mb-1">{stat.label}</div>
-            <div className="text-2xl font-bold" style={{ color: stat.color }}>
+    <div className="flex flex-col gap-6 md:flex-row">
+      {/* Sidebar Navigation */}
+      <aside className="w-full shrink-0 md:w-52">
+        <nav className="card flex flex-col gap-0.5 p-2">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.view}
+              type="button"
+              onClick={() => setView(item.view)}
+              className="w-full rounded-lg px-3 py-2 text-left text-sm no-underline transition-colors"
+              style={{
+                color: view === item.view ? "var(--color-accent)" : "var(--color-text)",
+                backgroundColor: view === item.view ? "var(--color-bg)" : "transparent",
+                fontWeight: view === item.view ? 600 : 400,
+              }}
+            >
+              {item.label}
+              {item.view === "reports" && pendingReportsCount > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                  {pendingReportsCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="min-w-0 flex-1">
+        {view === "dashboard" && <DashboardView pendingReportsCount={pendingReportsCount} userCount={allUsers.length} />}
+        {view === "reports" && <ReportsView />}
+        {view === "users" && <UserManagement initialUsers={allUsers} />}
+        {view === "log" && <ModerationLog entries={moderationLog} />}
+        {view === "suggestions" && <SuggestionsManager />}
+      </div>
+    </div>
+  );
+}
+
+function DashboardView({ pendingReportsCount, userCount }: { pendingReportsCount: number; userCount: number }) {
+  const stats = [
+    { label: "Offene Reports", value: pendingReportsCount, color: "#E8593C" },
+    { label: "Nutzer gesamt", value: userCount, color: "#2563eb" },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {stats.map((stat) => (
+          <div key={stat.label} className="card p-5">
+            <div className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+              {stat.label}
+            </div>
+            <div className="mt-1 text-2xl font-bold" style={{ color: stat.color }}>
               {stat.value}
             </div>
           </div>
         ))}
       </div>
-
-      {/* Quick Actions */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-4 dark:border-zinc-700">
-        <div className="text-sm font-semibold text-[var(--color-text)] mb-3">Schnellaktionen</div>
-        <div className="flex flex-wrap gap-2">
-          <XpButton variant="primary" onClick={() => setView("queue")}>
-            Moderations-Queue oeffnen
-          </XpButton>
-          <XpButton onClick={() => setView("users")}>
-            Nutzer verwalten
-          </XpButton>
-          <XpButton variant="danger" onClick={() => setView("news")}>
-            Breaking News senden
-          </XpButton>
-          <XpButton onClick={() => setView("log")}>
-            Moderations-Log
-          </XpButton>
-          <XpButton variant="primary" onClick={() => setView("suggestions")}>
-            Vorschlaege verwalten
-          </XpButton>
-        </div>
-      </div>
-
-      {/* System Info */}
-      <div className="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-3 dark:border-zinc-700">
-        <div className="font-mono text-xs text-[var(--color-muted)] space-y-0.5">
+      <div className="card p-4">
+        <div className="font-mono text-xs space-y-0.5" style={{ color: "var(--color-text-muted)" }}>
           <div>System: gleggmire.net v1.0.0</div>
-          <div>Admin-Modus: AKTIV</div>
+          <div>Moderation: AKTIV</div>
           <div>Letzte Pruefung: {new Date().toLocaleString("de-DE")}</div>
-          <div className="mt-1 text-emerald-600 dark:text-emerald-400">
-            Alle Systeme nominal.
-          </div>
+          <div className="mt-1 text-emerald-600">Alle Systeme nominal.</div>
         </div>
       </div>
-    </XpWindow>
+    </div>
   );
 }

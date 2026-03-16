@@ -51,7 +51,7 @@ export function FuzzyMatchAlert({
   // Exact match (Tier 1) - red alert
   if (hasExactMatch && exactMatch) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/50">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
         <div className="mb-3 flex items-center gap-2">
           <svg
             width="18"
@@ -67,7 +67,7 @@ export function FuzzyMatchAlert({
             <line x1="15" y1="9" x2="9" y2="15" />
             <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
-          <span className="text-sm font-semibold text-red-700 dark:text-red-300">
+          <span className="text-sm font-semibold text-red-700">
             Dieser Begriff existiert bereits: &quot;{exactMatch.term}&quot;
           </span>
         </div>
@@ -78,7 +78,7 @@ export function FuzzyMatchAlert({
           >
             Zum Eintrag wechseln
           </XpButton>
-          <XpButton onClick={() => onNavigate(exactMatch.slug)}>
+          <XpButton onClick={() => onNavigate(exactMatch.slug + "#add-definition")}>
             Definition vorschlagen
           </XpButton>
           <XpButton
@@ -114,7 +114,7 @@ export function FuzzyMatchAlert({
   // Many matches (>4) - collapsed view
   if (fuzzyMatches.length > 4 && !showAll) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/50">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
         <div className="mb-3 flex items-center gap-2">
           <svg
             width="18"
@@ -130,7 +130,7 @@ export function FuzzyMatchAlert({
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+          <span className="text-sm font-semibold text-amber-800">
             Es gibt bereits {fuzzyMatches.length} ähnliche Begriffe
           </span>
         </div>
@@ -156,7 +156,7 @@ export function FuzzyMatchAlert({
   if (fuzzyMatches.length === 1) {
     const match = fuzzyMatches[0];
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/50">
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
         <div className="mb-3 flex items-center gap-2">
           <svg
             width="18"
@@ -172,7 +172,7 @@ export function FuzzyMatchAlert({
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+          <span className="text-sm font-semibold text-amber-800">
             Ähnlicher Begriff gefunden: &quot;{match.term}&quot;
           </span>
         </div>
@@ -198,7 +198,7 @@ export function FuzzyMatchAlert({
 
   // Multiple matches (2-4, or >4 expanded)
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/50">
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
       <div className="mb-3 flex items-center gap-2">
         <svg
           width="18"
@@ -214,7 +214,7 @@ export function FuzzyMatchAlert({
           <line x1="12" y1="9" x2="12" y2="13" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
-        <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+        <span className="text-sm font-semibold text-amber-800">
           Ähnliche Begriffe gefunden:
         </span>
       </div>

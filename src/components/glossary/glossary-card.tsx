@@ -2,115 +2,142 @@
 
 import Link from "next/link";
 import type { GlossaryTerm, TermDefinition, TermTag } from "@/types/database";
-import { CopeOMeter } from "@/components/glossary/cope-o-meter";
+import { getTagClasses } from "@/lib/constants/tags";
 
 interface GlossaryCardProps {
   term: GlossaryTerm;
-  definition?: TermDefinition;
+  definitions: TermDefinition[];
   tags: TermTag[];
+  commentCount?: number;
+  creatorUsername?: string;
+  creatorAvatarUrl?: string | null;
 }
 
-const TAG_COLORS: Record<string, string> = {
-  Klassiker: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-  Insider: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
-  Essen: "bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300",
-  Rauchen: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-  Lifestyle: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300",
-  Slang: "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
-  Universell: "bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
-  Meme: "bg-pink-50 text-pink-700 dark:bg-pink-950 dark:text-pink-300",
-};
-
-function getTagClasses(tag: string) {
-  return TAG_COLORS[tag] ?? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+function getInitials(name: string): string {
+  const parts = name.split(/[\s-]+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
 }
 
-export function GlossaryCard({ term, definition, tags }: GlossaryCardProps) {
-  const preview = definition
-    ? definition.definition.length > 100
-      ? definition.definition.slice(0, 100) + "..."
-      : definition.definition
-    : "Keine Definition vorhanden.";
+function usernameColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 55%, 45%)`;
+}
+
+export function GlossaryCard({ term, definitions, tags, commentCount, creatorUsername, creatorAvatarUrl }: GlossaryCardProps) {
+  const topDef = definitions[0];
+  const preview = topDef
+    ? topDef.definition.length > 120
+      ? topDef.definition.slice(0, 120) + "..."
+      : topDef.definition
+    : "Noch keine Definition vorhanden.";
+
+  const totalUpvotes = definitions.reduce((sum, d) => sum + d.upvotes, 0);
 
   return (
     <Link
       href={`/glossar/${term.slug}`}
-      className="group block rounded-xl border p-5 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-      style={{
-        borderColor: "var(--color-border)",
-        backgroundColor: "var(--color-surface)",
-      }}
+      className="card-hover group block p-5 no-underline"
     >
       <div className="flex flex-col gap-3">
-        {/* Term heading */}
+        {/* Term heading + first tag */}
         <div className="flex items-start justify-between gap-2">
-          <h3
-            className="text-base font-semibold tracking-tight group-hover:text-[var(--color-accent)] transition-colors duration-200"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
+          <h3 className="text-base font-semibold tracking-tight group-hover:text-[var(--color-accent)] transition-colors duration-200">
             {term.term}
           </h3>
-          {term.verified_by_gleggmire && (
-            <span className="mt-0.5 shrink-0">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="var(--color-accent)"
-                aria-label="Gleggmire-verifiziert"
-              >
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-              </svg>
+          {tags.length > 0 && (
+            <span
+              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${getTagClasses(tags[0].tag)}`}
+            >
+              {tags[0].tag}
             </span>
           )}
         </div>
 
         {/* Definition preview */}
         <p
-          className="text-sm leading-relaxed line-clamp-3"
-          style={{ color: "var(--color-muted)" }}
+          className="text-sm leading-relaxed line-clamp-2"
+          style={{ color: "var(--color-text-muted)" }}
         >
           {preview}
         </p>
 
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
+        {/* Tags row (remaining tags) */}
+        {tags.length > 1 && (
+          <div className="flex flex-wrap gap-1">
+            {tags.slice(1, 4).map((tag) => (
               <span
                 key={tag.id}
-                className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-medium ${getTagClasses(tag.tag)}`}
+                className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${getTagClasses(tag.tag)}`}
               >
                 {tag.tag}
               </span>
             ))}
+            {tags.length > 4 && (
+              <span className="text-[10px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+                +{tags.length - 4}
+              </span>
+            )}
           </div>
         )}
 
-        {/* Votes inline */}
-        {definition && (
-          <div className="flex items-center gap-3 text-xs" style={{ color: "var(--color-muted)" }}>
+        {/* Stats row */}
+        <div className="flex items-center gap-4 text-[11px] font-medium" style={{ color: "var(--color-text-muted)" }}>
+          {/* Definitions count */}
+          <span className="inline-flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <path d="M14 2v6h6" />
+            </svg>
+            {definitions.length} {definitions.length === 1 ? "Definition" : "Definitionen"}
+          </span>
+
+          {/* Comment count */}
+          {commentCount !== undefined && commentCount > 0 && (
             <span className="inline-flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
               </svg>
-              {definition.upvotes}
+              {commentCount}
             </span>
+          )}
+
+          {/* Total upvotes */}
+          {totalUpvotes > 0 && (
             <span className="inline-flex items-center gap-1">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 10v12" />
+                <path d="M15 5.88L14 10h5.83a2 2 0 011.92 2.56l-2.33 8A2 2 0 0117.5 22H4a2 2 0 01-2-2v-8a2 2 0 012-2h2.76a2 2 0 001.79-1.11L12 2a3.13 3.13 0 013 3.88z" />
               </svg>
-              {definition.downvotes}
+              {totalUpvotes}
+            </span>
+          )}
+        </div>
+
+        {/* Creator row */}
+        {creatorUsername && (
+          <div className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+            <span>von</span>
+            {creatorAvatarUrl ? (
+              <img
+                src={creatorAvatarUrl}
+                alt={creatorUsername}
+                className="h-4 w-4 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span
+                className="h-4 w-4 shrink-0 rounded-full flex items-center justify-center text-[6px] font-bold text-white"
+                style={{ backgroundColor: usernameColor(creatorUsername) }}
+              >
+                {getInitials(creatorUsername)}
+              </span>
+            )}
+            <span className="font-medium" style={{ color: "var(--color-text)" }}>
+              {creatorUsername}
             </span>
           </div>
-        )}
-
-        {/* Cope-O-Meter */}
-        {definition && (
-          <CopeOMeter
-            sum={definition.cope_meter_sum}
-            count={definition.cope_meter_count}
-          />
         )}
       </div>
     </Link>

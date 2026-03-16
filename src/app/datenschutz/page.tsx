@@ -8,11 +8,10 @@ export const metadata: Metadata = {
 
 export default function DatenschutzPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <div className="py-10">
       <h1
         className="mb-6 text-xl font-bold uppercase tracking-wide sm:text-2xl"
         style={{
-          fontFamily: "var(--font-heading)",
           color: "var(--color-text)",
           letterSpacing: "0.04em",
         }}
@@ -343,6 +342,6 @@ export default function DatenschutzPage() {
           </p>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

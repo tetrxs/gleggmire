@@ -53,7 +53,7 @@ export function GleggScoreDisplay({ score }: GleggScoreDisplayProps) {
       </div>
 
       {/* Progress bar */}
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--color-border)] dark:bg-zinc-700">
+      <div className="h-2.5 w-full overflow-hidden rounded-full bg-[var(--color-border)]">
         <div
           className="h-full rounded-full transition-all duration-300"
           style={{
@@ -64,7 +64,7 @@ export function GleggScoreDisplay({ score }: GleggScoreDisplayProps) {
       </div>
 
       {nextTier && (
-        <span className="text-xs text-[var(--color-muted)]">
+        <span className="text-xs text-[var(--color-text-muted)]">
           Naechster Rang: {nextTier.name} ({nextTier.min.toLocaleString("de-DE")} Punkte)
         </span>
       )}
