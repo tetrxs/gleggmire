@@ -1,53 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { apiRateLimit, checkRateLimit } from "@/lib/rate-limit";
-import { checkBanned } from "@/lib/utils/ban-check";
-
-/**
- * Recount votes from the votes table and set absolute values on comments.
- * This is self-correcting: no race conditions, no drift over time.
- */
-async function syncCommentVoteCounts(commentId: string) {
-  const service = await createServiceClient();
-
-  const [{ count: upCount }, { count: downCount }] = await Promise.all([
-    service
-      .from("votes")
-      .select("*", { count: "exact", head: true })
-      .eq("entity_type", "comment")
-      .eq("entity_id", commentId)
-      .eq("vote_type", "up"),
-    service
-      .from("votes")
-      .select("*", { count: "exact", head: true })
-      .eq("entity_type", "comment")
-      .eq("entity_id", commentId)
-      .eq("vote_type", "down"),
-  ]);
-
-  const upvotes = upCount ?? 0;
-  const downvotes = downCount ?? 0;
-
-  await service
-    .from("comments")
-    .update({ upvotes, downvotes })
-    .eq("id", commentId);
-
-  return { upvotes, downvotes };
-}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const headers = {
     "Cache-Control": "no-store, no-cache, must-revalidate",
   };
+
+  // Auth + service client in parallel
+  const [supabase, service] = await Promise.all([
+    createClient(),
+    createServiceClient(),
+  ]);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ vote_type: null }, { headers });
@@ -55,7 +26,7 @@ export async function GET(
 
   const { id: commentId } = await params;
 
-  const { data: existingVote } = await supabase
+  const { data: existingVote } = await service
     .from("votes")
     .select("vote_type")
     .eq("user_id", user.id)
@@ -73,13 +44,19 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const { success } = await checkRateLimit(apiRateLimit, ip);
   if (!success) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const supabase = await createClient();
+  // Auth + service client + params in parallel
+  const [supabase, service, { id: commentId }] = await Promise.all([
+    createClient(),
+    createServiceClient(),
+    params,
+  ]);
 
   const {
     data: { user },
@@ -87,8 +64,6 @@ export async function POST(
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
-
-  const { id: commentId } = await params;
 
   let body: Record<string, unknown>;
   try {
@@ -99,19 +74,26 @@ export async function POST(
 
   const voteType = body.vote_type;
   if (voteType !== "up" && voteType !== "down") {
-    return NextResponse.json({ error: "vote_type must be 'up' or 'down'" }, { status: 400 });
+    return NextResponse.json(
+      { error: "vote_type must be 'up' or 'down'" },
+      { status: 400 }
+    );
   }
 
-  // Run ban check, comment lookup, and existing vote check in parallel
-  const [banStatus, { data: comment }, { data: existingVote }] =
+  // All checks via single service client in parallel
+  const [{ data: banUser }, { data: comment }, { data: existingVote }] =
     await Promise.all([
-      checkBanned(user.id),
-      supabase
+      service
+        .from("users")
+        .select("is_banned, ban_reason, ban_until")
+        .eq("id", user.id)
+        .maybeSingle(),
+      service
         .from("comments")
         .select("id, user_id")
         .eq("id", commentId)
         .maybeSingle(),
-      supabase
+      service
         .from("votes")
         .select("*")
         .eq("user_id", user.id)
@@ -120,8 +102,10 @@ export async function POST(
         .maybeSingle(),
     ]);
 
-  if (banStatus.banned) {
-    return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
+  if (banUser?.is_banned) {
+    if (!banUser.ban_until || new Date(banUser.ban_until) > new Date()) {
+      return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
+    }
   }
 
   if (!comment) {
@@ -136,11 +120,10 @@ export async function POST(
   }
 
   try {
-
     if (existingVote) {
       if (existingVote.vote_type === voteType) {
         // Toggle off
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await service
           .from("votes")
           .delete()
           .eq("id", existingVote.id);
@@ -152,8 +135,8 @@ export async function POST(
           );
         }
 
-        // Sync counts in background, respond immediately
-        syncCommentVoteCounts(commentId).catch(() => {});
+        // Sync denormalized counts in background
+        syncCommentVoteCounts(service, commentId);
         return NextResponse.json({
           action: "removed",
           vote_type: null,
@@ -161,7 +144,7 @@ export async function POST(
       }
 
       // Switch vote
-      const { error: updateError } = await supabase
+      const { error: updateError } = await service
         .from("votes")
         .update({ vote_type: voteType })
         .eq("id", existingVote.id);
@@ -173,7 +156,7 @@ export async function POST(
         );
       }
 
-      syncCommentVoteCounts(commentId).catch(() => {});
+      syncCommentVoteCounts(service, commentId);
       return NextResponse.json({
         action: "switched",
         vote_type: voteType,
@@ -181,7 +164,7 @@ export async function POST(
     }
 
     // New vote
-    const { error: voteError } = await supabase.from("votes").insert({
+    const { error: voteError } = await service.from("votes").insert({
       user_id: user.id,
       entity_type: "comment",
       entity_id: commentId,
@@ -189,16 +172,47 @@ export async function POST(
     });
 
     if (voteError) {
-      return NextResponse.json({ error: "Failed to cast vote" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to cast vote" },
+        { status: 500 }
+      );
     }
 
-    syncCommentVoteCounts(commentId).catch(() => {});
+    syncCommentVoteCounts(service, commentId);
     return NextResponse.json({
       action: "voted",
       vote_type: voteType,
     });
   } catch (err) {
     console.error("Comment vote error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function syncCommentVoteCounts(service: any, commentId: string) {
+  Promise.all([
+    service
+      .from("votes")
+      .select("*", { count: "exact", head: true })
+      .eq("entity_type", "comment")
+      .eq("entity_id", commentId)
+      .eq("vote_type", "up"),
+    service
+      .from("votes")
+      .select("*", { count: "exact", head: true })
+      .eq("entity_type", "comment")
+      .eq("entity_id", commentId)
+      .eq("vote_type", "down"),
+  ])
+    .then(([{ count: upCount }, { count: downCount }]) =>
+      service
+        .from("comments")
+        .update({ upvotes: upCount ?? 0, downvotes: downCount ?? 0 })
+        .eq("id", commentId)
+    )
+    .catch(() => {});
 }

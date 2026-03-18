@@ -1,53 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { apiRateLimit, checkRateLimit } from "@/lib/rate-limit";
-import { checkBanned } from "@/lib/utils/ban-check";
-
-/**
- * Recount votes from the votes table and set absolute values on term_definitions.
- * This is self-correcting: no race conditions, no drift over time.
- */
-async function syncVoteCounts(definitionId: string) {
-  const service = await createServiceClient();
-
-  const [{ count: upCount }, { count: downCount }] = await Promise.all([
-    service
-      .from("votes")
-      .select("*", { count: "exact", head: true })
-      .eq("entity_type", "definition")
-      .eq("entity_id", definitionId)
-      .eq("vote_type", "up"),
-    service
-      .from("votes")
-      .select("*", { count: "exact", head: true })
-      .eq("entity_type", "definition")
-      .eq("entity_id", definitionId)
-      .eq("vote_type", "down"),
-  ]);
-
-  const upvotes = upCount ?? 0;
-  const downvotes = downCount ?? 0;
-
-  await service
-    .from("term_definitions")
-    .update({ upvotes, downvotes })
-    .eq("id", definitionId);
-
-  return { upvotes, downvotes };
-}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const headers = {
     "Cache-Control": "no-store, no-cache, must-revalidate",
   };
+
+  // Auth + service client in parallel
+  const [supabase, service] = await Promise.all([
+    createClient(),
+    createServiceClient(),
+  ]);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ vote_type: null }, { headers });
@@ -55,7 +26,7 @@ export async function GET(
 
   const { id: definitionId } = await params;
 
-  const { data: existingVote } = await supabase
+  const { data: existingVote } = await service
     .from("votes")
     .select("vote_type")
     .eq("user_id", user.id)
@@ -80,17 +51,19 @@ export async function POST(
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const supabase = await createClient();
+  // Auth + service client + body + params in parallel
+  const [supabase, service, { id: definitionId }] = await Promise.all([
+    createClient(),
+    createServiceClient(),
+    params,
+  ]);
 
-  // Check auth
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
-
-  const { id: definitionId } = await params;
 
   let body: Record<string, unknown>;
   try {
@@ -107,16 +80,20 @@ export async function POST(
     );
   }
 
-  // Run ban check, definition lookup, and existing vote check in parallel
-  const [banStatus, { data: definition }, { data: existingVote }] =
+  // All checks via single service client in parallel
+  const [{ data: banUser }, { data: definition }, { data: existingVote }] =
     await Promise.all([
-      checkBanned(user.id),
-      supabase
+      service
+        .from("users")
+        .select("is_banned, ban_reason, ban_until")
+        .eq("id", user.id)
+        .maybeSingle(),
+      service
         .from("term_definitions")
         .select("id, submitted_by")
         .eq("id", definitionId)
         .maybeSingle(),
-      supabase
+      service
         .from("votes")
         .select("*")
         .eq("user_id", user.id)
@@ -125,8 +102,10 @@ export async function POST(
         .maybeSingle(),
     ]);
 
-  if (banStatus.banned) {
-    return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
+  if (banUser?.is_banned) {
+    if (!banUser.ban_until || new Date(banUser.ban_until) > new Date()) {
+      return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
+    }
   }
 
   if (!definition) {
@@ -144,11 +123,10 @@ export async function POST(
   }
 
   try {
-
     if (existingVote) {
       if (existingVote.vote_type === voteType) {
         // Toggle off: remove vote
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await service
           .from("votes")
           .delete()
           .eq("id", existingVote.id);
@@ -160,8 +138,8 @@ export async function POST(
           );
         }
 
-        // Sync counts in background, respond immediately
-        syncVoteCounts(definitionId).catch(() => {});
+        // Sync denormalized counts in background
+        syncVoteCounts(service, definitionId);
         return NextResponse.json({
           action: "removed",
           vote_type: null,
@@ -169,7 +147,7 @@ export async function POST(
       }
 
       // Switch vote: update existing
-      const { error: updateError } = await supabase
+      const { error: updateError } = await service
         .from("votes")
         .update({ vote_type: voteType })
         .eq("id", existingVote.id);
@@ -181,7 +159,7 @@ export async function POST(
         );
       }
 
-      syncVoteCounts(definitionId).catch(() => {});
+      syncVoteCounts(service, definitionId);
       return NextResponse.json({
         action: "switched",
         vote_type: voteType,
@@ -189,7 +167,7 @@ export async function POST(
     }
 
     // New vote
-    const { error: voteError } = await supabase.from("votes").insert({
+    const { error: voteError } = await service.from("votes").insert({
       user_id: user.id,
       entity_type: "definition",
       entity_id: definitionId,
@@ -203,7 +181,7 @@ export async function POST(
       );
     }
 
-    syncVoteCounts(definitionId).catch(() => {});
+    syncVoteCounts(service, definitionId);
     return NextResponse.json({
       action: "voted",
       vote_type: voteType,
@@ -215,4 +193,29 @@ export async function POST(
       { status: 500 }
     );
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function syncVoteCounts(service: any, definitionId: string) {
+  Promise.all([
+    service
+      .from("votes")
+      .select("*", { count: "exact", head: true })
+      .eq("entity_type", "definition")
+      .eq("entity_id", definitionId)
+      .eq("vote_type", "up"),
+    service
+      .from("votes")
+      .select("*", { count: "exact", head: true })
+      .eq("entity_type", "definition")
+      .eq("entity_id", definitionId)
+      .eq("vote_type", "down"),
+  ])
+    .then(([{ count: upCount }, { count: downCount }]) =>
+      service
+        .from("term_definitions")
+        .update({ upvotes: upCount ?? 0, downvotes: downCount ?? 0 })
+        .eq("id", definitionId)
+    )
+    .catch(() => {});
 }
