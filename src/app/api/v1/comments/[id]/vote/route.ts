@@ -45,8 +45,12 @@ export async function GET(
     data: { user },
   } = await supabase.auth.getUser();
 
+  const headers = {
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+  };
+
   if (!user) {
-    return NextResponse.json({ vote_type: null });
+    return NextResponse.json({ vote_type: null }, { headers });
   }
 
   const { id: commentId } = await params;
@@ -59,7 +63,10 @@ export async function GET(
     .eq("entity_id", commentId)
     .maybeSingle();
 
-  return NextResponse.json({ vote_type: existingVote?.vote_type ?? null });
+  return NextResponse.json(
+    { vote_type: existingVote?.vote_type ?? null },
+    { headers }
+  );
 }
 
 export async function POST(
