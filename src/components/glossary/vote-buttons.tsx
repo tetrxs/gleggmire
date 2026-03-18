@@ -60,6 +60,7 @@ export function VoteButtons({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
+        keepalive: true,
         body: JSON.stringify({ vote_type: voteType }),
       });
       if (!res.ok) return { ok: false };
@@ -109,15 +110,14 @@ export function VoteButtons({
         setDownvotes(prevDown);
         setVoted(prevVoted);
       } else {
-        // Reconcile with server truth
+        // Reconcile vote state with server truth
         const { data } = result;
-        if (typeof data.upvotes === "number") setUpvotes(data.upvotes);
-        if (typeof data.downvotes === "number") setDownvotes(data.downvotes);
         if (data.vote_type === "up" || data.vote_type === "down") {
           setVoted(data.vote_type as "up" | "down");
         } else if (data.vote_type === null || data.action === "removed") {
           setVoted(null);
         }
+        // Counts from optimistic update are kept (server syncs in background)
       }
       setLoading(false);
     });

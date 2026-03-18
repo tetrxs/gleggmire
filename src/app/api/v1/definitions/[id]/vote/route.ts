@@ -90,11 +90,6 @@ export async function POST(
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const banStatus = await checkBanned(user.id);
-  if (banStatus.banned) {
-    return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
-  }
-
   const { id: definitionId } = await params;
 
   let body: Record<string, unknown>;
@@ -112,12 +107,27 @@ export async function POST(
     );
   }
 
-  // Verify the definition exists and get author
-  const { data: definition } = await supabase
-    .from("term_definitions")
-    .select("id, submitted_by")
-    .eq("id", definitionId)
-    .maybeSingle();
+  // Run ban check, definition lookup, and existing vote check in parallel
+  const [banStatus, { data: definition }, { data: existingVote }] =
+    await Promise.all([
+      checkBanned(user.id),
+      supabase
+        .from("term_definitions")
+        .select("id, submitted_by")
+        .eq("id", definitionId)
+        .maybeSingle(),
+      supabase
+        .from("votes")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("entity_type", "definition")
+        .eq("entity_id", definitionId)
+        .maybeSingle(),
+    ]);
+
+  if (banStatus.banned) {
+    return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
+  }
 
   if (!definition) {
     return NextResponse.json(
@@ -126,7 +136,6 @@ export async function POST(
     );
   }
 
-  // Prevent self-voting
   if (definition.submitted_by === user.id) {
     return NextResponse.json(
       { error: "Du kannst nicht fuer deine eigene Definition stimmen." },
@@ -135,14 +144,6 @@ export async function POST(
   }
 
   try {
-    // Check if user already voted on this definition
-    const { data: existingVote } = await supabase
-      .from("votes")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("entity_type", "definition")
-      .eq("entity_id", definitionId)
-      .maybeSingle();
 
     if (existingVote) {
       if (existingVote.vote_type === voteType) {
@@ -159,11 +160,11 @@ export async function POST(
           );
         }
 
-        const counts = await syncVoteCounts(definitionId);
+        // Sync counts in background, respond immediately
+        syncVoteCounts(definitionId).catch(() => {});
         return NextResponse.json({
           action: "removed",
           vote_type: null,
-          ...counts,
         });
       }
 
@@ -180,11 +181,10 @@ export async function POST(
         );
       }
 
-      const counts = await syncVoteCounts(definitionId);
+      syncVoteCounts(definitionId).catch(() => {});
       return NextResponse.json({
         action: "switched",
         vote_type: voteType,
-        ...counts,
       });
     }
 
@@ -203,11 +203,10 @@ export async function POST(
       );
     }
 
-    const counts = await syncVoteCounts(definitionId);
+    syncVoteCounts(definitionId).catch(() => {});
     return NextResponse.json({
       action: "voted",
       vote_type: voteType,
-      ...counts,
     });
   } catch (err) {
     console.error("Vote error:", err);
