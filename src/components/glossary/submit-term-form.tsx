@@ -8,6 +8,7 @@ import { TagSelect } from "@/components/glossary/tag-select";
 import { FuzzyMatchAlert } from "@/components/glossary/fuzzy-match-alert";
 import { AttachmentPicker, type AttachmentData } from "@/components/comments/attachment-picker";
 import { findMatches, normalizeTerm, type TermMatch } from "@/lib/utils/normalize";
+import { stripTimestamp } from "@/lib/youtube-api";
 import type { TermMatchCandidate } from "@/lib/data/glossary";
 
 const STORAGE_KEY = "gleggmire-submit-draft";
@@ -148,12 +149,17 @@ export function SubmitTermForm({ existingTerms: rawTerms, onSuccess }: SubmitTer
       setSubmitting(true);
       setSubmitError("");
 
-      // Build origin_context from source
+      // Build origin_context from source — encode startSeconds as &t= for YouTube
       let originContext: string | undefined;
       if (form.sourceType === "other" && form.sourceText.trim()) {
         originContext = form.sourceText.trim();
       } else if (attachment) {
-        originContext = attachment.url;
+        let url = stripTimestamp(attachment.url);
+        if (attachment.type === "youtube" && attachment.startSeconds && attachment.startSeconds > 0) {
+          const sep = url.includes("?") ? "&" : "?";
+          url = `${url}${sep}t=${attachment.startSeconds}`;
+        }
+        originContext = url;
       }
 
       try {
