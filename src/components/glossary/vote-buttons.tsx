@@ -35,11 +35,13 @@ export function VoteButtons({
       entityType === "comment"
         ? `/api/v1/comments/${entityId}/vote`
         : `/api/v1/definitions/${entityId}/vote`;
-    fetch(endpoint)
+    fetch(endpoint, { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.vote_type === "up" || data?.vote_type === "down") {
           setVoted(data.vote_type);
+        } else {
+          setVoted(null);
         }
       })
       .catch(() => {})
@@ -57,6 +59,7 @@ export function VoteButtons({
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ vote_type: voteType }),
       });
       if (!res.ok) return { ok: false };
