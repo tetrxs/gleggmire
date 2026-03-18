@@ -88,11 +88,6 @@ export async function POST(
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const banStatus = await checkBanned(user.id);
-  if (banStatus.banned) {
-    return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
-  }
-
   const { id: commentId } = await params;
 
   let body: Record<string, unknown>;
@@ -107,18 +102,32 @@ export async function POST(
     return NextResponse.json({ error: "vote_type must be 'up' or 'down'" }, { status: 400 });
   }
 
-  // Verify comment exists and get author
-  const { data: comment } = await supabase
-    .from("comments")
-    .select("id, user_id")
-    .eq("id", commentId)
-    .maybeSingle();
+  // Run ban check, comment lookup, and existing vote check in parallel
+  const [banStatus, { data: comment }, { data: existingVote }] =
+    await Promise.all([
+      checkBanned(user.id),
+      supabase
+        .from("comments")
+        .select("id, user_id")
+        .eq("id", commentId)
+        .maybeSingle(),
+      supabase
+        .from("votes")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("entity_type", "comment")
+        .eq("entity_id", commentId)
+        .maybeSingle(),
+    ]);
+
+  if (banStatus.banned) {
+    return NextResponse.json({ error: "Du bist gesperrt." }, { status: 403 });
+  }
 
   if (!comment) {
     return NextResponse.json({ error: "Comment not found" }, { status: 404 });
   }
 
-  // Prevent self-voting
   if (comment.user_id === user.id) {
     return NextResponse.json(
       { error: "Du kannst nicht fuer deinen eigenen Kommentar stimmen." },
@@ -127,14 +136,6 @@ export async function POST(
   }
 
   try {
-    // Check existing vote
-    const { data: existingVote } = await supabase
-      .from("votes")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("entity_type", "comment")
-      .eq("entity_id", commentId)
-      .maybeSingle();
 
     if (existingVote) {
       if (existingVote.vote_type === voteType) {
@@ -151,11 +152,11 @@ export async function POST(
           );
         }
 
-        const counts = await syncCommentVoteCounts(commentId);
+        // Sync counts in background, respond immediately
+        syncCommentVoteCounts(commentId).catch(() => {});
         return NextResponse.json({
           action: "removed",
           vote_type: null,
-          ...counts,
         });
       }
 
@@ -172,11 +173,10 @@ export async function POST(
         );
       }
 
-      const counts = await syncCommentVoteCounts(commentId);
+      syncCommentVoteCounts(commentId).catch(() => {});
       return NextResponse.json({
         action: "switched",
         vote_type: voteType,
-        ...counts,
       });
     }
 
@@ -192,11 +192,10 @@ export async function POST(
       return NextResponse.json({ error: "Failed to cast vote" }, { status: 500 });
     }
 
-    const counts = await syncCommentVoteCounts(commentId);
+    syncCommentVoteCounts(commentId).catch(() => {});
     return NextResponse.json({
       action: "voted",
       vote_type: voteType,
-      ...counts,
     });
   } catch (err) {
     console.error("Comment vote error:", err);
