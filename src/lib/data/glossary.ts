@@ -97,6 +97,43 @@ export async function getApprovedTerms(): Promise<TermWithPreview[]> {
 }
 
 /**
+ * Get the previous and next term (alphabetically) for navigation on detail pages.
+ */
+export async function getAdjacentTerms(
+  currentTerm: string
+): Promise<{ prev: { term: string; slug: string } | null; next: { term: string; slug: string } | null }> {
+  try {
+    const supabase = await createClient();
+
+    const [{ data: prevData }, { data: nextData }] = await Promise.all([
+      supabase
+        .from("glossary_terms")
+        .select("term, slug")
+        .eq("status", "approved")
+        .eq("is_secret", false)
+        .lt("term", currentTerm)
+        .order("term", { ascending: false })
+        .limit(1),
+      supabase
+        .from("glossary_terms")
+        .select("term, slug")
+        .eq("status", "approved")
+        .eq("is_secret", false)
+        .gt("term", currentTerm)
+        .order("term", { ascending: true })
+        .limit(1),
+    ]);
+
+    return {
+      prev: prevData?.[0] ?? null,
+      next: nextData?.[0] ?? null,
+    };
+  } catch {
+    return { prev: null, next: null };
+  }
+}
+
+/**
  * Get a single term by slug with all definitions, aliases, and tags.
  * Returns null when the term does not exist.
  */
