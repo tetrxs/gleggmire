@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getTermBySlug } from "@/lib/data/glossary";
+import { getTermBySlug, getAdjacentTerms } from "@/lib/data/glossary";
 import { getCommentsForEntity } from "@/lib/data/comments";
 import { getUserInfoByIds } from "@/lib/data/users";
 import { TermDetail } from "@/components/glossary/term-detail";
@@ -9,6 +9,7 @@ import { CommentSection } from "@/components/comments/comment-section";
 import { YouTubeMuteProvider } from "@/lib/youtube-mute-context";
 import { FloatingMuteButton } from "@/components/ui/floating-mute-button";
 import { HashHighlight } from "@/components/ui/hash-highlight";
+import { TermNavigation } from "@/components/glossary/term-navigation";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -52,7 +53,10 @@ export default async function GlossarDetailPage({ params }: PageProps) {
   ];
   const userInfoMap = await getUserInfoByIds(userIds);
 
-  const comments = await getCommentsForEntity("term", term.id);
+  const [comments, adjacentTerms] = await Promise.all([
+    getCommentsForEntity("term", term.id),
+    getAdjacentTerms(data.term),
+  ]);
 
   // Get current user for edit/delete permissions
   const supabase = await createClient();
@@ -63,6 +67,7 @@ export default async function GlossarDetailPage({ params }: PageProps) {
   return (
     <YouTubeMuteProvider>
       <div className="py-10">
+        <TermNavigation prev={adjacentTerms.prev} next={adjacentTerms.next} />
         <TermDetail
           term={term}
           definitions={definitions}
