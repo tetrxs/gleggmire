@@ -2,9 +2,18 @@ import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ueber gleggmire.net — about",
+  title: "Ueber gleggmire.net — Das Fan-Community-Projekt fuer Gleggmire",
   description:
-    "Ueber gleggmire.net – ein interaktives Fan-Community-Projekt fuer den YouTuber Gleggmire.",
+    "Erfahre mehr ueber gleggmire.net — das inoffizielle Fan-Community-Projekt mit Glossar, Definitionen und Leaderboard rund um den YouTuber Gleggmire.",
+  alternates: {
+    canonical: "https://gleggmire.net/about",
+  },
+  openGraph: {
+    title: "Ueber gleggmire.net — Das Fan-Community-Projekt fuer Gleggmire",
+    description:
+      "Erfahre mehr ueber gleggmire.net — das inoffizielle Fan-Community-Projekt mit Glossar, Definitionen und Leaderboard rund um den YouTuber Gleggmire.",
+    url: "https://gleggmire.net/about",
+  },
 };
 
 export default function AboutPage() {

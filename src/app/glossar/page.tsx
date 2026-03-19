@@ -4,9 +4,19 @@ import { getApprovedTerms } from "@/lib/data/glossary";
 import { OpenModalButton } from "@/components/ui/open-modal-button";
 
 export const metadata: Metadata = {
-  title: "Glossar — gleggmire.net",
+  title: "Gleggmire Glossar — Alle Begriffe und Definitionen der Community",
   description:
-    "Das Gleggmire-Glossar: Alle Begriffe, Definitionen und Insider aus dem Gleggmire-Universum.",
+    "Das vollstaendige Gleggmire-Glossar: Alle Begriffe, Definitionen, Insider und Slang aus dem Gleggmire-Universum. Von der Community gesammelt und erklaert.",
+  alternates: {
+    canonical: "https://gleggmire.net/glossar",
+  },
+  openGraph: {
+    title: "Gleggmire Glossar — Alle Begriffe und Definitionen der Community",
+    description:
+      "Das vollstaendige Gleggmire-Glossar: Alle Begriffe, Definitionen, Insider und Slang aus dem Gleggmire-Universum.",
+    url: "https://gleggmire.net/glossar",
+    type: "website",
+  },
 };
 
 export default async function GlossarPage() {
@@ -23,8 +33,27 @@ export default async function GlossarPage() {
     creators[t.id] = { username: t.creatorUsername, avatarUrl: t.creatorAvatarUrl };
   }
 
+  // JSON-LD: DefinedTermSet schema for the glossary listing
+  const termSetSchema = {
+    "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    name: "Gleggmire Community Glossar",
+    description: "Community-Glossar mit Begriffen, Definitionen und Insider aus dem Gleggmire-Universum.",
+    url: "https://gleggmire.net/glossar",
+    hasDefinedTerm: termsWithPreview.slice(0, 50).map((t) => ({
+      "@type": "DefinedTerm",
+      name: t.term,
+      description: t.definitions[0]?.definition?.slice(0, 120) ?? "",
+      url: `https://gleggmire.net/glossar/${t.slug}`,
+    })),
+  };
+
   return (
     <div className="py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(termSetSchema) }}
+      />
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1
