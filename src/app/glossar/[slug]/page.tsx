@@ -11,6 +11,8 @@ import { FloatingMuteButton } from "@/components/ui/floating-mute-button";
 import { HashHighlight } from "@/components/ui/hash-highlight";
 import { TermNavigation } from "@/components/glossary/term-navigation";
 
+const BASE_URL = "https://gleggmire.net";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -23,14 +25,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: "Begriff nicht gefunden — gleggmire.net" };
   }
 
-  const firstDefinition = data.definitions[0]?.definition ?? "";
+  const firstDef = data.definitions[0];
+  const defText = firstDef?.definition ?? "";
+  const exampleText = firstDef?.example_sentence ?? "";
+  const aliasNames = data.aliases.map((a) => a.alias);
+  const tagNames = data.tags.map((t) => t.tag);
+  const keywords = [data.term, ...aliasNames, ...tagNames, "Gleggmire", "Glossar"];
+
+  // Build a rich description: definition + example sentence
+  let description = `${data.term}: ${defText}`;
+  if (exampleText) {
+    description += ` Beispiel: "${exampleText}"`;
+  }
+  description = description.slice(0, 160);
+
+  const url = `${BASE_URL}/glossar/${slug}`;
 
   return {
-    title: `${data.term} — Gleggmire-Glossar`,
-    description: firstDefinition.slice(0, 160),
+    title: `${data.term} — Was bedeutet ${data.term}? | Gleggmire-Glossar`,
+    description,
+    keywords,
+    alternates: {
+      canonical: url,
+    },
     openGraph: {
-      title: `${data.term} — Gleggmire-Glossar`,
-      description: firstDefinition.slice(0, 160),
+      title: `${data.term} — Was bedeutet ${data.term}? | Gleggmire-Glossar`,
+      description,
+      url,
+      type: "article",
+      locale: "de_DE",
       siteName: "gleggmire.net",
     },
   };
@@ -64,8 +87,55 @@ export default async function GlossarDetailPage({ params }: PageProps) {
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
+  // JSON-LD: DefinedTerm schema
+  const definedTermSchema = {
+    "@context": "https://schema.org",
+    "@type": "DefinedTerm",
+    name: data.term,
+    description: definitions[0]?.definition ?? "",
+    url: `${BASE_URL}/glossar/${slug}`,
+    inDefinedTermSet: {
+      "@type": "DefinedTermSet",
+      name: "Gleggmire Community Glossar",
+      url: `${BASE_URL}/glossar`,
+    },
+  };
+
+  // JSON-LD: BreadcrumbList schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Startseite",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Glossar",
+        item: `${BASE_URL}/glossar`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: data.term,
+      },
+    ],
+  };
+
   return (
     <YouTubeMuteProvider>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(definedTermSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="py-10">
         <TermNavigation prev={adjacentTerms.prev} next={adjacentTerms.next} />
         <TermDetail

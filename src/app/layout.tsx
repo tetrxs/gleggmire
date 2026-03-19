@@ -26,11 +26,17 @@ const lilitaOne = Lilita_One({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gleggmire.net"),
   title: "gleggmire.net — Das Gleggmire-Glossar",
   description:
     "Inoffizielles Fan-Projekt: Das umfassende Community-Lexikon rund um den YouTuber Gleggmire. Von der Community, fuer die Community.",
   icons: {
     icon: "/images/favicon.png",
+  },
+  openGraph: {
+    siteName: "gleggmire.net",
+    locale: "de_DE",
+    type: "website",
   },
 };
 

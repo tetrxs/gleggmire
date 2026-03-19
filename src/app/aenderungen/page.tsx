@@ -3,9 +3,18 @@ import Link from "next/link";
 import { getRecentEdits } from "@/lib/data/glossary";
 
 export const metadata: Metadata = {
-  title: "Änderungsprotokoll — gleggmire.net",
+  title: "Aenderungsprotokoll — gleggmire.net",
   description:
-    "Öffentliches Änderungsprotokoll aller Bearbeitungen im Gleggmire-Glossar.",
+    "Oeffentliches Aenderungsprotokoll aller Bearbeitungen im Gleggmire Community-Glossar — Transparenz fuer alle Aenderungen an Begriffen und Definitionen.",
+  alternates: {
+    canonical: "https://gleggmire.net/aenderungen",
+  },
+  openGraph: {
+    title: "Aenderungsprotokoll — gleggmire.net",
+    description:
+      "Oeffentliches Aenderungsprotokoll aller Bearbeitungen im Gleggmire Community-Glossar.",
+    url: "https://gleggmire.net/aenderungen",
+  },
 };
 
 function formatDate(dateStr: string) {

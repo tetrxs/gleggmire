@@ -3,7 +3,16 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Impressum — gleggmire.net",
   description:
-    "Impressum gemaess Paragraph 5 TMG fuer gleggmire.net – Angaben zum Verantwortlichen.",
+    "Impressum gemaess Paragraph 5 TMG fuer gleggmire.net — Angaben zum Verantwortlichen des Gleggmire Community-Glossars.",
+  alternates: {
+    canonical: "https://gleggmire.net/impressum",
+  },
+  openGraph: {
+    title: "Impressum — gleggmire.net",
+    description:
+      "Impressum gemaess Paragraph 5 TMG fuer gleggmire.net — Angaben zum Verantwortlichen.",
+    url: "https://gleggmire.net/impressum",
+  },
 };
 
 export default function ImpressumPage() {

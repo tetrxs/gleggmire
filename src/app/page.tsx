@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getLatestTerms } from "@/lib/data/glossary";
@@ -5,6 +6,22 @@ import { OpenModalButton } from "@/components/ui/open-modal-button";
 import { getTopUsers } from "@/lib/data/users";
 import { LeaderboardView } from "@/components/community/leaderboard-view";
 import { GlossaryCard } from "@/components/glossary/glossary-card";
+
+export const metadata: Metadata = {
+  title: "gleggmire.net — Das Community-Glossar fuer Gleggmire-Begriffe",
+  description:
+    "Das umfassende Community-Lexikon rund um den YouTuber Gleggmire. Begriffe, Definitionen, Insider und Slang — von der Community gesammelt, erklaert und bewertet.",
+  alternates: {
+    canonical: "https://gleggmire.net",
+  },
+  openGraph: {
+    title: "gleggmire.net — Das Community-Glossar fuer Gleggmire-Begriffe",
+    description:
+      "Das umfassende Community-Lexikon rund um den YouTuber Gleggmire. Begriffe, Definitionen, Insider und Slang — von der Community gesammelt und erklaert.",
+    url: "https://gleggmire.net",
+    type: "website",
+  },
+};
 
 const MARQUEE_FALLBACK =
   "GLEGGMIRE · GLOSSAR · COMMUNITY · DEFINITIONEN · LEADERBOARD · BADGES · ";
@@ -37,8 +54,40 @@ export default async function HomePage() {
     ? latestTerms.map((t) => t.term.toUpperCase()).join(" · ") + " · "
     : MARQUEE_FALLBACK;
 
+  // JSON-LD: WebSite schema with SearchAction for Google Sitelinks Search Box
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "gleggmire.net",
+    url: "https://gleggmire.net",
+    description: "Das umfassende Community-Lexikon rund um den YouTuber Gleggmire.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://gleggmire.net/glossar?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  // JSON-LD: Organization schema
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "gleggmire.net",
+    url: "https://gleggmire.net",
+    description: "Inoffizielles Fan-Community-Projekt rund um den YouTuber Gleggmire.",
+    email: "kontakt@gleggmire.net",
+  };
+
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       {/* ============================
           1. HERO SECTION
           ============================ */}

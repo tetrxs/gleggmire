@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Datenschutz — gleggmire.net",
+  title: "Datenschutzerklaerung — gleggmire.net",
   description:
-    "Datenschutzerklaerung gemaess DSGVO fuer gleggmire.net – Informationen zur Datenverarbeitung.",
+    "Datenschutzerklaerung gemaess DSGVO fuer gleggmire.net — Informationen zur Datenverarbeitung, Cookies, Discord-Login und Nutzerrechte.",
+  alternates: {
+    canonical: "https://gleggmire.net/datenschutz",
+  },
+  openGraph: {
+    title: "Datenschutzerklaerung — gleggmire.net",
+    description:
+      "Datenschutzerklaerung gemaess DSGVO fuer gleggmire.net — Informationen zur Datenverarbeitung und Nutzerrechte.",
+    url: "https://gleggmire.net/datenschutz",
+  },
 };
 
 export default function DatenschutzPage() {
