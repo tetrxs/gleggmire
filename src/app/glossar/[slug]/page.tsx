@@ -55,7 +55,7 @@ export default async function GlossarDetailPage({ params }: PageProps) {
 
   const [comments, adjacentTerms] = await Promise.all([
     getCommentsForEntity("term", term.id),
-    getAdjacentTerms(data.term),
+    getAdjacentTerms(term.id),
   ]);
 
   // Get current user for edit/delete permissions
