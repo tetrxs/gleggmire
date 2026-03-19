@@ -145,34 +145,23 @@ export async function getAdjacentTerms(
     const related = allTerms.filter((t) => relatedIds.has(t.id));
     const unrelated = allTerms.filter((t) => !relatedIds.has(t.id));
 
-    // 5. Pick two suggestions: prefer related, fill with unrelated/random
+    // 5. Build a priority pool: related first, then unrelated
     const pick = (pool: typeof allTerms): (typeof allTerms)[number] | null => {
       if (pool.length === 0) return null;
       return pool[Math.floor(Math.random() * pool.length)];
     };
 
-    let prevTerm: (typeof allTerms)[number] | null = null;
-    let nextTerm: (typeof allTerms)[number] | null = null;
+    // Prioritized pool: related terms first, then the rest
+    const prioritized = [...related, ...unrelated];
 
-    if (related.length >= 2) {
-      // Both from related
-      prevTerm = pick(related);
-      const remaining = related.filter((t) => t.id !== prevTerm!.id);
-      nextTerm = pick(remaining);
-    } else if (related.length === 1) {
-      // One related, one random
-      prevTerm = related[0];
-      nextTerm = pick(unrelated);
-    } else {
-      // No related: both random
-      prevTerm = pick(allTerms);
-      const remaining = allTerms.filter((t) => t.id !== prevTerm?.id);
-      nextTerm = pick(remaining);
-    }
+    // Always pick "next" (weiter) first — that's the primary navigation direction
+    const first = pick(prioritized);
+    const remainingPool = prioritized.filter((t) => t.id !== first?.id);
+    const second = pick(remainingPool);
 
     return {
-      prev: prevTerm ? { term: prevTerm.term, slug: prevTerm.slug } : null,
-      next: nextTerm ? { term: nextTerm.term, slug: nextTerm.slug } : null,
+      prev: second ? { term: second.term, slug: second.slug } : null,
+      next: first ? { term: first.term, slug: first.slug } : null,
     };
   } catch {
     return { prev: null, next: null };
