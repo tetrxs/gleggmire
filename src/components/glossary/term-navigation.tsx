@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 interface TermNavigationProps {
   prev: { term: string; slug: string } | null;
   next: { term: string; slug: string } | null;
@@ -11,32 +9,32 @@ export function TermNavigation({ prev, next }: TermNavigationProps) {
   return (
     <div className="flex items-center justify-between mb-4">
       {prev ? (
-        <Link
+        <a
           href={`/glossar/${prev.slug}`}
-          className="inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-[var(--color-accent)]"
-          style={{ color: "var(--color-text-muted)" }}
+          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-[var(--color-accent)]"
+          style={{ color: "var(--color-text-muted)", backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
           title={prev.term}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          <span className="hidden sm:inline">{prev.term}</span>
-        </Link>
+          <span className="hidden sm:inline max-w-[120px] truncate">{prev.term}</span>
+        </a>
       ) : (
         <span />
       )}
       {next ? (
-        <Link
+        <a
           href={`/glossar/${next.slug}`}
-          className="inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-[var(--color-accent)]"
-          style={{ color: "var(--color-text-muted)" }}
+          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-[var(--color-accent)]"
+          style={{ color: "var(--color-text-muted)", backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
           title={next.term}
         >
-          <span className="hidden sm:inline">{next.term}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <span className="hidden sm:inline max-w-[120px] truncate">{next.term}</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 6 15 12 9 18" />
           </svg>
-        </Link>
+        </a>
       ) : (
         <span />
       )}

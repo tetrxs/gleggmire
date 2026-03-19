@@ -97,36 +97,82 @@ export async function getApprovedTerms(): Promise<TermWithPreview[]> {
 }
 
 /**
- * Get the previous and next term (alphabetically) for navigation on detail pages.
+ * Smart navigation: find related terms by shared tags first, then fall back
+ * to random terms. Always returns two different suggestions (prev/next) when
+ * at least two other terms exist.
  */
 export async function getAdjacentTerms(
-  currentTerm: string
+  currentTermId: string
 ): Promise<{ prev: { term: string; slug: string } | null; next: { term: string; slug: string } | null }> {
   try {
     const supabase = await createClient();
 
-    const [{ data: prevData }, { data: nextData }] = await Promise.all([
-      supabase
-        .from("glossary_terms")
-        .select("term, slug")
-        .eq("status", "approved")
-        .eq("is_secret", false)
-        .lt("term", currentTerm)
-        .order("term", { ascending: false })
-        .limit(1),
-      supabase
-        .from("glossary_terms")
-        .select("term, slug")
-        .eq("status", "approved")
-        .eq("is_secret", false)
-        .gt("term", currentTerm)
-        .order("term", { ascending: true })
-        .limit(1),
-    ]);
+    // 1. Get current term's tags
+    const { data: currentTags } = await supabase
+      .from("term_tags")
+      .select("tag")
+      .eq("term_id", currentTermId);
+
+    const tagValues = (currentTags ?? []).map((t) => t.tag);
+
+    // 2. Get all other approved, non-secret terms with their tags
+    const { data: allTerms } = await supabase
+      .from("glossary_terms")
+      .select("id, term, slug")
+      .eq("status", "approved")
+      .eq("is_secret", false)
+      .neq("id", currentTermId);
+
+    if (!allTerms || allTerms.length === 0) {
+      return { prev: null, next: null };
+    }
+
+    // 3. If we have tags, find terms that share them
+    let relatedIds: Set<string> = new Set();
+    if (tagValues.length > 0) {
+      const { data: matchingTags } = await supabase
+        .from("term_tags")
+        .select("term_id")
+        .in("tag", tagValues)
+        .neq("term_id", currentTermId);
+
+      for (const t of matchingTags ?? []) {
+        relatedIds.add(t.term_id);
+      }
+    }
+
+    // 4. Separate into related and unrelated pools
+    const related = allTerms.filter((t) => relatedIds.has(t.id));
+    const unrelated = allTerms.filter((t) => !relatedIds.has(t.id));
+
+    // 5. Pick two suggestions: prefer related, fill with unrelated/random
+    const pick = (pool: typeof allTerms): (typeof allTerms)[number] | null => {
+      if (pool.length === 0) return null;
+      return pool[Math.floor(Math.random() * pool.length)];
+    };
+
+    let prevTerm: (typeof allTerms)[number] | null = null;
+    let nextTerm: (typeof allTerms)[number] | null = null;
+
+    if (related.length >= 2) {
+      // Both from related
+      prevTerm = pick(related);
+      const remaining = related.filter((t) => t.id !== prevTerm!.id);
+      nextTerm = pick(remaining);
+    } else if (related.length === 1) {
+      // One related, one random
+      prevTerm = related[0];
+      nextTerm = pick(unrelated);
+    } else {
+      // No related: both random
+      prevTerm = pick(allTerms);
+      const remaining = allTerms.filter((t) => t.id !== prevTerm?.id);
+      nextTerm = pick(remaining);
+    }
 
     return {
-      prev: prevData?.[0] ?? null,
-      next: nextData?.[0] ?? null,
+      prev: prevTerm ? { term: prevTerm.term, slug: prevTerm.slug } : null,
+      next: nextTerm ? { term: nextTerm.term, slug: nextTerm.slug } : null,
     };
   } catch {
     return { prev: null, next: null };
