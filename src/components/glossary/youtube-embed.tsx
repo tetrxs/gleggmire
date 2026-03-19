@@ -107,6 +107,7 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
           disablekb: 1,
           showinfo: 0,
           iv_load_policy: 3,
+          autoplay: 1,
           mute: 1,
           playsinline: 1,
           host: "https://www.youtube-nocookie.com",
@@ -114,8 +115,19 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
         events: {
           onReady: (event: { target: YTPlayer }) => {
             if (destroyed) return;
+            event.target.mute();
             event.target.seekTo(clipStart, true);
+            event.target.playVideo();
             setReady(true);
+          },
+          onStateChange: (event: { data: number }) => {
+            if (destroyed) return;
+            // YT.PlayerState: UNSTARTED=-1, ENDED=0, PLAYING=1, PAUSED=2, BUFFERING=3, CUED=5
+            // If paused or cued unexpectedly while visible, retry play
+            if ((event.data === 2 || event.data === 5 || event.data === -1) && isVisibleRef.current) {
+              playerRef.current?.mute();
+              playerRef.current?.playVideo();
+            }
           },
         },
       });
@@ -139,12 +151,11 @@ export function YouTubeEmbed({ videoId, startSeconds = 0, title }: YouTubeEmbedP
         isVisibleRef.current = entry.isIntersecting;
         if (entry.isIntersecting) {
           playerRef.current?.seekTo(clipStart, true);
+          playerRef.current?.mute();
           playerRef.current?.playVideo();
-          // Apply current mute state when becoming visible
-          if (globalMuted) {
-            playerRef.current?.mute();
-          } else {
-            playerRef.current?.unMute();
+          // Apply mute state after play started
+          if (!globalMuted) {
+            setTimeout(() => playerRef.current?.unMute(), 100);
           }
         } else {
           playerRef.current?.pauseVideo();
