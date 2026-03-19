@@ -82,7 +82,7 @@ export default async function ProfilPage() {
     is_admin: dbUser?.is_admin ?? false,
     is_moderator: dbUser?.is_moderator ?? false,
     is_gleggmire: dbUser?.is_gleggmire ?? false,
-    notifications_enabled: dbUser?.notifications_enabled ?? true,
+
     joined_at: dbUser?.joined_at ?? authUser.created_at,
     badges: userBadges,
     stats: {

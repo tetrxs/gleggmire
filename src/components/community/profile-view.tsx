@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { BadgeDisplay } from "@/components/community/badge-display";
 import { GleggScoreDisplay } from "@/components/community/glegg-score-display";
 import { BADGES } from "@/lib/constants/badges";
@@ -12,7 +11,6 @@ interface ProfileData {
   is_admin: boolean;
   is_moderator: boolean;
   is_gleggmire: boolean;
-  notifications_enabled: boolean;
   joined_at: string;
   badges: string[];
   stats: {
@@ -23,39 +21,12 @@ interface ProfileData {
 }
 
 export function ProfileView({ profile }: { profile: ProfileData }) {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(
-    profile.notifications_enabled
-  );
-  const [toggling, setToggling] = useState(false);
-
   const initials = profile.username.slice(0, 2).toUpperCase();
   const memberSince = new Date(profile.joined_at).toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
-
-  async function handleToggleNotifications() {
-    if (toggling) return;
-    setToggling(true);
-    const newValue = !notificationsEnabled;
-    setNotificationsEnabled(newValue);
-
-    try {
-      const res = await fetch("/api/v1/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: newValue }),
-      });
-      if (!res.ok) {
-        setNotificationsEnabled(!newValue);
-      }
-    } catch {
-      setNotificationsEnabled(!newValue);
-    } finally {
-      setToggling(false);
-    }
-  }
 
   return (
     <div className="py-10">
@@ -140,42 +111,6 @@ export function ProfileView({ profile }: { profile: ProfileData }) {
             </span>
           </div>
         ))}
-      </div>
-
-      {/* Notifications toggle */}
-      <div className="card mt-4 p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-sm font-medium text-[var(--color-text)]">
-              Benachrichtigungen
-            </span>
-            <p className="mt-0.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
-              Nachrichten vom Discord-Bot erhalten
-            </p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={notificationsEnabled}
-            disabled={toggling}
-            onClick={handleToggleNotifications}
-            className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50"
-            style={{
-              backgroundColor: notificationsEnabled
-                ? "var(--color-accent)"
-                : "var(--color-border)",
-            }}
-          >
-            <span
-              className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
-              style={{
-                transform: notificationsEnabled
-                  ? "translateX(20px)"
-                  : "translateX(0px)",
-              }}
-            />
-          </button>
-        </div>
       </div>
 
       {/* Badge showcase */}
