@@ -61,6 +61,7 @@ export default function DatenschutzPage() {
             gleggmire.net ist ein inoffizielles Fan-Projekt. Wir verarbeiten personenbezogene Daten
             nur soweit dies fuer den Betrieb der Webseite und ihrer Funktionen erforderlich ist.
             Es findet <strong>kein Tracking, keine Werbung und kein Profiling</strong> statt.
+            Es erfolgt keine automatisierte Entscheidungsfindung im Sinne von Art. 22 DSGVO.
           </p>
         </section>
 
@@ -75,6 +76,8 @@ export default function DatenschutzPage() {
             <li>
               <strong style={{ color: "var(--color-text)" }}>Art. 6 Abs. 1 lit. a DSGVO (Einwilligung):</strong>{" "}
               Discord OAuth Login, Cookie-Consent fuer optionale Dienste.
+              Du kannst deine Einwilligung jederzeit widerrufen, ohne dass die Rechtmaessigkeit
+              der aufgrund der Einwilligung bis zum Widerruf erfolgten Verarbeitung beruehrt wird (Art. 7 Abs. 3 DSGVO).
             </li>
             <li>
               <strong style={{ color: "var(--color-text)" }}>Art. 6 Abs. 1 lit. b DSGVO (Vertragsdurchfuehrung):</strong>{" "}
@@ -124,6 +127,8 @@ export default function DatenschutzPage() {
           </div>
           <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
             Alle Dienste verarbeiten Daten ausschliesslich innerhalb der EU.
+            Mit allen genannten Dienstleistern wurden Auftragsverarbeitungsvertraege (AVV)
+            gemaess Art. 28 DSGVO abgeschlossen.
           </p>
         </section>
 
@@ -174,6 +179,17 @@ export default function DatenschutzPage() {
             Twitch-Clips ueber Twitch-Embeds. Erst beim aktiven Abspielen werden Daten
             an YouTube (Google) bzw. Twitch (Amazon) uebermittelt. Beide sind unter dem
             EU-US Data Privacy Framework zertifiziert.
+          </p>
+          <p className="mt-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+            Datenschutzerklaerung von Google/YouTube:{" "}
+            <a href="https://policies.google.com/privacy" className="font-medium no-underline" style={{ color: "var(--color-accent)" }} target="_blank" rel="noopener noreferrer">
+              policies.google.com/privacy
+            </a>
+            <br />
+            Datenschutzerklaerung von Twitch (Amazon):{" "}
+            <a href="https://www.twitch.tv/p/legal/privacy-notice/" className="font-medium no-underline" style={{ color: "var(--color-accent)" }} target="_blank" rel="noopener noreferrer">
+              twitch.tv/p/legal/privacy-notice
+            </a>
           </p>
         </section>
 
@@ -299,10 +315,25 @@ export default function DatenschutzPage() {
 
         <div style={{ borderTop: "1px solid var(--color-border)" }} />
 
-        {/* 12. Rechte */}
+        {/* 12. Minderjaehrige */}
         <section>
           <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
-            12. Deine Rechte (Art. 15–21 DSGVO)
+            12. Mindestalter
+          </h2>
+          <p>
+            Die Nutzung von gleggmire.net ist ab 16 Jahren moeglich. Personen unter 16 Jahren
+            benoetigen die Einwilligung eines Erziehungsberechtigten (Art. 8 DSGVO).
+            Wir erheben wissentlich keine personenbezogenen Daten von Kindern unter 16 Jahren
+            ohne entsprechende Einwilligung.
+          </p>
+        </section>
+
+        <div style={{ borderTop: "1px solid var(--color-border)" }} />
+
+        {/* 13. Rechte */}
+        <section>
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
+            13. Deine Rechte (Art. 15–21 DSGVO)
           </h2>
           <ul className="ml-4 list-disc space-y-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
             <li><strong style={{ color: "var(--color-text)" }}>Auskunft</strong> (Art. 15) — Welche Daten ueber dich gespeichert sind</li>
@@ -322,10 +353,10 @@ export default function DatenschutzPage() {
 
         <div style={{ borderTop: "1px solid var(--color-border)" }} />
 
-        {/* 13. Beschwerderecht */}
+        {/* 14. Beschwerderecht */}
         <section>
           <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
-            13. Beschwerderecht
+            14. Beschwerderecht
           </h2>
           <p>
             Zustaendige Aufsichtsbehoerde: Bayerisches Landesamt fuer Datenschutzaufsicht (BayLDA),
@@ -338,13 +369,15 @@ export default function DatenschutzPage() {
 
         <div style={{ borderTop: "1px solid var(--color-border)" }} />
 
-        {/* 14. Aenderungen */}
+        {/* 15. Aenderungen */}
         <section>
           <h2 className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "var(--color-text-muted)" }}>
-            14. Aenderungen
+            15. Aenderungen
           </h2>
           <p>
             Wir behalten uns vor, diese Datenschutzerklaerung bei Bedarf anzupassen.
+            Bei wesentlichen Aenderungen, die deine Rechte betreffen, werden wir dich
+            durch einen gut sichtbaren Hinweis auf unserer Webseite informieren.
           </p>
           <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
             Stand: Maerz 2026
